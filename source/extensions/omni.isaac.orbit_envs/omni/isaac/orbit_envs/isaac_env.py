@@ -67,7 +67,7 @@ class IsaacEnv(gym.Env):
     environment for their agents.
     """
 
-    def __init__(self, cfg: IsaacEnvCfg, headless: bool = False):
+    def __init__(self, cfg: IsaacEnvCfg, headless: bool = False, enable_render=True):
         """Initialize the environment.
 
         We currently support only PyTorch backend for the environment. In the future, we plan to extend this to use
@@ -82,7 +82,7 @@ class IsaacEnv(gym.Env):
         """
         # store inputs to class
         self.cfg = cfg
-        self.enable_render = not headless
+        self.enable_render = not headless or enable_render
         # extract commonly used parameters
         self.num_envs = self.cfg.env.num_envs
         self.device = self.cfg.sim.device

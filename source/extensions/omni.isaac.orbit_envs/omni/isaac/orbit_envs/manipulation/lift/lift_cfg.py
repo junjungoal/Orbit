@@ -66,6 +66,7 @@ class FrameMarkerCfg:
     usd_path = f"{ISAAC_NUCLEUS_DIR}/Props/UIElements/frame_prim.usd"
     # scale of the asset at import
     scale = [0.1, 0.1, 0.1]  # x,y,z
+    # scale = [0., 0., 0.]  # x,y,z
 
 
 ##
