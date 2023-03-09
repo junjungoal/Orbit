@@ -72,13 +72,6 @@ class LiftEnv(IsaacEnv):
         self.robot.update_buffers(self.dt)
 
 
-        # camera= rep.create.camera(position=(2.2, 0, 1.6), rotation=(135.0, -45.0, 0))
-        # rp = rep.create.render_product(camera,resolution=(256, 256))
-        # self.listener = PytorchListener()
-        # self.writer = rep.WriterRegistry.get("PytorchWriter")
-        # self.writer.initialize(listener=self.listener, device=self.device)
-        # self.writer.attach([rp])
-        #
         camera_cfg = PinholeCameraCfg(
             sensor_tick=0,
             height=480,
