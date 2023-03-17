@@ -100,7 +100,7 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.5]  # position default (x,y,z)
+        position_default = [0.5, 0.0, 0.2]  # position default (x,y,z)
         position_uniform_min = [0.4, -0.25, 0.25]  # position (x,y,z)
         position_uniform_max = [0.6, 0.25, 0.5]  # position (x,y,z)
         # randomize orientation
@@ -164,7 +164,7 @@ class RewardsCfg:
     # penalizing_tool_action_l2 = {"weight": 1e-2}
     # -- object-centric
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.08}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.07}
     lifting_object_success = {"weight": 3.5, "threshold": 0.08}
 
 
@@ -182,7 +182,8 @@ class ControlCfg:
     """Processing of MDP actions."""
 
     # action space
-    control_type = "default"  # "default", "inverse_kinematics"
+    # control_type = "default"  # "default", "inverse_kinematics"
+    control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
     decimation = 2
 
