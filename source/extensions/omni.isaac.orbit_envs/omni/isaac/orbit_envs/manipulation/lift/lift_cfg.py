@@ -165,7 +165,7 @@ class RewardsCfg:
     # -- object-centric
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
     tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.07}
-    lifting_object_success = {"weight": 3.5, "threshold": 0.08}
+    lifting_object_success = {"weight": 3.5, "threshold": 0.07}
 
 
 @configclass
@@ -207,7 +207,7 @@ class LiftEnvCfg(IsaacEnvCfg):
 
     # General Settings
     env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=5.0)
-    viewer: ViewerCfg = ViewerCfg(debug_vis=True, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
+    viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         dt=0.01,
