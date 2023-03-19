@@ -108,7 +108,7 @@ class IsaacEnv(gym.Env):
         # create a simulation context to control the simulator
         self.sim = SimulationContext(
             stage_units_in_meters=1.0,
-            physics_dt=self.physics_dt,
+            # physics_dt=self.physics_dt,
             rendering_dt=self.rendering_dt,
             backend="torch",
             sim_params=sim_params,

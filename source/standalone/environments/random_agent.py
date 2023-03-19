@@ -7,7 +7,7 @@
 
 """Launch Isaac Sim Simulator first."""
 
-
+import os, sys
 import argparse
 
 from omni.isaac.kit import SimulationApp
@@ -22,7 +22,22 @@ args_cli = parser.parse_args()
 
 # launch the simulator
 config = {"headless": args_cli.headless}
-simulation_app = SimulationApp(config)
+experience = f'{os.environ["ISAAC_PATH"]}/apps/omni.isaac.sim.python.kit'
+simulation_app = SimulationApp(config, experience=experience)
+
+from omni.isaac.core.utils.extensions import enable_extension
+
+# Default Livestream settings
+simulation_app.set_setting("/app/window/drawMouse", True)
+simulation_app.set_setting("/app/livestream/proto", "ws")
+simulation_app.set_setting("/app/livestream/websocket/framerate_limit", 120)
+simulation_app.set_setting("/ngx/enabled", False)
+
+# Note: Only one livestream extension can be enabled at a time
+# Enable Native Livestream extension
+# Default App: Streaming Client from the Omniverse Launcher
+enable_extension("omni.kit.livestream.native")
+"""Rest everything follows."""
 
 """Rest everything follows."""
 

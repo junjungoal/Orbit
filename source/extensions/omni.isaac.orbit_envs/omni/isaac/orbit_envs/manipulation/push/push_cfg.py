@@ -89,8 +89,8 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_uniform_min = [0.3, -0.25, 0.075]  # position (x,y,z)
-        position_uniform_max = [0.4, 0.25, 0.075]  # position (x,y,z)
+        position_uniform_min = [0.4, -0.25, 0.075]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.25, 0.075]  # position (x,y,z)
 
     @configclass
     class ObjectDesiredPoseCfg:
@@ -100,7 +100,7 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.35, 0.0, 0.3]  # position default (x,y,z)
+        position_default = [0.5, 0.0, 0.3]  # position default (x,y,z)
         position_uniform_min = [0.4, -0.25, 0.25]  # position (x,y,z)
         position_uniform_max = [0.6, 0.25, 0.5]  # position (x,y,z)
         # randomize orientation
@@ -182,10 +182,10 @@ class ControlCfg:
     """Processing of MDP actions."""
 
     # action space
-    # control_type = "default"  # "default", "inverse_kinematics"
-    control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
+    control_type = "default"  # "default", "inverse_kinematics"
+    # control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 1
+    decimation = 2
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
@@ -202,8 +202,8 @@ class ControlCfg:
 
 
 @configclass
-class LiftEnvCfg(IsaacEnvCfg):
-    """Configuration for the Lift environment."""
+class PushEnvCfg(IsaacEnvCfg):
+    """Configuration for the Push environment."""
 
     # General Settings
     env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=5.0)

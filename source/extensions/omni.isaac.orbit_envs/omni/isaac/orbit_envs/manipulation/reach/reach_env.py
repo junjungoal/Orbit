@@ -18,6 +18,7 @@ from omni.isaac.orbit.utils.math import random_orientation, sample_uniform, scal
 from omni.isaac.orbit.utils.mdp import ObservationManager, RewardManager
 
 from omni.isaac.orbit_envs.isaac_env import IsaacEnv, VecEnvIndices, VecEnvObs
+from omni.isaac.orbit.sensors.camera import Camera, PinholeCameraCfg
 
 from .reach_cfg import RandomizationCfg, ReachEnvCfg
 
@@ -61,6 +62,23 @@ class ReachEnv(IsaacEnv):
         self.sim.step()
         # -- fill up buffers
         self.robot.update_buffers(self.dt)
+
+        camera_cfg = PinholeCameraCfg(
+            sensor_tick=0,
+            height=480,
+            width=640,
+            data_types=["rgb"],
+            usd_params=PinholeCameraCfg.UsdCameraCfg(
+                focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 1.0e5)
+            ),
+        )
+        self.camera = Camera(cfg=camera_cfg, device="cpu")
+        self.camera.spawn("/World/CameraSensor")
+        self.camera.initialize()
+        position = [2.2, 0, 1.6]
+        orientation = [-0.3069373, 0.6372103, 0.6362135, -0.3081962]
+        self.camera.set_world_pose_ros(position, orientation)
+
 
     """
     Implementation specifics.
@@ -165,6 +183,15 @@ class ReachEnv(IsaacEnv):
     def _get_observations(self) -> VecEnvObs:
         # compute observations
         return self._observation_manager.compute()
+
+    def render_visual_observations(self):
+        # obs = self.listener.get_rgb_data()
+        # if obs is not None:
+        #     obs = obs.permute(0, 2, 3, 1)
+        # return obs
+        # self.sim.step()
+        self.camera.update(dt=0.0)
+        return self.camera.data.output
 
     """
     Helper functions - Scene handling.

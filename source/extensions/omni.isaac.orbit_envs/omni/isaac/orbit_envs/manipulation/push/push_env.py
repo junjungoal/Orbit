@@ -26,13 +26,13 @@ import omni.replicator.core as rep
 from omni.replicator.isaac.scripts.writers.pytorch_listener import PytorchListener
 from omni.replicator.isaac.scripts.writers.pytorch_writer import PytorchWriter
 
-from .lift_cfg import LiftEnvCfg, RandomizationCfg
+from .push_cfg import PushEnvCfg, RandomizationCfg
 
 
-class LiftEnv(IsaacEnv):
-    """Environment for lifting an object off a table with a single-arm manipulator."""
+class PushEnv(IsaacEnv):
+    """Environment for pushing an object to a goal with a single-arm manipulator."""
 
-    def __init__(self, cfg: LiftEnvCfg = None, headless: bool = False):
+    def __init__(self, cfg: PushEnvCfg = None, headless: bool = False):
         # copy configuration
         self.cfg = cfg
         # parse the configuration for controller configuration
@@ -50,9 +50,9 @@ class LiftEnv(IsaacEnv):
         self._initialize_views()
 
         # prepare the observation manager
-        self._observation_manager = LiftObservationManager(class_to_dict(self.cfg.observations), self, self.device)
+        self._observation_manager = PushObservationManager(class_to_dict(self.cfg.observations), self, self.device)
         # prepare the reward manager
-        self._reward_manager = LiftRewardManager(
+        self._reward_manager = PushRewardManager(
             class_to_dict(self.cfg.rewards), self, self.num_envs, self.dt, self.device
         )
         # print information about MDP
@@ -86,8 +86,7 @@ class LiftEnv(IsaacEnv):
         self.camera = Camera(cfg=camera_cfg, device="cpu")
         self.camera.spawn("/World/CameraSensor")
         self.camera.initialize()
-        # position = [2.2, 0, 1.6]
-        position = [2.2, 0, 3]
+        position = [2.2, 0, 1.6]
         orientation = [-0.3069373, 0.6372103, 0.6362135, -0.3081962]
         self.camera.set_world_pose_ros(position, orientation)
 
@@ -386,14 +385,14 @@ class LiftEnv(IsaacEnv):
         self.object_des_pose_w[env_ids, 0:3] += self.envs_positions[env_ids]
 
 
-class LiftObservationManager(ObservationManager):
+class PushObservationManager(ObservationManager):
     """Reward manager for single-arm reaching environment."""
 
-    def arm_dof_pos(self, env: LiftEnv):
+    def arm_dof_pos(self, env: PushEnv):
         """DOF positions for the arm."""
         return env.robot.data.arm_dof_pos
 
-    def arm_dof_pos_scaled(self, env: LiftEnv):
+    def arm_dof_pos_scaled(self, env: PushEnv):
         """DOF positions for the arm normalized to its max and min ranges."""
         return scale_transform(
             env.robot.data.arm_dof_pos,
@@ -401,11 +400,11 @@ class LiftObservationManager(ObservationManager):
             env.robot.data.soft_dof_pos_limits[:, : env.robot.arm_num_dof, 1],
         )
 
-    def arm_dof_vel(self, env: LiftEnv):
+    def arm_dof_vel(self, env: PushEnv):
         """DOF velocity of the arm."""
         return env.robot.data.arm_dof_vel
 
-    def tool_dof_pos_scaled(self, env: LiftEnv):
+    def tool_dof_pos_scaled(self, env: PushEnv):
         """DOF positions of the tool normalized to its max and min ranges."""
         return scale_transform(
             env.robot.data.tool_dof_pos,
@@ -413,33 +412,33 @@ class LiftObservationManager(ObservationManager):
             env.robot.data.soft_dof_pos_limits[:, env.robot.arm_num_dof :, 1],
         )
 
-    def tool_positions(self, env: LiftEnv):
+    def tool_positions(self, env: PushEnv):
         """Current end-effector position of the arm."""
         return env.robot.data.ee_state_w[:, :3] - env.envs_positions
 
-    def tool_orientations(self, env: LiftEnv):
+    def tool_orientations(self, env: PushEnv):
         """Current end-effector orientation of the arm."""
         # make the first element positive
         quat_w = env.robot.data.ee_state_w[:, 3:7]
         quat_w[quat_w[:, 0] < 0] *= -1
         return quat_w
 
-    def object_positions(self, env: LiftEnv):
+    def object_positions(self, env: PushEnv):
         """Current object position."""
         return env.object.data.root_pos_w - env.envs_positions
 
-    def object_orientations(self, env: LiftEnv):
+    def object_orientations(self, env: PushEnv):
         """Current object orientation."""
         # make the first element positive
         quat_w = env.object.data.root_quat_w
         quat_w[quat_w[:, 0] < 0] *= -1
         return quat_w
 
-    def object_relative_tool_positions(self, env: LiftEnv):
+    def object_relative_tool_positions(self, env: PushEnv):
         """Current object position w.r.t. end-effector frame."""
         return env.object.data.root_pos_w - env.robot.data.ee_state_w[:, :3]
 
-    def object_relative_tool_orientations(self, env: LiftEnv):
+    def object_relative_tool_orientations(self, env: PushEnv):
         """Current object orientation w.r.t. end-effector frame."""
         # compute the relative orientation
         quat_ee = quat_mul(quat_inv(env.robot.data.ee_state_w[:, 3:7]), env.object.data.root_quat_w)
@@ -447,43 +446,43 @@ class LiftObservationManager(ObservationManager):
         quat_ee[quat_ee[:, 0] < 0] *= -1
         return quat_ee
 
-    def object_desired_positions(self, env: LiftEnv):
+    def object_desired_positions(self, env: PushEnv):
         """Desired object position."""
         return env.object_des_pose_w[:, 0:3] - env.envs_positions
 
-    def object_desired_orientations(self, env: LiftEnv):
+    def object_desired_orientations(self, env: PushEnv):
         """Desired object orientation."""
         # make the first element positive
         quat_w = env.object_des_pose_w[:, 3:7]
         quat_w[quat_w[:, 0] < 0] *= -1
         return quat_w
 
-    def arm_actions(self, env: LiftEnv):
+    def arm_actions(self, env: PushEnv):
         """Last arm actions provided to env."""
         return env.actions[:, :-1]
 
-    def tool_actions(self, env: LiftEnv):
+    def tool_actions(self, env: PushEnv):
         """Last tool actions provided to env."""
         return env.actions[:, -1].unsqueeze(1)
 
-    def tool_actions_bool(self, env: LiftEnv):
+    def tool_actions_bool(self, env: PushEnv):
         """Last tool actions transformed to a boolean command."""
         return torch.sign(env.actions[:, -1]).unsqueeze(1)
 
 
-class LiftRewardManager(RewardManager):
+class PushRewardManager(RewardManager):
     """Reward manager for single-arm object lifting environment."""
 
-    def reaching_object_position_l2(self, env: LiftEnv):
+    def reaching_object_position_l2(self, env: PushEnv):
         """Penalize end-effector tracking position error using L2-kernel."""
         return torch.sum(torch.square(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
 
-    def reaching_object_position_exp(self, env: LiftEnv, sigma: float):
+    def reaching_object_position_exp(self, env: PushEnv, sigma: float):
         """Penalize end-effector tracking position error using exp-kernel."""
         error = torch.sum(torch.square(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
         return torch.exp(-error / sigma)
 
-    def reaching_object_position_tanh(self, env: LiftEnv, sigma: float):
+    def reaching_object_position_tanh(self, env: PushEnv, sigma: float):
         """Penalize tool sites tracking position error using tanh-kernel."""
         # distance of end-effector to the object: (num_envs,)
         ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
@@ -497,36 +496,36 @@ class LiftRewardManager(RewardManager):
 
         return 1 - torch.tanh(average_distance / sigma)
 
-    def penalizing_arm_dof_velocity_l2(self, env: LiftEnv):
+    def penalizing_arm_dof_velocity_l2(self, env: PushEnv):
         """Penalize large movements of the robot arm."""
         return -torch.sum(torch.square(env.robot.data.arm_dof_vel), dim=1)
 
-    def penalizing_tool_dof_velocity_l2(self, env: LiftEnv):
+    def penalizing_tool_dof_velocity_l2(self, env: PushEnv):
         """Penalize large movements of the robot tool."""
         return -torch.sum(torch.square(env.robot.data.tool_dof_vel), dim=1)
 
-    def penalizing_arm_action_rate_l2(self, env: LiftEnv):
+    def penalizing_arm_action_rate_l2(self, env: PushEnv):
         """Penalize large variations in action commands besides tool."""
         return -torch.sum(torch.square(env.actions[:, :-1] - env.previous_actions[:, :-1]), dim=1)
 
-    def penalizing_tool_action_l2(self, env: LiftEnv):
+    def penalizing_tool_action_l2(self, env: PushEnv):
         """Penalize large values in action commands for the tool."""
         return -torch.square(env.actions[:, -1])
 
-    def tracking_object_position_exp(self, env: LiftEnv, sigma: float, threshold: float):
+    def tracking_object_position_exp(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using exp-kernel."""
         # distance of the end-effector to the object: (num_envs,)
         error = torch.sum(torch.square(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
         # rewarded if the object is lifted above the threshold
         return (env.object.data.root_pos_w[:, 2] > threshold) * torch.exp(-error / sigma)
 
-    def tracking_object_position_tanh(self, env: LiftEnv, sigma: float, threshold: float):
+    def tracking_object_position_tanh(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using tanh-kernel."""
         # distance of the end-effector to the object: (num_envs,)
         distance = torch.norm(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         # rewarded if the object is lifted above the threshold
         return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
 
-    def lifting_object_success(self, env: LiftEnv, threshold: float):
+    def lifting_object_success(self, env: PushEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
         return torch.where(env.object.data.root_pos_w[:, 2] > threshold, 1.0, 0.0)

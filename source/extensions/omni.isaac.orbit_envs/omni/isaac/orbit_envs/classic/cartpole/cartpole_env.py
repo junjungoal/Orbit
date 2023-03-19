@@ -16,6 +16,7 @@ import omni.isaac.orbit.utils.kit as kit_utils
 
 from omni.isaac.orbit_envs.isaac_env import IsaacEnv, VecEnvIndices, VecEnvObs
 from omni.isaac.orbit_envs.isaac_env_cfg import EnvCfg, IsaacEnvCfg
+from omni.isaac.orbit.sensors.camera import Camera, PinholeCameraCfg
 
 
 class CartpoleEnv(IsaacEnv):
@@ -63,6 +64,23 @@ class CartpoleEnv(IsaacEnv):
         self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(1,))
         # store maximum episode length
         self.max_episode_length = self.cfg_dict["env"]["episode_length"]
+
+        # camera_cfg = PinholeCameraCfg(
+        #     sensor_tick=0,
+        #     height=480,
+        #     width=640,
+        #     data_types=["rgb"],
+        #     usd_params=PinholeCameraCfg.UsdCameraCfg(
+        #         focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 1.0e5)
+        #     ),
+        # )
+        # self.camera = Camera(cfg=camera_cfg, device="cpu")
+        # self.camera.spawn("/World/CameraSensor")
+        # self.camera.initialize()
+        # position = [2.2, 0, 3.2]
+        # orientation = [-0.3069373, 0.6372103, 0.6362135, -0.3081962]
+        # self.camera.set_world_pose_ros(position, orientation)
+        #
 
     """
     Implementation specifics.
@@ -157,6 +175,15 @@ class CartpoleEnv(IsaacEnv):
         obs_buf = torch.cat([dof_pos, dof_vel], dim=-1)
 
         return {"policy": obs_buf}
+
+    def render_visual_observations(self):
+        # obs = self.listener.get_rgb_data()
+        # if obs is not None:
+        #     obs = obs.permute(0, 2, 3, 1)
+        # return obs
+        # self.sim.step()
+        self.camera.update(dt=0.0)
+        return self.camera.data.output
 
     """
     Helper functions.
