@@ -83,7 +83,7 @@ class PushEnv(IsaacEnv):
         prim_utils.create_prim(self.template_env_ns + "/Table", usd_path=self.cfg.table.usd_path)
 
         add_reference_to_stage(os.path.join(os.environ['ORBIT_PATH'],
-                                            'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/goal_marker.usd'),
+                                            'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/goal_marker.usda'),
                                self.template_env_ns + '/GoalMarker')
 
         # robot
