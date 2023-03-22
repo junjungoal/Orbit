@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os, sys
+
 from omni.isaac.orbit.controllers.differential_inverse_kinematics import DifferentialInverseKinematicsCfg
 from omni.isaac.orbit.objects import RigidObjectCfg
 from omni.isaac.orbit.robots.config.franka import FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
@@ -23,7 +25,8 @@ class TableCfg:
 
     # note: we use instanceable asset since it consumes less memory
     # usd_path = f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"
-    usd_path = "omniverse://localhost/Projects/wm_distill/table.usd"
+    # usd_path = "omniverse://localhost/Projects/wm_distill/table.usd"
+    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table.usd")
 
 
 @configclass
@@ -32,7 +35,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
         # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-    usd_path = "omniverse://localhost/Projects/wm_distill/cube.usd",
+        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube.usd"),
         scale=(0.8, 0.8, 0.8),
     )
     init_state = RigidObjectCfg.InitialStateCfg(

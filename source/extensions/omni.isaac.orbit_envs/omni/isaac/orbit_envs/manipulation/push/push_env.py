@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os, sys
 import gym.spaces
 import math
 import torch
@@ -81,7 +82,9 @@ class PushEnv(IsaacEnv):
         # table
         prim_utils.create_prim(self.template_env_ns + "/Table", usd_path=self.cfg.table.usd_path)
 
-        add_reference_to_stage('omniverse://localhost/Projects/wm_distill/goal_marker.usd', self.template_env_ns + '/GoalMarker')
+        add_reference_to_stage(os.path.join(os.environ['ORBIT_PATH'],
+                                            'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/goal_marker.usd'),
+                               self.template_env_ns + '/GoalMarker')
 
         # robot
         self.robot.spawn(self.template_env_ns + "/Robot")
