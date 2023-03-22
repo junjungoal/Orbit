@@ -144,7 +144,7 @@ class PushEnv(IsaacEnv):
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
-            self._ik_controller.set_command(self.actions[:, :-1])
+            self._ik_controller.set_command(self.actions)
             # use IK to convert to joint-space commands
             self.robot_actions[:, : self.robot.arm_num_dof] = self._ik_controller.compute(
                 self.robot.data.ee_state_w[:, 0:3] - self.envs_positions,
@@ -155,8 +155,6 @@ class PushEnv(IsaacEnv):
             # offset actuator command with position offsets
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
-            # we assume last command is tool action so don't change that
-            self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
@@ -247,9 +245,9 @@ class PushEnv(IsaacEnv):
             self._ik_controller = DifferentialInverseKinematics(
                 self.cfg.control.inverse_kinematics, self.robot.count, self.device
             )
-            self.num_actions = self._ik_controller.num_actions + 1
+            self.num_actions = self._ik_controller.num_actions
         elif self.cfg.control.control_type == "default":
-            self.num_actions = self.robot.num_actions
+            self.num_actions = self.robot.arm_num_dof
 
         # history
         self.actions = torch.zeros((self.num_envs, self.num_actions), device=self.device)
