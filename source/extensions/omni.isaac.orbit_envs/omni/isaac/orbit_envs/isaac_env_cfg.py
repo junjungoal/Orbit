@@ -67,6 +67,7 @@ class CameraCfg:
     orientation: Tuple[float, float, float, float] = (-0.3069373, 0.6372103, 0.6362135, -0.3081962)
     height: int = 480
     width: int = 640
+    device: str = 'cuda'
 ##
 # Simulation settings
 ##
