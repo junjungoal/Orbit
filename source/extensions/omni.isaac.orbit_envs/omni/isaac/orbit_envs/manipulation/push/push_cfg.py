@@ -175,7 +175,7 @@ class ControlCfg:
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
-        command_type="position_rel",
+        command_type="pose_rel",
         ik_method="dls",
         position_command_scale=(0.1, 0.1, 0.1),
         rotation_command_scale=(0.1, 0.1, 0.1),

@@ -32,6 +32,8 @@ class EnvCfg:
     """Spacing between cloned environments."""
     episode_length_s: float = None
     """Duration of an episode (in seconds). Default is None (no limit)."""
+    enable_camera: bool = True
+    """Whether to enable/disable a camera"""
 
 
 @configclass
@@ -46,6 +48,19 @@ class ViewerCfg:
     """Initial camera target position (in m). Default is (0.0, 0.0, 0.0)."""
 
 
+@configclass
+class CameraCfg:
+    """Configuration of the scene viewport camera."""
+
+    set_type: str = 'view'  # view or ros
+    eye: Tuple[float, float, float] = (7.5, 7.5, 7.5)
+    """Initial camera position (in m). Default is (7.5, 7.5, 7.5)."""
+    lookat: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    """Initial camera target position (in m). Default is (0.0, 0.0, 0.0)."""
+    position: Tuple[float, float, float] = (2.2, 0, 1.6)
+    orientation: Tuple[float, float, float, float] = (-0.3069373, 0.6372103, 0.6362135, -0.3081962)
+    height: int = 480
+    width: int = 640
 ##
 # Simulation settings
 ##
@@ -227,3 +242,4 @@ class IsaacEnvCfg:
     """Viewer configuration. Default is ViewerCfg()."""
     sim: SimCfg = SimCfg()
     """Physics simulation configuration. Default is SimCfg()."""
+    camera: CameraCfg = CameraCfg()
