@@ -288,7 +288,8 @@ class PushEnv(IsaacEnv):
         # compute resets
         # -- when task is successful
         if self.cfg.terminations.is_success:
-            object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
+            goal_positions = env.goal.get_world_poses()[0]
+            object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - goal_positions[:, :2], dim=1)
             self.reset_buf = torch.where(object_position_error < 0.002, 1, self.reset_buf)
         # -- object fell off the table (table at height: 0.0 m)
         if self.cfg.terminations.object_falling:
