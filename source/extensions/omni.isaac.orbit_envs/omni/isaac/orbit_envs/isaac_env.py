@@ -22,6 +22,8 @@ from omni.isaac.core.simulation_context import SimulationContext
 from omni.isaac.core.utils.extensions import enable_extension
 from omni.isaac.core.utils.viewports import set_camera_view
 
+from omni.isaac.orbit.sensors.camera import Camera, PinholeCameraCfg
+
 from .isaac_env_cfg import IsaacEnvCfg
 
 # Define type aliases here to avoid circular import
@@ -170,6 +172,25 @@ class IsaacEnv(gym.Env):
         cloner.filter_collisions(
             physics_scene_path, "/World/collisions", prim_paths=self.envs_prim_paths, global_paths=global_prim_paths
         )
+
+        if self.cfg.env.enable_camera:
+            camera_cfg = PinholeCameraCfg(
+                sensor_tick=0,
+                height=self.cfg.camera.height,
+                width=self.cfg.camera.width,
+                data_types=["rgb"],
+                usd_params=PinholeCameraCfg.UsdCameraCfg(
+                    focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 1.0e5)
+                ),
+            )
+            self.camera = Camera(cfg=camera_cfg, device=self.device)
+            self.camera.spawn("/World/CameraSensor")
+            self.camera.initialize()
+
+            if self.cfg.camera.set_type == 'ros':
+                self.camera.set_world_pose_ros(self.cfg.camera.position, self.cfg.camera.orientation)
+            else:
+                self.camera.set_world_pose_from_view(eye=self.cfg.camera.eye, target=self.cfg.camera.lookat)
 
     """
     Properties
@@ -328,6 +349,10 @@ class IsaacEnv(gym.Env):
             raise NotImplementedError(
                 f"Render mode '{mode}' is not supported. Please use: {self.metadata['render.modes']}."
             )
+
+    def render_visual_observations(self):
+        self.camera.update(dt=0.0)
+        return self.camera.data.output
 
     def close(self):
         """Cleanup for the environment."""
