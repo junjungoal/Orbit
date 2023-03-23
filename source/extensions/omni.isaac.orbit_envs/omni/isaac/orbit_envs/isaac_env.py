@@ -183,7 +183,7 @@ class IsaacEnv(gym.Env):
                     focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 1.0e5)
                 ),
             )
-            self.camera = Camera(cfg=camera_cfg, device=self.cfg.camera.device)
+            self.camera = Camera(cfg=camera_cfg, device='cpu')
             self.camera.spawn("/World/CameraSensor")
             self.camera.initialize()
 
