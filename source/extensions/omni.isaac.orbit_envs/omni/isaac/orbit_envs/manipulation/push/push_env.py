@@ -326,8 +326,7 @@ class PushEnv(IsaacEnv):
         # set the root state
         self.object.set_root_state(root_state, env_ids=env_ids)
 
-
-        self.goal.set_world_poses(torch.tensor([[0.5, 0, 0]], device=self.device).repeat(len(env_ids), 1))
+        # self.goal.set_world_poses(torch.tensor([[0.5, 0, 0]], device=self.device).repeat(len(env_ids), 1))
 
     def _randomize_goal_pose(self, env_ids: torch.Tensor, cfg: RandomizationCfg.GoalPoseCfg):
         """Randomize the desired pose of the object."""
