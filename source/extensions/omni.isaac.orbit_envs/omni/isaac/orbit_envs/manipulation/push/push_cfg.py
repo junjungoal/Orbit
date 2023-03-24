@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os, sys
+
 from omni.isaac.orbit.controllers.differential_inverse_kinematics import DifferentialInverseKinematicsCfg
 from omni.isaac.orbit.objects import RigidObjectCfg
 from omni.isaac.orbit.robots.config.franka import FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
@@ -22,7 +24,9 @@ class TableCfg:
     """Properties for the table."""
 
     # note: we use instanceable asset since it consumes less memory
-    usd_path = f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"
+    # usd_path = f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"
+    # usd_path = "omniverse://localhost/Projects/wm_distill/table.usd"
+    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table.usd")
 
 
 @configclass
@@ -30,13 +34,12 @@ class ManipulationObjectCfg(RigidObjectCfg):
     """Properties for the object to manipulate in the scene."""
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
-        # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/red_block.usd",
-        # scale=(1, 1, 1),
-        usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+        # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
         scale=(0.8, 0.8, 0.8),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.4, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.3, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -52,16 +55,6 @@ class ManipulationObjectCfg(RigidObjectCfg):
 
 
 @configclass
-class GoalMarkerCfg:
-    """Properties for visualization marker."""
-
-    # usd file to import
-    usd_path = f"{ISAAC_NUCLEUS_DIR}/Props/UIElements/frame_prim.usd"
-    # scale of the asset at import
-    scale = [0.05, 0.05, 0.05]  # x,y,z
-
-
-@configclass
 class FrameMarkerCfg:
     """Properties for visualization marker."""
 
@@ -69,7 +62,6 @@ class FrameMarkerCfg:
     usd_path = f"{ISAAC_NUCLEUS_DIR}/Props/UIElements/frame_prim.usd"
     # scale of the asset at import
     scale = [0.1, 0.1, 0.1]  # x,y,z
-    # scale = [0., 0., 0.]  # x,y,z
 
 
 ##
@@ -93,22 +85,19 @@ class RandomizationCfg:
         position_uniform_max = [0.6, 0.25, 0.075]  # position (x,y,z)
 
     @configclass
-    class ObjectDesiredPoseCfg:
+    class GoalPoseCfg:
         """Randomization of object desired pose."""
 
         # category
         position_cat: str = "default"  # randomize position: "default", "uniform"
-        orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.3]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.25, 0.25]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.25, 0.5]  # position (x,y,z)
-        # randomize orientation
-        orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
+        position_default = [0.5, 0.0, 0.0]  # position default (x,y,z)
+        position_uniform_min = [0.4, -0.25, 0.]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.25, 0.]  # position (x,y,z)
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
-    object_desired_pose: ObjectDesiredPoseCfg = ObjectDesiredPoseCfg()
+    goal_pose: GoalPoseCfg = GoalPoseCfg()
 
 
 @configclass
@@ -137,6 +126,7 @@ class ObservationsCfg:
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_desired_positions = {"scale": 1.0}
+        object_to_goal_positions = {"scale": 1.0}
         # -- previous action
         arm_actions = {"scale": 1.0}
         tool_actions = {"scale": 1.0}
@@ -164,8 +154,8 @@ class RewardsCfg:
     # penalizing_tool_action_l2 = {"weight": 1e-2}
     # -- object-centric
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.07}
-    lifting_object_success = {"weight": 3.5, "threshold": 0.08}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.08}
+    push_object_success = {"weight": 3.5, "threshold": 0.08}
 
 
 @configclass
@@ -182,10 +172,9 @@ class ControlCfg:
     """Processing of MDP actions."""
 
     # action space
-    control_type = "default"  # "default", "inverse_kinematics"
-    # control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
+    control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 2
+    decimation = 1
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
@@ -229,7 +218,6 @@ class PushEnvCfg(IsaacEnvCfg):
     # -- table
     table: TableCfg = TableCfg()
     # -- visualization marker
-    goal_marker: GoalMarkerCfg = GoalMarkerCfg()
     frame_marker: FrameMarkerCfg = FrameMarkerCfg()
 
     # MDP settings
@@ -240,3 +228,4 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # Controller settings
     control: ControlCfg = ControlCfg()
+

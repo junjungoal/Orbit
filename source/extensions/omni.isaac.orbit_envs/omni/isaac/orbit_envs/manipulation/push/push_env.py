@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os, sys
 import gym.spaces
 import math
 import torch
@@ -20,17 +21,14 @@ from omni.isaac.orbit.utils.math import quat_inv, quat_mul, random_orientation, 
 from omni.isaac.orbit.utils.mdp import ObservationManager, RewardManager
 
 from omni.isaac.orbit_envs.isaac_env import IsaacEnv, VecEnvIndices, VecEnvObs
-from omni.isaac.orbit.sensors.camera import Camera, PinholeCameraCfg
-
-import omni.replicator.core as rep
-from omni.replicator.isaac.scripts.writers.pytorch_listener import PytorchListener
-from omni.replicator.isaac.scripts.writers.pytorch_writer import PytorchWriter
 
 from .push_cfg import PushEnvCfg, RandomizationCfg
+from omni.isaac.core.utils.stage import add_reference_to_stage
+from omni.isaac.core.prims import GeometryPrimView
 
 
 class PushEnv(IsaacEnv):
-    """Environment for pushing an object to a goal with a single-arm manipulator."""
+    """Environment for lifting an object off a table with a single-arm manipulator."""
 
     def __init__(self, cfg: PushEnvCfg = None, headless: bool = False):
         # copy configuration
@@ -73,32 +71,21 @@ class PushEnv(IsaacEnv):
         self.object.update_buffers(self.dt)
         self.robot.update_buffers(self.dt)
 
-
-        camera_cfg = PinholeCameraCfg(
-            sensor_tick=0,
-            height=480,
-            width=640,
-            data_types=["rgb"],
-            usd_params=PinholeCameraCfg.UsdCameraCfg(
-                focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 1.0e5)
-            ),
-        )
-        self.camera = Camera(cfg=camera_cfg, device="cpu")
-        self.camera.spawn("/World/CameraSensor")
-        self.camera.initialize()
-        position = [2.2, 0, 1.6]
-        orientation = [-0.3069373, 0.6372103, 0.6362135, -0.3081962]
-        self.camera.set_world_pose_ros(position, orientation)
-
     """
     Implementation specifics.
     """
 
     def _design_scene(self) -> List[str]:
         # ground plane
-        kit_utils.create_ground_plane("/World/defaultGroundPlane", z_position=-1.05)
+        # kit_utils.create_ground_plane("/World/defaultGroundPlane", z_position=-1.05)
+        kit_utils.create_ground_plane("/World/defaultGroundPlane", z_position=-0.65)
         # table
         prim_utils.create_prim(self.template_env_ns + "/Table", usd_path=self.cfg.table.usd_path)
+
+        add_reference_to_stage(os.path.join(os.environ['ORBIT_PATH'],
+                                            'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/goal_marker_instanceable.usd'),
+                               self.template_env_ns + '/GoalMarker')
+
         # robot
         self.robot.spawn(self.template_env_ns + "/Robot")
         # object
@@ -106,13 +93,6 @@ class PushEnv(IsaacEnv):
 
         # setup debug visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
-            # create point instancer to visualize the goal points
-            self._goal_markers = StaticMarker(
-                "/Visuals/object_goal",
-                self.num_envs,
-                usd_path=self.cfg.goal_marker.usd_path,
-                scale=self.cfg.goal_marker.scale,
-            )
             # create marker for viewing end-effector pose
             self._ee_markers = StaticMarker(
                 "/Visuals/ee_current",
@@ -139,7 +119,7 @@ class PushEnv(IsaacEnv):
         # -- object pose
         self._randomize_object_initial_pose(env_ids=env_ids, cfg=self.cfg.randomization.object_initial_pose)
         # -- goal pose
-        self._randomize_object_desired_pose(env_ids=env_ids, cfg=self.cfg.randomization.object_desired_pose)
+        self._randomize_goal_pose(env_ids=env_ids, cfg=self.cfg.randomization.goal_pose)
 
         # -- Reward logging
         # fill extras with episode information
@@ -164,7 +144,7 @@ class PushEnv(IsaacEnv):
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
-            self._ik_controller.set_command(self.actions[:, :-1])
+            self._ik_controller.set_command(self.actions)
             # use IK to convert to joint-space commands
             self.robot_actions[:, : self.robot.arm_num_dof] = self._ik_controller.compute(
                 self.robot.data.ee_state_w[:, 0:3] - self.envs_positions,
@@ -175,8 +155,6 @@ class PushEnv(IsaacEnv):
             # offset actuator command with position offsets
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
-            # we assume last command is tool action so don't change that
-            self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
@@ -214,15 +192,6 @@ class PushEnv(IsaacEnv):
         # compute observations
         return self._observation_manager.compute()
 
-    def render_visual_observations(self):
-        # obs = self.listener.get_rgb_data()
-        # if obs is not None:
-        #     obs = obs.permute(0, 2, 3, 1)
-        # return obs
-        # self.sim.step()
-        self.camera.update(dt=0.0)
-        return self.camera.data.output
-
     """
     Helper functions - Scene handling.
     """
@@ -255,8 +224,8 @@ class PushEnv(IsaacEnv):
         for attr in ["position_uniform_min", "position_uniform_max"]:
             setattr(config, attr, torch.tensor(getattr(config, attr), device=self.device, requires_grad=False))
         # -- desired pose
-        config = self.cfg.randomization.object_desired_pose
-        for attr in ["position_uniform_min", "position_uniform_max", "position_default", "orientation_default"]:
+        config = self.cfg.randomization.goal_pose
+        for attr in ["position_uniform_min", "position_uniform_max", "position_default"]:
             setattr(config, attr, torch.tensor(getattr(config, attr), device=self.device, requires_grad=False))
 
     def _initialize_views(self) -> None:
@@ -268,16 +237,17 @@ class PushEnv(IsaacEnv):
         # define views over instances
         self.robot.initialize(self.env_ns + "/.*/Robot")
         self.object.initialize(self.env_ns + "/.*/Object")
-        # self.object.initialize(self.env_ns + "/.*/Object/Cube")
+
+        self.goal = GeometryPrimView(self.env_ns + "/.*/GoalMarker")
 
         # create controller
         if self.cfg.control.control_type == "inverse_kinematics":
             self._ik_controller = DifferentialInverseKinematics(
                 self.cfg.control.inverse_kinematics, self.robot.count, self.device
             )
-            self.num_actions = self._ik_controller.num_actions + 1
+            self.num_actions = self._ik_controller.num_actions
         elif self.cfg.control.control_type == "default":
-            self.num_actions = self.robot.num_actions
+            self.num_actions = self.robot.arm_num_dof
 
         # history
         self.actions = torch.zeros((self.num_envs, self.num_actions), device=self.device)
@@ -294,8 +264,6 @@ class PushEnv(IsaacEnv):
     def _debug_vis(self):
         """Visualize the environment in debug mode."""
         # apply to instance manager
-        # -- goal
-        self._goal_markers.set_world_poses(self.object_des_pose_w[:, 0:3], self.object_des_pose_w[:, 3:7])
         # -- end-effector
         self._ee_markers.set_world_poses(self.robot.data.ee_state_w[:, 0:3], self.robot.data.ee_state_w[:, 3:7])
         # -- task-space commands
@@ -318,7 +286,8 @@ class PushEnv(IsaacEnv):
         # compute resets
         # -- when task is successful
         if self.cfg.terminations.is_success:
-            object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
+            goal_positions = env.goal.get_world_poses()[0]
+            object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - goal_positions[:, :2], dim=1)
             self.reset_buf = torch.where(object_position_error < 0.002, 1, self.reset_buf)
         # -- object fell off the table (table at height: 0.0 m)
         if self.cfg.terminations.object_falling:
@@ -357,32 +326,25 @@ class PushEnv(IsaacEnv):
         # set the root state
         self.object.set_root_state(root_state, env_ids=env_ids)
 
-    def _randomize_object_desired_pose(self, env_ids: torch.Tensor, cfg: RandomizationCfg.ObjectDesiredPoseCfg):
+        # self.goal.set_world_poses(torch.tensor([[0.5, 0, 0]], device=self.device).repeat(len(env_ids), 1))
+
+    def _randomize_goal_pose(self, env_ids: torch.Tensor, cfg: RandomizationCfg.GoalPoseCfg):
         """Randomize the desired pose of the object."""
         # -- desired object root position
         if cfg.position_cat == "default":
             # constant command for position
-            self.object_des_pose_w[env_ids, 0:3] = cfg.position_default
+            pos = cfg.position_default.repeat(len(env_ids), 1) + self.envs_positions
+            self.goal.set_world_poses(pos, indices=env_ids)
         elif cfg.position_cat == "uniform":
             # sample uniformly from box
             # note: this should be within in the workspace of the robot
-            self.object_des_pose_w[env_ids, 0:3] = sample_uniform(
+            pos = sample_uniform(
                 cfg.position_uniform_min, cfg.position_uniform_max, (len(env_ids), 3), device=self.device
-            )
+            ) + self.envs_positions
+            #TODO: add envs_position
+            self.goal.set_world_poses(pos, indices=env_ids)
         else:
             raise ValueError(f"Invalid category for randomizing the desired object positions '{cfg.position_cat}'.")
-        # -- desired object root orientation
-        if cfg.orientation_cat == "default":
-            # constant position of the object
-            self.object_des_pose_w[env_ids, 3:7] = cfg.orientation_default
-        elif cfg.orientation_cat == "uniform":
-            self.object_des_pose_w[env_ids, 3:7] = random_orientation(len(env_ids), self.device)
-        else:
-            raise ValueError(
-                f"Invalid category for randomizing the desired object orientation '{cfg.orientation_cat}'."
-            )
-        # transform command from local env to world
-        self.object_des_pose_w[env_ids, 0:3] += self.envs_positions[env_ids]
 
 
 class PushObservationManager(ObservationManager):
@@ -446,17 +408,6 @@ class PushObservationManager(ObservationManager):
         quat_ee[quat_ee[:, 0] < 0] *= -1
         return quat_ee
 
-    def object_desired_positions(self, env: PushEnv):
-        """Desired object position."""
-        return env.object_des_pose_w[:, 0:3] - env.envs_positions
-
-    def object_desired_orientations(self, env: PushEnv):
-        """Desired object orientation."""
-        # make the first element positive
-        quat_w = env.object_des_pose_w[:, 3:7]
-        quat_w[quat_w[:, 0] < 0] *= -1
-        return quat_w
-
     def arm_actions(self, env: PushEnv):
         """Last arm actions provided to env."""
         return env.actions[:, :-1]
@@ -468,6 +419,16 @@ class PushObservationManager(ObservationManager):
     def tool_actions_bool(self, env: PushEnv):
         """Last tool actions transformed to a boolean command."""
         return torch.sign(env.actions[:, -1]).unsqueeze(1)
+
+    def object_to_goal_positions(self, env: PushEnv):
+        object_positions = env.object.data.root_pos_w
+        goal_positions = env.goal.get_world_poses()[0]
+        return torch.norm(object_positions[:, :2]-goal_positions[:, :2], dim=1).unsqueeze(1)
+
+    def object_desired_positions(self, env: PushEnv):
+        goal_positions = env.goal.get_world_poses()[0] - env.envs_positions
+        return goal_positions
+
 
 
 class PushRewardManager(RewardManager):
@@ -515,17 +476,19 @@ class PushRewardManager(RewardManager):
     def tracking_object_position_exp(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using exp-kernel."""
         # distance of the end-effector to the object: (num_envs,)
-        error = torch.sum(torch.square(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
+        error = torch.sum(torch.square(env.goal.get_world_poses()[0][:, :2] - env.object.data.root_pos_w[:, :2]), dim=1)
+        dist = torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.get_world_poses()[0][:, :2], dim=1)
         # rewarded if the object is lifted above the threshold
-        return (env.object.data.root_pos_w[:, 2] > threshold) * torch.exp(-error / sigma)
+        return (dist < threshold) * torch.exp(-error / sigma)
 
     def tracking_object_position_tanh(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using tanh-kernel."""
         # distance of the end-effector to the object: (num_envs,)
-        distance = torch.norm(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        obj_to_goal = torch.norm(env.object_des_pose_w[:, :2] - env.object.data.root_pos_w[:, :2], dim=1)
+        ee_to_obj = torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.get_world_poses()[0][:, :2], dim=1)
         # rewarded if the object is lifted above the threshold
-        return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
+        return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
 
-    def lifting_object_success(self, env: PushEnv, threshold: float):
+    def push_object_success(self, env: PushEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
-        return torch.where(env.object.data.root_pos_w[:, 2] > threshold, 1.0, 0.0)
+        return torch.where(torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.get_world_poses()[0][:, :2], dim=1) > threshold, 1.0, 0.0)
