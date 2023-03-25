@@ -58,7 +58,7 @@ class ViewerCfg:
 class CameraCfg:
     """Configuration of the scene viewport camera."""
 
-    set_type: str = 'ros'  # view or ros
+    set_type: str = 'view'  # view or ros
     eye: Tuple[float, float, float] = (2.5, 0, 5.5)
     """Initial camera position (in m). Default is (7.5, 7.5, 7.5)."""
     lookat: Tuple[float, float, float] = (0.0, 0.0, 0.0)
