@@ -59,7 +59,7 @@ class CameraCfg:
     """Configuration of the scene viewport camera."""
 
     set_type: str = 'view'  # view or ros
-    eye: Tuple[float, float, float] = (2.5, 0, 5.5)
+    eye: Tuple[float, float, float] = (3, 0, 4.5)
     """Initial camera position (in m). Default is (7.5, 7.5, 7.5)."""
     lookat: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     """Initial camera target position (in m). Default is (0.0, 0.0, 0.0)."""
@@ -67,7 +67,7 @@ class CameraCfg:
     orientation: Tuple[float, float, float, float] = (-0.3069373, 0.6372103, 0.6362135, -0.3081962)
     height: int = 480
     width: int = 640
-    device: str = 'cpu'
+    device: str = 'cuda'
 ##
 # Simulation settings
 ##
