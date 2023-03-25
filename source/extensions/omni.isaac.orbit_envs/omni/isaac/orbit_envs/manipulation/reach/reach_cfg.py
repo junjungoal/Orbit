@@ -48,8 +48,8 @@ class RandomizationCfg:
         """Randomization of end-effector pose command."""
 
         # category
-        position_cat: str = "default"  # randomize position: "default", "uniform"
-        orientation_cat: str = "default"  # randomize position: "default", "uniform"
+        position_cat: str = "uniform"  # randomize position: "default", "uniform"
+        orientation_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.5, 0.0, 0.5]  # position default (x,y,z)
         position_uniform_min = [0.25, -0.25, 0.25]  # position (x,y,z)
@@ -89,11 +89,14 @@ class ObservationsCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    tracking_robot_position_l2 = {"weight": 0.0}
+    # tracking_robot_position_l2 = {"weight": 0.0}
     tracking_robot_position_exp = {"weight": 2.5, "sigma": 0.05}  # 0.25
-    penalizing_robot_dof_velocity_l2 = {"weight": -0.02}  # -1e-4
-    penalizing_robot_dof_acceleration_l2 = {"weight": -1e-5}
-    penalizing_action_rate_l2 = {"weight": -0.1}
+    # penalizing_robot_dof_velocity_l2 = {"weight": 0.0}  # -1e-4
+    # penalizing_robot_dof_velocity_l2 = {"weight": -0.02}  # -1e-4
+    # penalizing_robot_dof_acceleration_l2 = {"weight": -1e-5}
+    # penalizing_robot_dof_acceleration_l2 = {"weight": 0}
+    # penalizing_action_rate_l2 = {"weight": -0.1}
+    # penalizing_action_rate_l2 = {"weight": 0}
 
 
 @configclass
@@ -108,9 +111,9 @@ class ControlCfg:
     """Processing of MDP actions."""
 
     # action space
-    control_type = "default"  # "default", "inverse_kinematics"
+    control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 2
+    decimation = 1
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(

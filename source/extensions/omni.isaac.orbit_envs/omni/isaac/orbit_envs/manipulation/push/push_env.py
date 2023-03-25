@@ -72,6 +72,7 @@ class PushEnv(IsaacEnv):
         # -- fill up buffers
         self.object.update_buffers(self.dt)
         self.robot.update_buffers(self.dt)
+        self.goal.update_buffers(self.dt)
 
     """
     Implementation specifics.
@@ -173,6 +174,7 @@ class PushEnv(IsaacEnv):
         # -- compute common buffers
         self.robot.update_buffers(self.dt)
         self.object.update_buffers(self.dt)
+        self.goal.update_buffers(self.dt)
         # -- compute MDP signals
         # reward
         self.reward_buf = self._reward_manager.compute()
@@ -479,15 +481,15 @@ class PushRewardManager(RewardManager):
         """Penalize tracking object position error using exp-kernel."""
         # distance of the end-effector to the object: (num_envs,)
         error = torch.sum(torch.square(env.goal.data.root_pos_w[:, :2] - env.object.data.root_pos_w[:, :2]), dim=1)
-        dist = torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1)
+        dist = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
         # rewarded if the object is lifted above the threshold
         return (dist < threshold) * torch.exp(-error / sigma)
 
     def tracking_object_position_tanh(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using tanh-kernel."""
         # distance of the end-effector to the object: (num_envs,)
-        obj_to_goal = torch.norm(env.object_des_pose_w[:, :2] - env.object.data.root_pos_w[:, :2], dim=1)
-        ee_to_obj = torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1)
+        obj_to_goal = torch.norm(env.goal.data.root_pos_w[:, :2] - env.object.data.root_pos_w[:, :2], dim=1)
+        ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
         # rewarded if the object is lifted above the threshold
         return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
 
