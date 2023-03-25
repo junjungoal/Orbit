@@ -346,7 +346,7 @@ class PushEnv(IsaacEnv):
             raise ValueError(f"Invalid category for randomizing the desired object positions '{cfg.position_cat}'.")
 
         root_state[:, 0:3] += self.envs_positions[env_ids]
-        self.object.set_root_state(root_state, env_ids=env_ids)
+        self.goal.set_root_state(root_state, env_ids=env_ids)
 
 
 class PushObservationManager(ObservationManager):
