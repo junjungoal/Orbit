@@ -24,8 +24,6 @@ class TableCfg:
     """Properties for the table."""
 
     # note: we use instanceable asset since it consumes less memory
-    # usd_path = f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"
-    # usd_path = "omniverse://localhost/Projects/wm_distill/table.usd"
     usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table.usd")
 
 
@@ -34,12 +32,11 @@ class ManipulationObjectCfg(RigidObjectCfg):
     """Properties for the object to manipulate in the scene."""
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
-        # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
-        scale=(0.8, 0.8, 0.8),
+        scale=(1, 1, 1),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.3, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.2, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -50,7 +47,25 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=0.5, dynamic_friction=0.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+    )
+
+@configclass
+class GoalMarkerCfg(RigidObjectCfg):
+    """Properties for the object to manipulate in the scene."""
+
+    meta_info = RigidObjectCfg.MetaInfoCfg(
+        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/goal_marker_instanceable.usd"),
+        scale=(1, 1, 1),
+    )
+    init_state = RigidObjectCfg.InitialStateCfg(
+        pos=(0.5, 0.2, 0.0), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+    )
+    rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
+        disable_gravity=True,
+    )
+    collision_props = RigidObjectCfg.CollisionPropertiesCfg(
+        collision_enabled=False,
     )
 
 
@@ -81,6 +96,7 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
+        position_default = [0.2, 0.0, 0.075]  # position default (x,y,z)
         position_uniform_min = [0.4, -0.25, 0.075]  # position (x,y,z)
         position_uniform_max = [0.6, 0.25, 0.075]  # position (x,y,z)
 
@@ -91,7 +107,7 @@ class RandomizationCfg:
         # category
         position_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.0]  # position default (x,y,z)
+        position_default = [0.5, 0.2, 0.0]  # position default (x,y,z)
         position_uniform_min = [0.4, -0.25, 0.]  # position (x,y,z)
         position_uniform_max = [0.6, 0.25, 0.]  # position (x,y,z)
 
@@ -215,6 +231,8 @@ class PushEnvCfg(IsaacEnvCfg):
     robot: SingleArmManipulatorCfg = FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
     # -- object
     object: ManipulationObjectCfg = ManipulationObjectCfg()
+    # -- goal
+    goal: GoalMarkerCfg = GoalMarkerCfg()
     # -- table
     table: TableCfg = TableCfg()
     # -- visualization marker

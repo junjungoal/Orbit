@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import numpy as np
 import os, sys
 import gym.spaces
 import math
@@ -24,7 +25,7 @@ from omni.isaac.orbit_envs.isaac_env import IsaacEnv, VecEnvIndices, VecEnvObs
 
 from .push_cfg import PushEnvCfg, RandomizationCfg
 from omni.isaac.core.utils.stage import add_reference_to_stage
-from omni.isaac.core.prims import GeometryPrimView
+from omni.isaac.core.prims import GeometryPrimView, RigidPrimView, GeometryPrim, RigidPrim
 
 
 class PushEnv(IsaacEnv):
@@ -39,6 +40,7 @@ class PushEnv(IsaacEnv):
         # create classes (these are called by the function :meth:`_design_scene`)
         self.robot = SingleArmManipulator(cfg=self.cfg.robot)
         self.object = RigidObject(cfg=self.cfg.object)
+        self.goal = RigidObject(cfg=self.cfg.goal)
 
         # initialize the base class to setup the scene.
         super().__init__(self.cfg, headless=headless)
@@ -82,14 +84,15 @@ class PushEnv(IsaacEnv):
         # table
         prim_utils.create_prim(self.template_env_ns + "/Table", usd_path=self.cfg.table.usd_path)
 
-        add_reference_to_stage(os.path.join(os.environ['ORBIT_PATH'],
-                                            'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/goal_marker_instanceable.usd'),
-                               self.template_env_ns + '/GoalMarker')
+        # goal_geom = GeometryPrim(prim_path=self.template_env_ns+'/GoalMarker')
+        # goal_geom.disable_collision(torch.arange(self.num_envs).to(self.device))
 
         # robot
         self.robot.spawn(self.template_env_ns + "/Robot")
         # object
         self.object.spawn(self.template_env_ns + "/Object")
+
+        self.goal.spawn(self.template_env_ns + '/GoalMarker')
 
         # setup debug visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
@@ -237,8 +240,7 @@ class PushEnv(IsaacEnv):
         # define views over instances
         self.robot.initialize(self.env_ns + "/.*/Robot")
         self.object.initialize(self.env_ns + "/.*/Object")
-
-        self.goal = GeometryPrimView(self.env_ns + "/.*/GoalMarker")
+        self.goal.initialize(self.env_ns + '/.*/GoalMarker')
 
         # create controller
         if self.cfg.control.control_type == "inverse_kinematics":
@@ -331,20 +333,20 @@ class PushEnv(IsaacEnv):
     def _randomize_goal_pose(self, env_ids: torch.Tensor, cfg: RandomizationCfg.GoalPoseCfg):
         """Randomize the desired pose of the object."""
         # -- desired object root position
+        root_state = self.goal.get_default_root_state(env_ids)
         if cfg.position_cat == "default":
-            # constant command for position
-            pos = cfg.position_default.repeat(len(env_ids), 1) + self.envs_positions
-            self.goal.set_world_poses(pos, indices=env_ids)
+            pass
         elif cfg.position_cat == "uniform":
             # sample uniformly from box
             # note: this should be within in the workspace of the robot
-            pos = sample_uniform(
+            root_state[:, 0:3] += sample_uniform(
                 cfg.position_uniform_min, cfg.position_uniform_max, (len(env_ids), 3), device=self.device
             ) + self.envs_positions
-            #TODO: add envs_position
-            self.goal.set_world_poses(pos, indices=env_ids)
         else:
             raise ValueError(f"Invalid category for randomizing the desired object positions '{cfg.position_cat}'.")
+
+        root_state[:, 0:3] += self.envs_positions[env_ids]
+        self.object.set_root_state(root_state, env_ids=env_ids)
 
 
 class PushObservationManager(ObservationManager):
@@ -422,11 +424,11 @@ class PushObservationManager(ObservationManager):
 
     def object_to_goal_positions(self, env: PushEnv):
         object_positions = env.object.data.root_pos_w
-        goal_positions = env.goal.get_world_poses()[0]
+        goal_positions = env.goal.data.root_pos_w
         return torch.norm(object_positions[:, :2]-goal_positions[:, :2], dim=1).unsqueeze(1)
 
     def object_desired_positions(self, env: PushEnv):
-        goal_positions = env.goal.get_world_poses()[0] - env.envs_positions
+        goal_positions = env.goal.data.root_pos_w - env.envs_positions
         return goal_positions
 
 
@@ -476,8 +478,8 @@ class PushRewardManager(RewardManager):
     def tracking_object_position_exp(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using exp-kernel."""
         # distance of the end-effector to the object: (num_envs,)
-        error = torch.sum(torch.square(env.goal.get_world_poses()[0][:, :2] - env.object.data.root_pos_w[:, :2]), dim=1)
-        dist = torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.get_world_poses()[0][:, :2], dim=1)
+        error = torch.sum(torch.square(env.goal.data.root_pos_w[:, :2] - env.object.data.root_pos_w[:, :2]), dim=1)
+        dist = torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1)
         # rewarded if the object is lifted above the threshold
         return (dist < threshold) * torch.exp(-error / sigma)
 
@@ -485,10 +487,10 @@ class PushRewardManager(RewardManager):
         """Penalize tracking object position error using tanh-kernel."""
         # distance of the end-effector to the object: (num_envs,)
         obj_to_goal = torch.norm(env.object_des_pose_w[:, :2] - env.object.data.root_pos_w[:, :2], dim=1)
-        ee_to_obj = torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.get_world_poses()[0][:, :2], dim=1)
+        ee_to_obj = torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1)
         # rewarded if the object is lifted above the threshold
         return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
 
     def push_object_success(self, env: PushEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
-        return torch.where(torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.get_world_poses()[0][:, :2], dim=1) > threshold, 1.0, 0.0)
+        return torch.where(torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1) > threshold, 1.0, 0.0)
