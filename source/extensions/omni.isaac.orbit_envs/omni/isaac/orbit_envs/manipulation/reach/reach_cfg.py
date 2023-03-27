@@ -48,8 +48,8 @@ class RandomizationCfg:
         """Randomization of end-effector pose command."""
 
         # category
-        position_cat: str = "uniform"  # randomize position: "default", "uniform"
-        orientation_cat: str = "uniform"  # randomize position: "default", "uniform"
+        position_cat: str = "default"  # randomize position: "default", "uniform"
+        orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.5, 0.0, 0.5]  # position default (x,y,z)
         position_uniform_min = [0.25, -0.25, 0.25]  # position (x,y,z)
@@ -111,9 +111,9 @@ class ControlCfg:
     """Processing of MDP actions."""
 
     # action space
-    control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
+    control_type = "default"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 1
+    decimation = 2
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
