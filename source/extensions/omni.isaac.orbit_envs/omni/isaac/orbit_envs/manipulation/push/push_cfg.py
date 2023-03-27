@@ -33,10 +33,10 @@ class ManipulationObjectCfg(RigidObjectCfg):
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
-        scale=(0.8, 0.8, 0.8),
+        scale=(1.2, 1.2, 1.2),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.3, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.35, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -47,7 +47,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=0.6, dynamic_friction=0.6, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 @configclass
@@ -170,8 +170,8 @@ class RewardsCfg:
     # penalizing_tool_action_l2 = {"weight": 1e-2}
     # -- object-centric
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.08}
-    push_object_success = {"weight": 3.5, "threshold": 0.08}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
+    push_object_success = {"weight": 3.5, "threshold": 0.01}
 
 
 @configclass
@@ -211,7 +211,7 @@ class PushEnvCfg(IsaacEnvCfg):
     """Configuration for the Push environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3.0)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4.0)
     viewer: ViewerCfg = ViewerCfg(debug_vis=True, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
