@@ -131,7 +131,7 @@ class ObservationsCfg:
         arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
-        tool_dof_pos_scaled = {"scale": 1.0}
+        # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
         tool_positions = {"scale": 1.0}
         tool_orientations = {"scale": 1.0}
@@ -145,7 +145,7 @@ class ObservationsCfg:
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
         arm_actions = {"scale": 1.0}
-        tool_actions = {"scale": 1.0}
+        # tool_actions = {"scale": 1.0}
 
     # global observation settings
     return_dict_obs_in_group = False
@@ -166,7 +166,7 @@ class RewardsCfg:
     # penalizing_tool_dof_velocity_l2 = {"weight": 1e-5}
     # penalizing_robot_dof_acceleration_l2 = {"weight": 1e-7}
     # -- action-centric
-    # penalizing_arm_action_rate_l2 = {"weight": 1e-2}
+    penalizing_arm_action_rate_l2 = {"weight": 1e-2}
     # penalizing_tool_action_l2 = {"weight": 1e-2}
     # -- object-centric
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
@@ -188,7 +188,7 @@ class ControlCfg:
     """Processing of MDP actions."""
 
     # action space
-    control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
+    control_type = "default"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
     decimation = 2
 

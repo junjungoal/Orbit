@@ -160,7 +160,7 @@ class PushEnv(IsaacEnv):
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
         elif self.cfg.control.control_type == "default":
-            self.robot_actions[:] = self.actions
+            self.robot_actions[:, :self.robot.arm_num_dof] = self.actions
         # perform physics stepping
         for _ in range(self.cfg.control.decimation):
             # set actions into buffers
@@ -431,7 +431,7 @@ class PushObservationManager(ObservationManager):
 
     def object_desired_positions(self, env: PushEnv):
         goal_positions = env.goal.data.root_pos_w - env.envs_positions
-        return goal_positions
+        return goal_positions[:, :2]
 
 
 
