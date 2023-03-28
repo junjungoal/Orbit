@@ -47,7 +47,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=0.9, dynamic_friction=0.9, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 @configclass
