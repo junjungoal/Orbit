@@ -34,7 +34,7 @@ class EnvCfg:
     """Duration of an episode (in seconds). Default is None (no limit)."""
     enable_camera: bool = True
     """Whether to enable/disable a camera"""
-    enable_render: bool = False
+    enable_render: bool = True
     """Whether to enable/disable rendering"""
 
 
