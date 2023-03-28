@@ -93,19 +93,19 @@ class RandomizationCfg:
         """Randomization of object initial pose."""
 
         # category
-        position_cat: str = "default"  # randomize position: "default", "uniform"
+        position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.2, 0.0, 0.075]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.25, 0.075]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.25, 0.075]  # position (x,y,z)
+        position_default = [0.3, 0.0, 0.075]  # position default (x,y,z)
+        position_uniform_min = [0.3, -0.25, 0.075]  # position (x,y,z)
+        position_uniform_max = [0.4, 0.25, 0.075]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
         """Randomization of object desired pose."""
 
         # category
-        position_cat: str = "default"  # randomize position: "default", "uniform"
+        position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.5, 0.2, 0.0]  # position default (x,y,z)
         position_uniform_min = [0.4, -0.25, 0.]  # position (x,y,z)
@@ -166,7 +166,7 @@ class RewardsCfg:
     # penalizing_tool_dof_velocity_l2 = {"weight": 1e-5}
     # penalizing_robot_dof_acceleration_l2 = {"weight": 1e-7}
     # -- action-centric
-    penalizing_arm_action_rate_l2 = {"weight": 1e-2}
+    # penalizing_arm_action_rate_l2 = {"weight": 1e-2}
     # penalizing_tool_action_l2 = {"weight": 1e-2}
     # -- object-centric
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
@@ -197,8 +197,8 @@ class ControlCfg:
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="pose_rel",
         ik_method="dls",
-        position_command_scale=(0.1, 0.1, 0.1),
-        rotation_command_scale=(0.1, 0.1, 0.1),
+        position_command_scale=(0.05, 0.05, 0.05),
+        rotation_command_scale=(0.05, 0.05, 0.05),
     )
 
 

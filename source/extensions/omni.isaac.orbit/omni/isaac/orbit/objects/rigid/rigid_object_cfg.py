@@ -72,7 +72,7 @@ class RigidObjectCfg:
         """Dynamic friction coefficient. Defaults to 0.5."""
         restitution: float = 0.0
         """Restitution coefficient. Defaults to 0.0."""
-        mass: float None
+        mass: float = None
 
     @configclass
     class InitialStateCfg:
