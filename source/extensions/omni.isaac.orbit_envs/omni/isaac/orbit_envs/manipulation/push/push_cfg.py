@@ -105,7 +105,7 @@ class RandomizationCfg:
         """Randomization of object desired pose."""
 
         # category
-        position_cat: str = "uniform"  # randomize position: "default", "uniform"
+        position_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.5, 0.2, 0.0]  # position default (x,y,z)
         position_uniform_min = [0.4, -0.25, 0.]  # position (x,y,z)
@@ -144,7 +144,7 @@ class ObservationsCfg:
         object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
-        arm_actions = {"scale": 1.0}
+        # arm_actions = {"scale": 1.0}
         # tool_actions = {"scale": 1.0}
 
     # global observation settings
