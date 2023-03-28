@@ -67,7 +67,7 @@ class IsaacEnv(gym.Env):
     environment for their agents.
     """
 
-    def __init__(self, cfg: IsaacEnvCfg, headless: bool = False, enable_render=True):
+    def __init__(self, cfg: IsaacEnvCfg, headless: bool = False):
         """Initialize the environment.
 
         We currently support only PyTorch backend for the environment. In the future, we plan to extend this to use
@@ -82,7 +82,7 @@ class IsaacEnv(gym.Env):
         """
         # store inputs to class
         self.cfg = cfg
-        self.enable_render = not headless or enable_render
+        self.enable_render = not headless or self.cfg.env.enable_render
         # extract commonly used parameters
         self.num_envs = self.cfg.env.num_envs
         self.device = self.cfg.sim.device
@@ -159,7 +159,7 @@ class IsaacEnv(gym.Env):
             physics_scene_path, "/World/collisions", prim_paths=self.envs_prim_paths, global_paths=global_prim_paths
         )
 
-        if self.cfg.env.enable_camera:
+        if self.cfg.env.enable_camera and self.enable_render:
             camera_cfg = PinholeCameraCfg(
                 sensor_tick=0,
                 height=self.cfg.camera.height,
