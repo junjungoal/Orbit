@@ -34,7 +34,7 @@ class EnvCfg:
     """Duration of an episode (in seconds). Default is None (no limit)."""
     enable_camera: bool = True
     """Whether to enable/disable a camera"""
-    enable_render: bool = False
+    enable_render: bool = True
     """Whether to enable/disable rendering"""
 
 
@@ -60,12 +60,13 @@ class ViewerCfg:
 class CameraCfg:
     """Configuration of the scene viewport camera."""
 
-    set_type: str = 'view'  # view or ros
+    set_type: str = 'ros'  # view or ros
     eye: Tuple[float, float, float] = (3, 0, 4.5)
     """Initial camera position (in m). Default is (7.5, 7.5, 7.5)."""
     lookat: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     """Initial camera target position (in m). Default is (0.0, 0.0, 0.0)."""
-    position: Tuple[float, float, float] = (2.2, 0, 1.6)
+    # position: Tuple[float, float, float] = (2.2, 0, 1.6)
+    position: Tuple[float, float, float] = (1.8, 0, 1.4)
     orientation: Tuple[float, float, float, float] = (-0.3069373, 0.6372103, 0.6362135, -0.3081962)
     height: int = 480
     width: int = 640

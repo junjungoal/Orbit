@@ -15,6 +15,14 @@ from omni.isaac.orbit.utils.math import (
     quat_apply,
     quat_inv,
 )
+from omni.isaac.core.utils.torch.rotations import (
+    quat_apply,
+    quat_conjugate,
+    quat_from_angle_axis,
+    quat_mul,
+    quat_rotate,
+    quat_rotate_inverse,
+)
 
 
 @configclass
@@ -29,6 +37,17 @@ class DifferentialInverseKinematicsCfg:
 
     ik_params: Optional[Dict[str, float]] = None
     """Parameters for the inverse-kinematics method. (default: obj:`None`).
+
+    rot_actions = delta_pose[:, 3:6]
+    angle = torch.linalg.vector_norm(rot_actions, dim=1)
+    axis = rot_actions / angle.unsqueeze(-1)
+    # change from axis-angle to quat convention
+    identity_quat = torch.tensor([1.0, 0.0, 0.0, 0.0], device=device).repeat(num_poses, 1)
+    rot_delta_quat = torch.where(
+        angle.unsqueeze(-1).repeat(1, 4) > eps, quat_from_angle_axis(angle, axis), identity_quat
+    )
+    # TODO: Check if this is the correct order for this multiplication.
+    target_rot = quat_mul(rot_delta_quat, source_rot)
 
     - Moore-Penrose pseudo-inverse ("pinv"):
         - "k_val": Scaling of computed delta-dof positions (default: 1.0).
@@ -99,7 +118,7 @@ class DifferentialInverseKinematics:
         # check valid input
         if self.cfg.ik_method not in ["pinv", "svd", "trans", "dls"]:
             raise ValueError(f"Unsupported inverse-kinematics method: {self.cfg.ik_method}.")
-        if self.cfg.command_type not in ["position_abs", "position_rel", "pose_abs", "pose_rel"]:
+        if self.cfg.command_type not in ["position_abs", "position_rel", "pose_abs", "pose_rel", 'pose_z_rel']:
             raise ValueError(f"Unsupported inverse-kinematics command: {self.cfg.command_type}.")
 
         # update parameters for IK-method
@@ -139,6 +158,8 @@ class DifferentialInverseKinematics:
             return 6
         elif self.cfg.command_type == "pose_abs":
             return 7
+        elif self.cfg.command_type == "pose_z_rel":
+            return 5
         else:
             raise ValueError(f"Invalid control command: {self.cfg.command_type}.")
 
@@ -197,6 +218,9 @@ class DifferentialInverseKinematics:
             # compute targets
             self.desired_ee_pos = self._command[:, 0:3]
             self.desired_ee_rot = self._command[:, 3:7]
+        elif 'pose_z_rel' in self.cfg.command_type:
+            self.desired_ee_pos = current_ee_pos + self._command[:, 0:3] @ self._position_command_scale
+            self.desired_ee_rot = torch.cat([torch.clamp(self._command[:, 3][:, None], -1, 1), torch.zeros(self._command.size(0), 2).to(self._command.device), torch.clamp(self._command[:, 4][:, None], -1, 1)], dim=-1)
         else:
             raise ValueError(f"Invalid control command: {self.cfg.command_type}.")
 

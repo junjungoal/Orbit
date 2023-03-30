@@ -36,7 +36,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         scale=(1.2, 1.2, 1.2),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.35, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.35, 0.0, 0.01), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -97,8 +97,8 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.3, 0.0, 0.075]  # position default (x,y,z)
-        position_uniform_min = [0.3, -0.25, 0.075]  # position (x,y,z)
-        position_uniform_max = [0.4, 0.25, 0.075]  # position (x,y,z)
+        position_uniform_min = [0.3, -0.2, 0.075]  # position (x,y,z)
+        position_uniform_max = [0.4, 0.2, 0.075]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
@@ -108,8 +108,8 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.5, 0.2, 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.25, 0.]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.25, 0.]  # position (x,y,z)
+        position_uniform_min = [0.4, -0.2, 0.]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.2, 0.]  # position (x,y,z)
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
@@ -170,8 +170,8 @@ class RewardsCfg:
     # penalizing_tool_action_l2 = {"weight": 1e-2}
     # -- object-centric
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
-    push_object_success = {"weight": 3.5, "threshold": 0.01}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.12}
+    push_object_success = {"weight": 3.5, "threshold": 0.005}
 
 
 @configclass
@@ -213,7 +213,7 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # General Settings
     env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4.0)
-    viewer: ViewerCfg = ViewerCfg(debug_vis=True, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
+    viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         dt=0.01,
