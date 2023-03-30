@@ -188,7 +188,7 @@ class PushEnv(IsaacEnv):
         self.extras["time_outs"] = self.episode_length_buf >= self.max_episode_length
         # -- add information to extra if task completed
         object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
-        self.extras["is_success"] = torch.where(object_position_error < 0.002, 1, self.reset_buf)
+        self.extras["is_success"] = torch.where(object_position_error < 0.005, 1, self.reset_buf)
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -343,7 +343,7 @@ class PushEnv(IsaacEnv):
             # note: this should be within in the workspace of the robot
             root_state[:, 0:3] += sample_uniform(
                 cfg.position_uniform_min, cfg.position_uniform_max, (len(env_ids), 3), device=self.device
-            ) + self.envs_positions
+            )
         else:
             raise ValueError(f"Invalid category for randomizing the desired object positions '{cfg.position_cat}'.")
 
