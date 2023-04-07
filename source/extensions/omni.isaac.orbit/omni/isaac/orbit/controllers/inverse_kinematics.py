@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os
 import torch
 from dataclasses import MISSING
 from typing import Dict, Optional, Tuple
@@ -14,7 +15,10 @@ from omni.isaac.orbit.utils.math import (
     compute_pose_error,
     quat_apply,
     quat_inv,
+    quaternion_to_matrix,
+    make_poses
 )
+from omni.isaac.orbit.utils.array import convert_to_numpy, convert_to_torch
 from omni.isaac.core.utils.torch.rotations import (
     quat_apply,
     quat_conjugate,
@@ -23,19 +27,17 @@ from omni.isaac.core.utils.torch.rotations import (
     quat_rotate,
     quat_rotate_inverse,
 )
+from tracikpy import TracIKSolver, MultiTracIKSolver
+
 
 
 @configclass
-class DifferentialInverseKinematicsCfg:
+class InverseKinematicsCfg:
     """Configuration for inverse differential kinematics controller."""
 
     command_type: str = MISSING
     """Type of command: "position_abs", "position_rel", "pose_abs", "pose_rel"."""
 
-    ik_method: str = MISSING
-    """Method for computing inverse of Jacobian: "pinv", "svd", "trans", "dls"."""
-
-    ik_params: Optional[Dict[str, float]] = None
     """Parameters for the inverse-kinematics method. (default: obj:`None`).
 
     rot_actions = delta_pose[:, 3:6]
@@ -71,7 +73,7 @@ class DifferentialInverseKinematicsCfg:
     """Scaling of the rotation command received. Used only in relative mode."""
 
 
-class DifferentialInverseKinematics:
+class InverseKinematics:
     """Inverse differential kinematics controller.
 
     This controller uses the Jacobian mapping from joint-space velocities to end-effector velocities
@@ -91,19 +93,13 @@ class DifferentialInverseKinematics:
         [2] https://www.cs.cmu.edu/~15464-s13/lectures/lecture6/iksurvey.pdf
     """
 
-    _DEFAULT_IK_PARAMS = {
-        "pinv": {"k_val": 1.0},
-        "svd": {"k_val": 1.0, "min_singular_value": 1e-5},
-        "trans": {"k_val": 1.0},
-        "dls": {"lambda_val": 0.1},
-    }
     """Default parameters for different inverse kinematics approaches."""
 
-    def __init__(self, cfg: DifferentialInverseKinematicsCfg, num_robots: int, device: str):
+    def __init__(self, cfg: InverseKinematicsCfg, num_robots: int, device: str):
         """Initialize the controller.
 
         Args:
-            cfg (DifferentialInverseKinematicsCfg): The configuration for the controller.
+            cfg (InverseKinematicsCfg): The configuration for the controller.
             num_robots (int): The number of robots to control.
             device (str): The device to use for computations.
 
@@ -116,10 +112,24 @@ class DifferentialInverseKinematics:
         self.num_robots = num_robots
         self._device = device
         # check valid input
-        if self.cfg.ik_method not in ["pinv", "svd", "trans", "dls"]:
-            raise ValueError(f"Unsupported inverse-kinematics method: {self.cfg.ik_method}.")
-        if self.cfg.command_type not in ["position_abs", "position_rel", "pose_abs", "pose_rel"]:
+        if self.cfg.command_type not in ["position_abs", "position_rel", "pose_abs", "pose_rel", 'pose_z_rel']:
             raise ValueError(f"Unsupported inverse-kinematics command: {self.cfg.command_type}.")
+
+        assert self.num_robots == 1, "Number of robots must be 1 for IK controller using Trac IK"
+        # self.ik_solver = TracIKSolver(
+        #     os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit/omni/isaac/orbit/robots/assets/franka_panda.urdf"),
+        #     "panda_link0",
+        #     "panda_hand",
+        #     solve_type='Manipulation2'
+        # )
+        self.ik_solver = MultiTracIKSolver(
+            os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit/omni/isaac/orbit/robots/assets/franka_panda.urdf"),
+            "panda_link0",
+            "panda_hand",
+            solve_type='Manipulation2',
+            num_workers=self.num_robots if self.num_robots < os.cpu_count() else os.cpu_count()
+        )
+
 
         # end-effector offsets
         # -- position
@@ -140,7 +150,7 @@ class DifferentialInverseKinematics:
         self.desired_ee_rot = torch.zeros(self.num_robots, 4, device=self._device)
         # -- input command
         self._command = torch.zeros(self.num_robots, self.num_actions, device=self._device)
-        self.base_rot = torch.tensor([ 0.0015, -0.9645, -0.2641,  0.0038], device=self._device)[None].repeat(self.num_robots, 1)
+        self.base_rot = torch.tensor([0.0, -1., 0.,  0.0], device=self._device)[None].repeat(self.num_robots, 1)
 
     """
     Properties.
@@ -161,10 +171,6 @@ class DifferentialInverseKinematics:
     """
     Operations.
     """
-
-    def initialize(self):
-        """Initialize the internals."""
-        pass
 
     def reset_idx(self, robot_ids: torch.Tensor = None):
         """Reset the internals."""
@@ -198,7 +204,7 @@ class DifferentialInverseKinematics:
             self._command @= self._position_command_scale
             # compute targets
             self.desired_ee_pos = current_ee_pos + self._command
-            self.desired_ee_rot = current_ee_rot
+            self.desired_ee_rot = self.base_rot
         elif "position_abs" in self.cfg.command_type:
             # compute targets
             self.desired_ee_pos = self._command
@@ -221,82 +227,14 @@ class DifferentialInverseKinematics:
         desired_parent_pos, desired_parent_rot = combine_frame_transforms(
             self.desired_ee_pos, self.desired_ee_rot, self._tool_parent_link_pos, self._tool_parent_link_rot
         )
-        # transform from ee -> parent
-        # TODO: Make this optional to reduce overhead?
-        current_parent_pos, current_parent_rot = combine_frame_transforms(
-            current_ee_pos, current_ee_rot, self._tool_parent_link_pos, self._tool_parent_link_rot
-        )
-        # compute pose error between current and desired
-        position_error, axis_angle_error = compute_pose_error(
-            current_parent_pos, current_parent_rot, desired_parent_pos, desired_parent_rot, rot_error_type="axis_angle"
-        )
-        # compute the delta in joint-space
-        if "position" in self.cfg.command_type:
-            jacobian_pos = jacobian[:, 0:3]
-            delta_joint_positions = self._compute_delta_dof_pos(delta_pose=position_error, jacobian=jacobian_pos)
-        else:
-            pose_error = torch.cat((position_error, axis_angle_error), dim=1)
-            delta_joint_positions = self._compute_delta_dof_pos(delta_pose=pose_error, jacobian=jacobian)
+
+        desired_parent_rot_mat = quaternion_to_matrix(desired_parent_rot)
+        desired_poses = convert_to_numpy(make_poses(desired_parent_pos, desired_parent_rot_mat))
+        # desired_joint_positions = self.ik_solver.ik(desired_poses[0], qinit=convert_to_numpy(joint_positions)[0])[None]
+        joint_positions = convert_to_numpy(joint_positions)
+        valid, desired_joint_positions = self.ik_solver.iks(desired_poses, qinits=joint_positions)
+        desired_joint_positions[~valid] = joint_positions[~valid]
+        desired_joint_positions = convert_to_torch(desired_joint_positions, device=self._device).float()
         # return the desired joint positions
-        return joint_positions + delta_joint_positions
+        return desired_joint_positions
 
-    """
-    Helper functions.
-    """
-
-    def _compute_delta_dof_pos(self, delta_pose: torch.Tensor, jacobian: torch.Tensor) -> torch.Tensor:
-        """Computes the change in dos-position that yields the desired change in pose.
-
-        The method uses the Jacobian mapping from joint-space velocities to end-effector velocities
-        to compute the delta-change in the joint-space that moves the robot closer to a desired end-effector
-        position.
-
-        Args:
-            delta_pose (torch.Tensor): The desired delta pose in shape [N, 3 or 6].
-            jacobian (torch.Tensor): The geometric jacobian matrix in shape [N, 3 or 6, num-dof]
-
-        Returns:
-            torch.Tensor: The desired delta in joint space.
-        """
-        if self.cfg.ik_method == "pinv":  # Jacobian pseudo-inverse
-            # parameters
-            k_val = self._ik_params["k_val"]
-            # computation
-            jacobian_pinv = torch.linalg.pinv(jacobian)
-            delta_dof_pos = k_val * jacobian_pinv @ delta_pose.unsqueeze(-1)
-            delta_dof_pos = delta_dof_pos.squeeze(-1)
-        elif self.cfg.ik_method == "svd":  # adaptive SVD
-            # parameters
-            k_val = self._ik_params["k_val"]
-            min_singular_value = self._ik_params["min_singular_value"]
-            # computation
-            # U: 6xd, S: dxd, V: d x num-dof
-            U, S, Vh = torch.linalg.svd(jacobian)
-            S_inv = 1.0 / S
-            S_inv = torch.where(S > min_singular_value, S_inv, torch.zeros_like(S_inv))
-            jacobian_pinv = (
-                torch.transpose(Vh, dim0=1, dim1=2)[:, :, :6]
-                @ torch.diag_embed(S_inv)
-                @ torch.transpose(U, dim0=1, dim1=2)
-            )
-            delta_dof_pos = k_val * jacobian_pinv @ delta_pose.unsqueeze(-1)
-            delta_dof_pos = delta_dof_pos.squeeze(-1)
-        elif self.cfg.ik_method == "trans":  # Jacobian transpose
-            # parameters
-            k_val = self._ik_params["k_val"]
-            # computation
-            jacobian_T = torch.transpose(jacobian, dim0=1, dim1=2)
-            delta_dof_pos = k_val * jacobian_T @ delta_pose.unsqueeze(-1)
-            delta_dof_pos = delta_dof_pos.squeeze(-1)
-        elif self.cfg.ik_method == "dls":  # damped least squares
-            # parameters
-            lambda_val = self._ik_params["lambda_val"]
-            # computation
-            jacobian_T = torch.transpose(jacobian, dim0=1, dim1=2)
-            lambda_matrix = (lambda_val**2) * torch.eye(n=jacobian.shape[1], device=self._device)
-            delta_dof_pos = jacobian_T @ torch.inverse(jacobian @ jacobian_T + lambda_matrix) @ delta_pose.unsqueeze(-1)
-            delta_dof_pos = delta_dof_pos.squeeze(-1)
-        else:
-            raise ValueError(f"Unsupported inverse-kinematics method: {self.cfg.ik_method}")
-
-        return delta_dof_pos

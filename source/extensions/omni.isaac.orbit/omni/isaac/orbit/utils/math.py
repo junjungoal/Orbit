@@ -53,6 +53,8 @@ __all__ = [
     "subtract_frame_transforms",
     "compute_pose_error",
     "apply_delta_pose",
+    "quaternion_to_matrix",
+    "make_poses",
     # Sampling
     "default_orientation",
     "random_orientation",
@@ -624,3 +626,39 @@ def sample_cylinder(
     xyz[..., 2].uniform_(h_min, h_max)
     # return positions
     return xyz
+
+
+def quaternion_to_matrix(quaternions: torch.Tensor) -> torch.Tensor:
+    """
+    Convert rotations given as quaternions to rotation matrices.
+    Args:
+        quaternions: quaternions with real part first,
+            as tensor of shape (..., 4).
+    Returns:
+        Rotation matrices as tensor of shape (..., 3, 3).
+    """
+    r, i, j, k = torch.unbind(quaternions, -1)
+    two_s = 2.0 / (quaternions * quaternions).sum(-1)
+
+    mat = torch.stack(
+        (
+            1 - two_s * (j * j + k * k),
+            two_s * (i * j - k * r),
+            two_s * (i * k + j * r),
+            two_s * (i * j + k * r),
+            1 - two_s * (i * i + k * k),
+            two_s * (j * k - i * r),
+            two_s * (i * k - j * r),
+            two_s * (j * k + i * r),
+            1 - two_s * (i * i + j * j),
+        ),
+        -1,
+    )
+    return mat.reshape(quaternions.shape[:-1] + (3, 3))
+
+def make_poses(translation, rotation):
+    poses = torch.zeros((translation.size(0), 4, 4), device=translation.device)
+    poses[:, :3, :3] = rotation
+    poses[:, :3, 3] = translation
+    poses[:, 3, 3] = 1.0
+    return poses
