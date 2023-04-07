@@ -6,6 +6,7 @@
 import os, sys
 
 from omni.isaac.orbit.controllers.differential_inverse_kinematics import DifferentialInverseKinematicsCfg
+from omni.isaac.orbit.controllers.inverse_kinematics import InverseKinematicsCfg
 from omni.isaac.orbit.objects import RigidObjectCfg
 from omni.isaac.orbit.robots.config.franka import FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
 from omni.isaac.orbit.robots.single_arm import SingleArmManipulatorCfg
@@ -33,10 +34,11 @@ class ManipulationObjectCfg(RigidObjectCfg):
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
-        scale=(1.2, 1.2, 1.2),
+        # scale=(1.2, 1.2, 1.2),
+        scale=(1., 1., 1.),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.35, 0.0, 0.07), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.35, 0.0, 0.15), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -194,9 +196,10 @@ class ControlCfg:
     decimation = 2
 
     # configuration loaded when control_type == "inverse_kinematics"
-    inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
-        command_type="pose_rel",
-        ik_method="dls",
+    # inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
+    inverse_kinematics: InverseKinematicsCfg = InverseKinematicsCfg(
+        command_type="position_rel",
+        # ik_method="dls",
         position_command_scale=(0.05, 0.05, 0.05),
         rotation_command_scale=(0.05, 0.05, 0.05),
     )
@@ -213,7 +216,7 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # General Settings
     env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4.0)
-    viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
+    viewer: ViewerCfg = ViewerCfg(debug_vis=True, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         dt=0.01,

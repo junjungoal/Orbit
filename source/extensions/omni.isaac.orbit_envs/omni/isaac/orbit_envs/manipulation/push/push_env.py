@@ -14,6 +14,7 @@ import omni.isaac.core.utils.prims as prim_utils
 
 import omni.isaac.orbit.utils.kit as kit_utils
 from omni.isaac.orbit.controllers.differential_inverse_kinematics import DifferentialInverseKinematics
+from omni.isaac.orbit.controllers.inverse_kinematics import InverseKinematics
 from omni.isaac.orbit.markers import StaticMarker
 from omni.isaac.orbit.objects import RigidObject
 from omni.isaac.orbit.robots.single_arm import SingleArmManipulator
@@ -139,14 +140,14 @@ class PushEnv(IsaacEnv):
         self.reset_buf[env_ids] = 0
         self.episode_length_buf[env_ids] = 0
         # controller reset
-        if self.cfg.control.control_type == "inverse_kinematics":
+        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             self._ik_controller.reset_idx(env_ids)
 
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
         # transform actions based on controller
-        if self.cfg.control.control_type == "inverse_kinematics":
+        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control_type == 'differential_inverse_kinematics':
             # set the controller commands
             self._ik_controller.set_command(self.actions)
             # use IK to convert to joint-space commands
@@ -204,7 +205,7 @@ class PushEnv(IsaacEnv):
     def _pre_process_cfg(self) -> None:
         """Pre-processing of configuration parameters."""
         # set configuration for task-space controller
-        if self.cfg.control.control_type == "inverse_kinematics":
+        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control_type == 'differential_inverse_kinematics':
             print("Using inverse kinematics controller...")
             # enable jacobian computation
             self.cfg.robot.data_info.enable_jacobian = True
@@ -245,8 +246,13 @@ class PushEnv(IsaacEnv):
         self.goal.initialize(self.env_ns + '/.*/GoalMarker')
 
         # create controller
-        if self.cfg.control.control_type == "inverse_kinematics":
+        if self.cfg.control.control_type == "differential_inverse_kinematics":
             self._ik_controller = DifferentialInverseKinematics(
+                self.cfg.control.inverse_kinematics, self.robot.count, self.device
+            )
+            self.num_actions = self._ik_controller.num_actions
+        elif self.cfg.control.control_type == 'inverse_kinematics':
+            self._ik_controller = InverseKinematics(
                 self.cfg.control.inverse_kinematics, self.robot.count, self.device
             )
             self.num_actions = self._ik_controller.num_actions
@@ -271,7 +277,7 @@ class PushEnv(IsaacEnv):
         # -- end-effector
         self._ee_markers.set_world_poses(self.robot.data.ee_state_w[:, 0:3], self.robot.data.ee_state_w[:, 3:7])
         # -- task-space commands
-        if self.cfg.control.control_type == "inverse_kinematics":
+        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             # convert to world frame
             ee_positions = self._ik_controller.desired_ee_pos + self.envs_positions
             ee_orientations = self._ik_controller.desired_ee_rot

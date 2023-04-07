@@ -13,6 +13,7 @@ Reference: https://github.com/frankaemika/franka_ros
 """
 
 
+import numpy as np
 from omni.isaac.orbit.actuators.config.franka import PANDA_HAND_MIMIC_GROUP_CFG
 from omni.isaac.orbit.actuators.group import ActuatorGroupCfg
 from omni.isaac.orbit.actuators.group.actuator_group_cfg import ActuatorControlCfg
@@ -34,12 +35,12 @@ FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
     init_state=SingleArmManipulatorCfg.InitialStateCfg(
         dof_pos={
             "panda_joint1": 0.0,
-            "panda_joint2": -0.569,
+            "panda_joint2": -np.pi/4.,
             "panda_joint3": 0.0,
-            "panda_joint4": -2.810,
+            "panda_joint4": -3*np.pi/4,
             "panda_joint5": 0.0,
-            "panda_joint6": 3.037,
-            "panda_joint7": 0.741,
+            "panda_joint6": np.pi/2,
+            "panda_joint7": np.pi/4,
             "panda_finger_joint*": 0.04,
         },
         dof_vel={".*": 0.0},

@@ -11,7 +11,7 @@ from typing import Optional, Sequence, Union
 
 import warp as wp
 
-__all__ = ["TENSOR_TYPES", "TENSOR_TYPE_CONVERSIONS", "convert_to_torch"]
+__all__ = ["TENSOR_TYPES", "TENSOR_TYPE_CONVERSIONS", "convert_to_torch", "convert_to_numpy"]
 
 TENSOR_TYPES = {
     "numpy": np.ndarray,
@@ -75,3 +75,17 @@ def convert_to_torch(
         tensor = tensor.type(dtype)
 
     return tensor
+
+def convert_to_numpy(tensor):
+    if isinstance(tensor, np.ndarray):
+        return tensor
+    elif torch.is_tensor(tensor):
+        return tensor.detach().cpu().numpy()
+    elif np.isscalar(tensor):
+        return tensor
+    elif hasattr(tensor, 'to_numpy'):
+        return tensor.to_numpy()
+    else:
+        import pdb; pdb.set_trace()
+        raise ValueError('input to ten2ar cannot be converted to numpy array')
+
