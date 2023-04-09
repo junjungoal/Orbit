@@ -147,7 +147,7 @@ class PushEnv(IsaacEnv):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
         # transform actions based on controller
-        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control_type == 'differential_inverse_kinematics':
+        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             # set the controller commands
             self._ik_controller.set_command(self.actions)
             # use IK to convert to joint-space commands
@@ -205,7 +205,7 @@ class PushEnv(IsaacEnv):
     def _pre_process_cfg(self) -> None:
         """Pre-processing of configuration parameters."""
         # set configuration for task-space controller
-        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control_type == 'differential_inverse_kinematics':
+        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             print("Using inverse kinematics controller...")
             # enable jacobian computation
             self.cfg.robot.data_info.enable_jacobian = True

@@ -115,7 +115,7 @@ class InverseKinematics:
         if self.cfg.command_type not in ["position_abs", "position_rel", "pose_abs", "pose_rel", 'pose_z_rel']:
             raise ValueError(f"Unsupported inverse-kinematics command: {self.cfg.command_type}.")
 
-        assert self.num_robots == 1, "Number of robots must be 1 for IK controller using Trac IK"
+        # assert self.num_robots == 1, "Number of robots must be 1 for IK controller using Trac IK"
         # self.ik_solver = TracIKSolver(
         #     os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit/omni/isaac/orbit/robots/assets/franka_panda.urdf"),
         #     "panda_link0",
