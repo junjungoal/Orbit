@@ -121,6 +121,11 @@ class DifferentialInverseKinematics:
         if self.cfg.command_type not in ["position_abs", "position_rel", "pose_abs", "pose_rel"]:
             raise ValueError(f"Unsupported inverse-kinematics command: {self.cfg.command_type}.")
 
+        # update parameters for IK-method
+        self._ik_params = self._DEFAULT_IK_PARAMS[self.cfg.ik_method].copy()
+        if self.cfg.ik_params is not None:
+            self._ik_params.update(self.cfg.ik_params)
+
         # end-effector offsets
         # -- position
         tool_child_link_pos = torch.tensor(self.cfg.position_offset, device=self._device)
@@ -140,7 +145,7 @@ class DifferentialInverseKinematics:
         self.desired_ee_rot = torch.zeros(self.num_robots, 4, device=self._device)
         # -- input command
         self._command = torch.zeros(self.num_robots, self.num_actions, device=self._device)
-        self.base_rot = torch.tensor([ 0.0015, -0.9645, -0.2641,  0.0038], device=self._device)[None].repeat(self.num_robots, 1)
+        self.base_rot = torch.tensor([0.0, -1., 0.,  0.0], device=self._device)[None].repeat(self.num_robots, 1)
 
     """
     Properties.
@@ -198,7 +203,8 @@ class DifferentialInverseKinematics:
             self._command @= self._position_command_scale
             # compute targets
             self.desired_ee_pos = current_ee_pos + self._command
-            self.desired_ee_rot = current_ee_rot
+            self.desired_ee_rot = self.base_rot
+            # self.desired_ee_rot = current_ee_rot
         elif "position_abs" in self.cfg.command_type:
             # compute targets
             self.desired_ee_pos = self._command
