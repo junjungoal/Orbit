@@ -32,9 +32,9 @@ class EnvCfg:
     """Spacing between cloned environments."""
     episode_length_s: float = None
     """Duration of an episode (in seconds). Default is None (no limit)."""
-    enable_camera: bool = True
+    enable_camera: bool = False
     """Whether to enable/disable a camera"""
-    enable_render: bool = True
+    enable_render: bool = False
     """Whether to enable/disable rendering"""
 
 
