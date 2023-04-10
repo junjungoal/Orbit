@@ -73,7 +73,7 @@ class IsaacEnv(gym.Env):
     metadata: ClassVar[Dict[str, Any]] = {"render.modes": ["human", "rgb_array"]}
     """Metadata for the environment."""
 
-    def __init__(self, cfg: IsaacEnvCfg, headless: bool = False, viewport: bool = False, enable_render=True, **kwargs):
+    def __init__(self, cfg: IsaacEnvCfg, headless: bool = False, viewport: bool = False, enable_render=False, enable_camera=False, **kwargs):
         """Initialize the environment.
 
         We currently support only PyTorch backend for the environment. In the future, we plan to extend this to use
@@ -97,6 +97,7 @@ class IsaacEnv(gym.Env):
         self.cfg = cfg
         self.enable_render = not headless or enable_render
         self.enable_viewport = viewport or self.enable_render
+        self.enable_camera = enable_camera
         # extract commonly used parameters
         self.num_envs = self.cfg.env.num_envs
         self.device = self.cfg.sim.device
@@ -173,7 +174,8 @@ class IsaacEnv(gym.Env):
             physics_scene_path, "/World/collisions", prim_paths=self.envs_prim_paths, global_paths=global_prim_paths
         )
 
-        if self.cfg.env.enable_camera and self.enable_render:
+        # if self.cfg.env.enable_camera and self.enable_render:
+        if self.enable_camera and self.enable_render:
             camera_cfg = PinholeCameraCfg(
                 sensor_tick=0,
                 height=self.cfg.camera.height,

@@ -34,8 +34,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
-        # scale=(1.2, 1.2, 1.2),
-        scale=(1., 1., 1.),
+        scale=(1.2, 1.2, 1.2),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
         pos=(0.35, 0.0, 0.15), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
@@ -99,8 +98,8 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.3, 0.0, 0.075]  # position default (x,y,z)
-        position_uniform_min = [0.3, -0.2, 0.075]  # position (x,y,z)
-        position_uniform_max = [0.4, 0.2, 0.075]  # position (x,y,z)
+        position_uniform_min = [0.35, -0.1, 0.05]  # position (x,y,z)
+        position_uniform_max = [0.4, 0.1, 0.05]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
@@ -110,8 +109,8 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.5, 0.2, 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.2, 0.]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.2, 0.]  # position (x,y,z)
+        position_uniform_min = [0.4, -0.2, 0.22]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.2, 0.22]  # position (x,y,z)
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
@@ -217,7 +216,7 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # General Settings
     env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4.0)
-    viewer: ViewerCfg = ViewerCfg(debug_vis=True, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
+    viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         dt=0.01,
