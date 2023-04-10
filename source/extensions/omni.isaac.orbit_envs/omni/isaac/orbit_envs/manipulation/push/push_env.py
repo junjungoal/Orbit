@@ -32,7 +32,7 @@ from omni.isaac.core.prims import GeometryPrimView, RigidPrimView, GeometryPrim,
 class PushEnv(IsaacEnv):
     """Environment for lifting an object off a table with a single-arm manipulator."""
 
-    def __init__(self, cfg: PushEnvCfg = None, headless: bool = False):
+    def __init__(self, cfg: PushEnvCfg = None, headless: bool = False, enable_camera=False, enable_render=False):
         # copy configuration
         self.cfg = cfg
         # parse the configuration for controller configuration
@@ -44,7 +44,7 @@ class PushEnv(IsaacEnv):
         self.goal = RigidObject(cfg=self.cfg.goal)
 
         # initialize the base class to setup the scene.
-        super().__init__(self.cfg, headless=headless)
+        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera, enable_render=enable_render)
         # parse the configuration for information
         self._process_cfg()
         # initialize views for the cloned scenes
@@ -188,8 +188,9 @@ class PushEnv(IsaacEnv):
         # Note: this is used by algorithms like PPO where time-outs are handled differently
         self.extras["time_outs"] = self.episode_length_buf >= self.max_episode_length
         # -- add information to extra if task completed
-        object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
-        self.extras["is_success"] = torch.where(object_position_error < 0.005, 1, self.reset_buf)
+        object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - self.goal.data.root_pos_w[:, :2], dim=1)
+        # self.extras["is_success"] = torch.where(object_position_error < 0.005, 1, self.reset_buf)
+        self.extras["is_success"] = object_position_error < 0.005
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -264,8 +265,6 @@ class PushEnv(IsaacEnv):
         self.previous_actions = torch.zeros((self.num_envs, self.num_actions), device=self.device)
         # robot joint actions
         self.robot_actions = torch.zeros((self.num_envs, self.robot.num_actions), device=self.device)
-        # commands
-        self.object_des_pose_w = torch.zeros((self.num_envs, 7), device=self.device)
         # buffers
         self.object_root_pose_ee = torch.zeros((self.num_envs, 7), device=self.device)
         # time-step = 0
@@ -298,7 +297,7 @@ class PushEnv(IsaacEnv):
         if self.cfg.terminations.is_success:
             goal_positions = env.goal.get_world_poses()[0]
             object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - goal_positions[:, :2], dim=1)
-            self.reset_buf = torch.where(object_position_error < 0.002, 1, self.reset_buf)
+            self.reset_buf = torch.where(object_position_error < 0.005, 1, self.reset_buf)
         # -- object fell off the table (table at height: 0.0 m)
         if self.cfg.terminations.object_falling:
             self.reset_buf = torch.where(object_pos[:, 2] < -0.05, 1, self.reset_buf)
