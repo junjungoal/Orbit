@@ -335,8 +335,6 @@ class PushEnv(IsaacEnv):
         # set the root state
         self.object.set_root_state(root_state, env_ids=env_ids)
 
-        # self.goal.set_world_poses(torch.tensor([[0.5, 0, 0]], device=self.device).repeat(len(env_ids), 1))
-
     def _randomize_goal_pose(self, env_ids: torch.Tensor, cfg: RandomizationCfg.GoalPoseCfg):
         """Randomize the desired pose of the object."""
         # -- desired object root position
@@ -447,6 +445,11 @@ class PushRewardManager(RewardManager):
         """Penalize end-effector tracking position error using L2-kernel."""
         return torch.sum(torch.square(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
 
+    def reaching_object_position_negative(self, env: PushEnv, sigma: float):
+        """Penalize end-effector tracking position error using L2-kernel."""
+        error = torch.sum(torch.square(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
+        return -error
+
     def reaching_object_position_exp(self, env: PushEnv, sigma: float):
         """Penalize end-effector tracking position error using exp-kernel."""
         error = torch.sum(torch.square(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
@@ -481,6 +484,12 @@ class PushRewardManager(RewardManager):
     def penalizing_tool_action_l2(self, env: PushEnv):
         """Penalize large values in action commands for the tool."""
         return -torch.square(env.actions[:, -1])
+
+    def tracking_object_position_negative(self, env: PushEnv, sigma: float):
+        """Penalize tracking object position error using exp-kernel."""
+        # distance of the end-effector to the object: (num_envs,)
+        error = torch.sum(torch.square(env.goal.data.root_pos_w[:, :2] - env.object.data.root_pos_w[:, :2]), dim=1)
+        return -error
 
     def tracking_object_position_exp(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using exp-kernel."""
