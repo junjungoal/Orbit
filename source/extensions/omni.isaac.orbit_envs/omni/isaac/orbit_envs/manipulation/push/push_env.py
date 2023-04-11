@@ -508,5 +508,5 @@ class PushRewardManager(RewardManager):
         return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
 
     def push_object_success(self, env: PushEnv, threshold: float):
-        """Sparse reward if object is lifted successfully."""
+        """Sparse reward if object is pushed successfully."""
         return torch.where(torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1) < threshold, 1.0, 0.0)
