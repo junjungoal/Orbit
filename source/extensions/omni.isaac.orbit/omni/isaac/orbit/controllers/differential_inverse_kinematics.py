@@ -237,12 +237,12 @@ class DifferentialInverseKinematics:
             current_parent_pos, current_parent_rot, desired_parent_pos, desired_parent_rot, rot_error_type="axis_angle"
         )
         # compute the delta in joint-space
-        if "position" in self.cfg.command_type:
-            jacobian_pos = jacobian[:, 0:3]
-            delta_joint_positions = self._compute_delta_dof_pos(delta_pose=position_error, jacobian=jacobian_pos)
-        else:
-            pose_error = torch.cat((position_error, axis_angle_error), dim=1)
-            delta_joint_positions = self._compute_delta_dof_pos(delta_pose=pose_error, jacobian=jacobian)
+        # if "position" in self.cfg.command_type:
+        #     jacobian_pos = jacobian[:, 0:3]
+        #     delta_joint_positions = self._compute_delta_dof_pos(delta_pose=position_error, jacobian=jacobian_pos)
+        # else:
+        pose_error = torch.cat((position_error, axis_angle_error), dim=1)
+        delta_joint_positions = self._compute_delta_dof_pos(delta_pose=pose_error, jacobian=jacobian)
         # return the desired joint positions
         return joint_positions + delta_joint_positions
 
