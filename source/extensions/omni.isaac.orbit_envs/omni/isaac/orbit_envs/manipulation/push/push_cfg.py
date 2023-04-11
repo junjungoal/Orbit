@@ -163,7 +163,7 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 1, "sigma": 0.1}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.11}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.13}
     push_object_success = {"weight": 3.5, "threshold": 0.01}
 
 
@@ -224,6 +224,7 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # Scene Settings
     # -- robot
+    FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG.init_state.dof_pos['panda_finger_joint*'] = 0
     robot: SingleArmManipulatorCfg = FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
     # -- object
     object: ManipulationObjectCfg = ManipulationObjectCfg()
