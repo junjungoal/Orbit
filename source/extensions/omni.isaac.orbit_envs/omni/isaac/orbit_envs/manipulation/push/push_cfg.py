@@ -37,7 +37,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         scale=(1., 1., 1.),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.35, 0.0, 0.04), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.4, 0.0, 0.04), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -49,7 +49,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial",
-        mass=0.1
+        # mass=0.1
     )
 
 @configclass
@@ -131,7 +131,7 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        arm_dof_pos = {"scale": 1.0}
+        # arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
@@ -165,8 +165,8 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
     # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.14}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
-    reaching_object_position_negative = {"weight": 0.6,}
-    tracking_object_position_negative = {"weight": 1.0,}
+    reaching_object_position_negative = {"weight": 1.0,}
+    tracking_object_position_negative = {"weight": 2.5,}
     push_object_success = {"weight": 1, "threshold": 0.04}
 
 
@@ -195,7 +195,7 @@ class ControlCfg:
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="position_rel",
         ik_method="dls",
-        position_command_scale=(0.02, 0.02, 0.02),
+        position_command_scale=(0.05, 0.05, 0.05),
         rotation_command_scale=(0.05, 0.05, 0.05),
     )
 
