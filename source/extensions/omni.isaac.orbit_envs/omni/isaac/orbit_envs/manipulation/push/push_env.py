@@ -164,7 +164,7 @@ class PushEnv(IsaacEnv):
             self.robot_actions[:, :self.robot.arm_num_dof] = self.actions
 
         # close the gripper
-        self.robot_actions[:, -1] = -1.
+        # self.robot_actions[:, -1] = -1.
         # perform physics stepping
         for _ in range(self.cfg.control.decimation):
             # set actions into buffers
@@ -448,7 +448,7 @@ class PushRewardManager(RewardManager):
         """Penalize end-effector tracking position error using L2-kernel."""
         return torch.sum(torch.square(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
 
-    def reaching_object_position_negative(self, env: PushEnv, sigma: float):
+    def reaching_object_position_negative(self, env: PushEnv):
         """Penalize end-effector tracking position error using L2-kernel."""
         error = torch.sum(torch.square(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
         return -error
@@ -488,7 +488,7 @@ class PushRewardManager(RewardManager):
         """Penalize large values in action commands for the tool."""
         return -torch.square(env.actions[:, -1])
 
-    def tracking_object_position_negative(self, env: PushEnv, sigma: float):
+    def tracking_object_position_negative(self, env: PushEnv):
         """Penalize tracking object position error using exp-kernel."""
         # distance of the end-effector to the object: (num_envs,)
         error = torch.sum(torch.square(env.goal.data.root_pos_w[:, :2] - env.object.data.root_pos_w[:, :2]), dim=1)
