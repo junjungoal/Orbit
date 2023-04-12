@@ -100,7 +100,7 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.35, 0.0, 0.04]  # position default (x,y,z)
-        position_uniform_min = [0.35, -0.1, 0.04]  # position (x,y,z)
+        position_uniform_min = [0.4, -0.1, 0.04]  # position (x,y,z)
         position_uniform_max = [0.4, 0.1, 0.04]  # position (x,y,z)
 
     @configclass
