@@ -165,7 +165,7 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
     # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.14}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
-    reaching_object_position_negative = {"weight": 5.0,}
+    reaching_object_position_negative = {"weight": 10.0,}
     tracking_object_position_negative = {"weight": 50,}
     push_object_success = {"weight": 1, "threshold": 0.04}
 
