@@ -34,10 +34,10 @@ class ManipulationObjectCfg(RigidObjectCfg):
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
-        scale=(1., 1., 1.),
+        scale=(0.75, 0.75, 0.75),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.4, 0.0, 0.04), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.4, 0.0, 0.07), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -49,7 +49,6 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial",
-        # mass=0.1
     )
 
 @configclass
@@ -99,9 +98,9 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.35, 0.0, 0.04]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.1, 0.04]  # position (x,y,z)
-        position_uniform_max = [0.4, 0.1, 0.04]  # position (x,y,z)
+        position_default = [0.45, 0.0, 0.07]  # position default (x,y,z)
+        position_uniform_min = [0.35, -0.1, 0.07]  # position (x,y,z)
+        position_uniform_max = [0.4, 0.1, 0.07]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
@@ -131,7 +130,7 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        # arm_dof_pos = {"scale": 1.0}
+        arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
@@ -162,12 +161,12 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
-    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.14}
+    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.4, "threshold": 0.1}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
-    reaching_object_position_negative = {"weight": 10.0,}
-    tracking_object_position_negative = {"weight": 50,}
-    push_object_success = {"weight": 1, "threshold": 0.04}
+    # reaching_object_position_negative = {"weight": 50.0,}
+    # tracking_object_position_negative = {"weight": 50,}
+    push_object_success = {"weight": 1, "threshold": 0.03}
 
 
 @configclass
