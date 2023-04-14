@@ -34,10 +34,10 @@ class ManipulationObjectCfg(RigidObjectCfg):
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
-        scale=(0.9, 0.9, 0.9),
+        scale=(0.75, 0.75, 0.75),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.4, 0.0, 0.09), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.4, 0.0, 0.07), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -98,9 +98,9 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.45, 0.0, 0.09]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.1, 0.09]  # position (x,y,z)
-        position_uniform_max = [0.4, 0.1, 0.09]  # position (x,y,z)
+        position_default = [0.45, 0.0, 0.065]  # position default (x,y,z)
+        position_uniform_min = [0.35, -0.1, 0.065]  # position (x,y,z)
+        position_uniform_max = [0.4, 0.1, 0.065]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
@@ -130,7 +130,7 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        # arm_dof_pos = {"scale": 1.0}
+        arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
@@ -162,13 +162,11 @@ class RewardsCfg:
 
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
-    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.4, "threshold": 0.08}
-    # reaching_object_position_exp = {"weight": 1, "sigma": 0.1}
-    # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.1, "threshold": 0.08}
+    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.4, "threshold": 0.1}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
     reaching_object_position_negative = {"weight": 1,}
     tracking_object_position_negative = {"weight": 5,}
-    push_object_success = {"weight": 1, "threshold": 0.04}
+    push_object_success = {"weight": 1, "threshold": 0.03}
 
 
 @configclass
@@ -196,7 +194,7 @@ class ControlCfg:
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="position_rel",
         ik_method="dls",
-        position_command_scale=(0.02, 0.02, 0.02),
+        position_command_scale=(0.05, 0.05, 0.05),
         rotation_command_scale=(0.05, 0.05, 0.05),
     )
 
