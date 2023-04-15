@@ -25,7 +25,7 @@ from .reach_cfg import RandomizationCfg, ReachEnvCfg
 class ReachEnv(IsaacEnv):
     """Environment for reaching to desired pose for a single-arm manipulator."""
 
-    def __init__(self, cfg: ReachEnvCfg = None, **kwargs):
+    def __init__(self, cfg: ReachEnvCfg = None, headless: bool = False, enable_render=False, enable_camera=False):
         # copy configuration
         self.cfg = cfg
         # parse the configuration for controller configuration
@@ -35,7 +35,7 @@ class ReachEnv(IsaacEnv):
         self.robot = SingleArmManipulator(cfg=self.cfg.robot)
 
         # initialize the base class to setup the scene.
-        super().__init__(self.cfg, **kwargs)
+        super().__init__(self.cfg, headless=headless, enable_render=enable_render, enable_camera=enable_camera)
         # parse the configuration for information
         self._process_cfg()
         # initialize views for the cloned scenes
@@ -208,14 +208,12 @@ class ReachEnv(IsaacEnv):
         self.robot.initialize(self.env_ns + "/.*/Robot")
 
         # create controller
-        if self.cfg.control.control_type == "inverse_kinematics":
+        if self.cfg.control.control_type == "differential_inverse_kinematics":
             self._ik_controller = DifferentialInverseKinematics(
                 self.cfg.control.inverse_kinematics, self.robot.count, self.device
             )
-            # note: we exclude gripper from actions in this env
             self.num_actions = self._ik_controller.num_actions
         elif self.cfg.control.control_type == "default":
-            # note: we exclude gripper from actions in this env
             self.num_actions = self.robot.arm_num_dof
 
         # history
@@ -238,7 +236,7 @@ class ReachEnv(IsaacEnv):
         # -- end-effector
         self._ee_markers.set_world_poses(self.robot.data.ee_state_w[:, 0:3], self.robot.data.ee_state_w[:, 3:7])
         # -- task-space commands
-        if self.cfg.control.control_type == "inverse_kinematics":
+        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             # convert to world frame
             ee_positions = self._ik_controller.desired_ee_pos + self.envs_positions
             ee_orientations = self._ik_controller.desired_ee_rot
@@ -311,6 +309,13 @@ class ReachObservationManager(ObservationManager):
     def actions(self, env: ReachEnv):
         """Last actions provided to env."""
         return env.actions
+
+    def ee_orientations(self, env: ReachEnv):
+        """Current end-effector orientation of the arm."""
+        # make the first element positive
+        quat_w = env.robot.data.ee_state_w[:, 3:7]
+        quat_w[quat_w[:, 0] < 0] *= -1
+        return quat_w
 
 
 class ReachRewardManager(RewardManager):
