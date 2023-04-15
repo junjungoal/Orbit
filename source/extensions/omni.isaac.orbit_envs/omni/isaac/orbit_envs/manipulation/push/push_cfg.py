@@ -138,8 +138,8 @@ class ObservationsCfg:
         tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
-        # object_positions = {"scale": 1.0}
-        # object_orientations = {"scale": 1.0}
+        object_positions = {"scale": 1.0}
+        object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
@@ -161,13 +161,13 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.1, "threshold": 0.08}
+    # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
+    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.1, "threshold": 0.08}
     # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.1}
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
-    # reaching_object_position_negative = {"weight": 1,}
-    # tracking_object_position_negative = {"weight": 5,}
+    reaching_object_position_negative = {"weight": 1,}
+    tracking_object_position_negative = {"weight": 5,}
     push_object_success = {"weight": 1, "threshold": 0.04}
 
 
