@@ -37,7 +37,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         scale=(0.9, 0.9, 0.9),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.4, 0.0, 0.09), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.4, 0.0, 0.05), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -48,7 +48,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial",
+        static_friction=1.5, dynamic_friction=1.2, restitution=0.0, prim_path="/World/Materials/cubeMaterial",
     )
 
 @configclass
@@ -98,9 +98,9 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.45, 0.0, 0.09]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.1, 0.09]  # position (x,y,z)
-        position_uniform_max = [0.4, 0.1, 0.09]  # position (x,y,z)
+        position_default = [0.45, 0.0, 0.05]  # position default (x,y,z)
+        position_uniform_min = [0.4, -0.1, 0.05]  # position (x,y,z)
+        position_uniform_max = [0.4, 0.1, 0.05]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
