@@ -25,7 +25,7 @@ class TableCfg:
     """Properties for the table."""
 
     # note: we use instanceable asset since it consumes less memory
-    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table.usd")
+    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table_instanceable.usd")
 
 
 @configclass
@@ -161,13 +161,13 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.1, "threshold": 0.08}
+    # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
+    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.1, "threshold": 0.08}
     # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.1}
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
-    # reaching_object_position_negative = {"weight": 1,}
-    # tracking_object_position_negative = {"weight": 5,}
+    reaching_object_position_negative = {"weight": 1,}
+    tracking_object_position_negative = {"weight": 5,}
     push_object_success = {"weight": 1, "threshold": 0.04}
 
 
@@ -196,7 +196,7 @@ class ControlCfg:
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="position_rel",
         ik_method="dls",
-        position_command_scale=(0.02, 0.02, 0.02),
+        position_command_scale=(0.05, 0.05, 0.05),
         rotation_command_scale=(0.05, 0.05, 0.05),
     )
 
