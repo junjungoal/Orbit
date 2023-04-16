@@ -70,6 +70,9 @@ class DifferentialInverseKinematicsCfg:
     rotation_command_scale: Tuple[float, float, float] = (1.0, 1.0, 1.0)
     """Scaling of the rotation command received. Used only in relative mode."""
 
+    ee_max_limit: Optional[Tuple[float, float, float]] = None
+    ee_min_limit: Optional[Tuple[float, float, float]] = None
+
 
 class DifferentialInverseKinematics:
     """Inverse differential kinematics controller.
@@ -139,6 +142,16 @@ class DifferentialInverseKinematics:
         # scaling of command
         self._position_command_scale = torch.diag(torch.tensor(self.cfg.position_command_scale, device=self._device))
         self._rotation_command_scale = torch.diag(torch.tensor(self.cfg.rotation_command_scale, device=self._device))
+
+        if self.cfg.ee_max_limit is not None:
+            self._ee_max_limit = torch.tensor(self.cfg.ee_max_limit, device=self._device)
+        else:
+            self._ee_max_limit = None
+
+        if self.cfg.ee_min_limit is not None:
+            self._ee_min_limit = torch.tensor(self.cfg.ee_min_limit, device=self._device)
+        else:
+            self._ee_min_limit = None
 
         # create buffers
         self.desired_ee_pos = torch.zeros(self.num_robots, 3, device=self._device)
@@ -217,6 +230,8 @@ class DifferentialInverseKinematics:
             self.desired_ee_rot = self._command[:, 3:7]
         else:
             raise ValueError(f"Invalid control command: {self.cfg.command_type}.")
+
+        self.desired_ee_pos = torch.clamp(self.desired_ee_pos, min=self._ee_min_limit, max=self._ee_max_limit)
 
         # transform from ee -> parent
         # TODO: Make this optional to reduce overhead?
