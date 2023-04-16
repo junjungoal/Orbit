@@ -195,7 +195,7 @@ class PushEnv(IsaacEnv):
         # -- add information to extra if task completed
         object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - self.goal.data.root_pos_w[:, :2], dim=1)
         # self.extras["is_success"] = torch.where(object_position_error < 0.005, 1, self.reset_buf)
-        self.extras["is_success"] = object_position_error < 0.04
+        self.extras["is_success"] = object_position_error < 0.05
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -302,7 +302,7 @@ class PushEnv(IsaacEnv):
         if self.cfg.terminations.is_success:
             goal_positions = env.goal.get_world_poses()[0]
             object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - goal_positions[:, :2], dim=1)
-            self.reset_buf = torch.where(object_position_error < 0.04, 1, self.reset_buf)
+            self.reset_buf = torch.where(object_position_error < 0.05, 1, self.reset_buf)
         # -- object fell off the table (table at height: 0.0 m)
         if self.cfg.terminations.object_falling:
             self.reset_buf = torch.where(object_pos[:, 2] < -0.05, 1, self.reset_buf)
@@ -472,8 +472,7 @@ class PushRewardManager(RewardManager):
         num_tool_sites = tool_sites_distance.shape[1]
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        # return 1 - torch.tanh(ee_distance / sigma)
-        return 1 - torch.tanh(average_distance / sigma)
+        return 1 - torch.tanh(ee_distance / sigma)
 
     def penalizing_arm_dof_velocity_l2(self, env: PushEnv):
         """Penalize large movements of the robot arm."""
@@ -512,7 +511,6 @@ class PushRewardManager(RewardManager):
         ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
         # rewarded if the object is lifted above the threshold
         return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
-        # return (1 - torch.tanh(obj_to_goal / sigma))
 
     def tracking_object_position_diff(self, env: PushEnv):
         prev_obj_to_goal = torch.norm(env.previous_object_root_pos_w[:, :2] - env.goal.data.root_pos_w[:, :2])
