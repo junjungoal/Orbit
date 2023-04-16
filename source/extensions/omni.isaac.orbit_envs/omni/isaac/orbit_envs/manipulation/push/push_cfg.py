@@ -162,8 +162,8 @@ class RewardsCfg:
 
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
-    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.11}
-    tracking_object_position_diff = {'weight': 10.}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.12}
+    # tracking_object_position_diff = {'weight': 10.}
     # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.1}
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
