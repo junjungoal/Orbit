@@ -34,10 +34,10 @@ class ManipulationObjectCfg(RigidObjectCfg):
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
-        scale=(0.9, 0.9, 0.9),
+        scale=(1., 1., 1.),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.4, 0.0, 0.05), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.4, 0.0, 0.045), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -48,7 +48,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=1.5, dynamic_friction=1.2, restitution=0.0, prim_path="/World/Materials/cubeMaterial",
+        static_friction=1.6, dynamic_friction=1.4, restitution=0.0, prim_path="/World/Materials/cubeMaterial",
     )
 
 @configclass
@@ -98,9 +98,9 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.45, 0.0, 0.05]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.1, 0.05]  # position (x,y,z)
-        position_uniform_max = [0.4, 0.1, 0.05]  # position (x,y,z)
+        position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
+        position_uniform_min = [0.4, -0.1, 0.045]  # position (x,y,z)
+        position_uniform_max = [0.4, 0.1, 0.045]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
@@ -161,14 +161,14 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
+    # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.11}
     # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.1}
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
-    # reaching_object_position_negative = {"weight": 1,}
+    reaching_object_position_negative = {"weight": 1,}
     # tracking_object_position_negative = {"weight": 3,}
-    push_object_success = {"weight": 3.5, "threshold": 0.04}
+    push_object_success = {"weight": 3.5, "threshold": 0.05}
 
 
 @configclass

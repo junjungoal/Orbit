@@ -139,11 +139,13 @@ class PushEnv(IsaacEnv):
         # -- MDP reset
         self.reset_buf[env_ids] = 0
         self.episode_length_buf[env_ids] = 0
+        self.previous_object_root_pos_w = self.object.data.root_pos_w.clone()
         # controller reset
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             self._ik_controller.reset_idx(env_ids)
 
     def _step_impl(self, actions: torch.Tensor):
+        self.previous_object_root_pos_w = self.object.data.root_pos_w.clone()
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
         # transform actions based on controller
@@ -511,6 +513,11 @@ class PushRewardManager(RewardManager):
         # rewarded if the object is lifted above the threshold
         return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
         # return (1 - torch.tanh(obj_to_goal / sigma))
+
+    def tracking_object_position_diff(self, env: PushEnv):
+        prev_obj_to_goal = torch.norm(env.previous_object_root_pos_w[:, :2] - env.goal.data.root_pos_w[:, :2])
+        obj_to_goal = torch.norm(env.object.data.root_pos_w[:, :2] - env.goal.data.root_pos_w[:, :2])
+        return (prev_obj_to_goal - obj_to_goal)
 
     def push_object_success(self, env: PushEnv, threshold: float):
         """Sparse reward if object is pushed successfully."""
