@@ -199,8 +199,8 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.05, 0.05, 0.05),
         rotation_command_scale=(0.05, 0.05, 0.05),
-        ee_min_limit=(0, -0.3, 0),
-        ee_max_limit=(0.8, 0.3, 0.9)
+        ee_min_limit=(0.15, -0.4, 0),
+        ee_max_limit=(0.7, 0.4, 0.5)
     )
 
 
