@@ -218,13 +218,13 @@ class DifferentialInverseKinematics:
             # scale command
             self._command[:, 0:3] @= self._position_command_scale
             self._command[:, 3:4] *= self._rotation_command_scale[-1, -1]
-            current_ee_rot_z =  axis_angle_from_quat(current_ee_rot)[:, -1:]
+            current_ee_rot_z =  axis_angle_from_quat(current_ee_rot)[:, 1:2]
             desired_ee_rot_z = current_ee_rot_z + self._command[:, 3:4]
-            desired_ee_rot = torch.cat([axis_angle_from_quat(self.base_rot)[:, :2], desired_ee_rot_z], dim=-1)
+            # desired_ee_rot_z = torch.clamp(desired_ee_rot_z, min=-1.57, max=1.57)
+            base_ee_axis_angle = axis_angle_from_quat(self.base_rot)
+            desired_ee_rot = torch.cat([base_ee_axis_angle[:, :1], desired_ee_rot_z, base_ee_axis_angle[:, -1:]], dim=-1)
             command = torch.cat([self._command[:, 0:3], desired_ee_rot-axis_angle_from_quat(current_ee_rot)], dim=-1)
             self.desired_ee_pos, self.desired_ee_rot = apply_delta_pose(current_ee_pos, current_ee_rot, command)
-            # self.desired_ee_pos = current_ee_pos + self._command[:, :3]
-            # self.desired_ee_rot = quat_from_angle_axis(torch.cat([axis_angle_from_quat(self.base_rot)[:, :2], desired_ee_rot_z], dim=-1))
 
         elif "position_rel" in self.cfg.command_type:
             # scale command
