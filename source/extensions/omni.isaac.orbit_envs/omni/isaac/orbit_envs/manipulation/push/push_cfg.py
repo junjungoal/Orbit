@@ -198,7 +198,7 @@ class ControlCfg:
         command_type="position_rel_z",
         ik_method="dls",
         position_command_scale=(0.05, 0.05, 0.05),
-        rotation_command_scale=(0.05, 0.05, 0.05),
+        rotation_command_scale=(0.2, 0.2, 0.2),
         ee_min_limit=(0.15, -0.4, 0),
         ee_max_limit=(0.7, 0.4, 0.5)
     )

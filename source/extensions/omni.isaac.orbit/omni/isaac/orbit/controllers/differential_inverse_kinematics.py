@@ -214,13 +214,16 @@ class DifferentialInverseKinematics:
             # scale command
             self._command[:, 0:3] @= self._position_command_scale
             self._command[:, 3:4] *= self._rotation_command_scale[-1, -1]
-            current_ee_rot_z =  axis_angle_from_quat(current_ee_rot)[:, 1:2]
-            desired_ee_rot_z = current_ee_rot_z + self._command[:, 3:4]
-            # desired_ee_rot_z = torch.clamp(desired_ee_rot_z, min=-1.57, max=1.57)
-            base_ee_axis_angle = axis_angle_from_quat(self.base_rot)
-            desired_ee_rot = torch.cat([base_ee_axis_angle[:, :1], desired_ee_rot_z, base_ee_axis_angle[:, -1:]], dim=-1)
-            command = torch.cat([self._command[:, 0:3], desired_ee_rot-axis_angle_from_quat(current_ee_rot)], dim=-1)
-            self.desired_ee_pos, self.desired_ee_rot = apply_delta_pose(current_ee_pos, current_ee_rot, command)
+
+            self.desired_ee_pos = current_ee_pos + self._command[:, 0:3]
+            self.desired_ee_rot = self.base_rot
+            # current_ee_rot_z =  axis_angle_from_quat(current_ee_rot)[:, 1:2]
+            # desired_ee_rot_z = current_ee_rot_z + self._command[:, 3:4]
+            # # desired_ee_rot_z = torch.clamp(desired_ee_rot_z, min=-1.57, max=1.57)
+            # base_ee_axis_angle = axis_angle_from_quat(self.base_rot)
+            # desired_ee_rot = torch.cat([base_ee_axis_angle[:, :1], desired_ee_rot_z, base_ee_axis_angle[:, -1:]], dim=-1)
+            # command = torch.cat([self._command[:, 0:3], desired_ee_rot-axis_angle_from_quat(current_ee_rot)], dim=-1)
+            # self.desired_ee_pos, self.desired_ee_rot = apply_delta_pose(current_ee_pos, current_ee_rot, command)
 
         elif "position_rel" in self.cfg.command_type:
             # scale command
@@ -271,6 +274,8 @@ class DifferentialInverseKinematics:
         pose_error = torch.cat((position_error, axis_angle_error), dim=1)
         delta_joint_positions = self._compute_delta_dof_pos(delta_pose=pose_error, jacobian=jacobian)
         # return the desired joint positions
+        if 'position_rel_z' in self.cfg.command_type:
+            delta_joint_positions[:, -1:] += self._command[:, -1:]
         return joint_positions + delta_joint_positions
 
     """
