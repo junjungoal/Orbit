@@ -33,7 +33,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     """Properties for the object to manipulate in the scene."""
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
-        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
+        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_instanceable.usd"),
         scale=(0.6, 0.6, 0.6),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
@@ -130,7 +130,7 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        arm_dof_pos = {"scale": 1.0}
+        # arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
@@ -161,13 +161,13 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
+    # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.12}
     # tracking_object_position_diff = {'weight': 10.}
     # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.1}
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
-    # reaching_object_position_negative = {"weight": 1,}
+    reaching_object_position_negative = {"weight": 1,}
     # tracking_object_position_negative = {"weight": 3,}
     push_object_success = {"weight": 3.5, "threshold": 0.05}
 
@@ -195,7 +195,7 @@ class ControlCfg:
     # configuration loaded when control_type == "inverse_kinematics"
     # inverse_kinematics: InverseKinematicsCfg = InverseKinematicsCfg(
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
-        command_type="position_rel_z",
+        command_type="position_rel",
         ik_method="dls",
         position_command_scale=(0.05, 0.05, 0.05),
         rotation_command_scale=(0.2, 0.2, 0.2),
