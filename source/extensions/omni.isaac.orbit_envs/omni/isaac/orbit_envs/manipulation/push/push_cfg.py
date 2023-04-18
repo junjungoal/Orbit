@@ -48,7 +48,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=1.6, dynamic_friction=1.4, restitution=0.0, prim_path="/World/Materials/cubeMaterial",
+        static_friction=2.6, dynamic_friction=2.4, restitution=0.0, prim_path="/World/Materials/cubeMaterial",
     )
 
 @configclass
@@ -195,7 +195,7 @@ class ControlCfg:
     # configuration loaded when control_type == "inverse_kinematics"
     # inverse_kinematics: InverseKinematicsCfg = InverseKinematicsCfg(
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
-        command_type="position_rel",
+        command_type="position_rel_z",
         ik_method="dls",
         position_command_scale=(0.05, 0.05, 0.05),
         rotation_command_scale=(0.05, 0.05, 0.05),
