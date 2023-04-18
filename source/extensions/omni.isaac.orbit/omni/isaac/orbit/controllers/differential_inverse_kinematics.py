@@ -14,6 +14,7 @@ from omni.isaac.orbit.utils.math import (
     compute_pose_error,
     quat_apply,
     quat_inv,
+    axis_angle_from_quat
 )
 from omni.isaac.core.utils.torch.rotations import (
     quat_apply,
@@ -121,7 +122,7 @@ class DifferentialInverseKinematics:
         # check valid input
         if self.cfg.ik_method not in ["pinv", "svd", "trans", "dls"]:
             raise ValueError(f"Unsupported inverse-kinematics method: {self.cfg.ik_method}.")
-        if self.cfg.command_type not in ["position_abs", "position_rel", "pose_abs", "pose_rel"]:
+        if self.cfg.command_type not in ["position_abs", "position_rel", "pose_abs", "pose_rel", 'position_rel_z']:
             raise ValueError(f"Unsupported inverse-kinematics command: {self.cfg.command_type}.")
 
         # update parameters for IK-method
@@ -167,7 +168,9 @@ class DifferentialInverseKinematics:
     @property
     def num_actions(self) -> int:
         """Dimension of the action space of controller."""
-        if "position" in self.cfg.command_type:
+        if 'position_rel_z' in self.cfg.command_type:
+            return 4
+        elif "position" in self.cfg.command_type:
             return 3
         elif self.cfg.command_type == "pose_rel":
             return 6
@@ -207,7 +210,19 @@ class DifferentialInverseKinematics:
             torch.Tensor: The target joint positions commands.
         """
         # compute the desired end-effector pose
-        if "position_rel" in self.cfg.command_type:
+        if 'position_rel_z' in self.cfg.command_type:
+            # scale command
+            self._command[:, 0:3] @= self._position_command_scale
+            self._command[:, 3:4] *= self._rotation_command_scale[-1, -1]
+            current_ee_rot_z =  axis_angle_from_quat(current_ee_rot)[:, -1:]
+            desired_ee_rot_z = current_ee_rot_z + self._command[:, 3:4]
+            desired_ee_rot = torch.cat([axis_angle_from_quat(self.base_rot)[:, :2], desired_ee_rot_z], dim=-1)
+            command = torch.cat([self._command[:, 0:3], desired_ee_rot-axis_angle_from_quat(current_ee_rot)], dim=-1)
+            self.desired_ee_pos, self.desired_ee_rot = apply_delta_pose(current_ee_pos, current_ee_rot, command)
+            # self.desired_ee_pos = current_ee_pos + self._command[:, :3]
+            # self.desired_ee_rot = quat_from_angle_axis(torch.cat([axis_angle_from_quat(self.base_rot)[:, :2], desired_ee_rot_z], dim=-1))
+
+        elif "position_rel" in self.cfg.command_type:
             # scale command
             self._command @= self._position_command_scale
             # compute targets
