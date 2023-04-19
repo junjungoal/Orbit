@@ -34,7 +34,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_instanceable.usd"),
-        scale=(0.6, 0.6, 0.6),
+        scale=(1, 1, 1),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
         pos=(0.4, 0.0, 0.045), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
@@ -48,7 +48,8 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=2.6, dynamic_friction=2.4, restitution=0.0, prim_path="/World/Materials/cubeMaterial",
+        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial",
+        mass=0.15
     )
 
 @configclass
