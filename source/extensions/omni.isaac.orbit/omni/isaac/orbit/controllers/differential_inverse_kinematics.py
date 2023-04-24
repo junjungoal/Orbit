@@ -279,7 +279,8 @@ class DifferentialInverseKinematics:
         delta_joint_positions = self._compute_delta_dof_pos(delta_pose=pose_error, jacobian=jacobian)
         # return the desired joint positions
         if 'position_rel_z' in self.cfg.command_type:
-            delta_joint_positions[:, -1:] += self._command[:, -1:]
+            # delta_joint_positions[:, -1:] += self._command[:, -1:]
+            delta_joint_positions[:, -1:] = self._command[:, -1:]
         return joint_positions + delta_joint_positions
 
     """
