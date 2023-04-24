@@ -67,7 +67,7 @@ class GoalMarkerCfg(RigidObjectCfg):
         scale=(1, 1, 1),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.5, 0.2, 0.0), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.55, 0.05, 0.0), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         disable_gravity=True,
@@ -106,8 +106,8 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
-        position_uniform_min = [0.35, -0.1, 0.045]  # position (x,y,z)
-        position_uniform_max = [0.4, 0.1, 0.045]  # position (x,y,z)
+        position_uniform_min = [0.35, -0.05, 0.045]  # position (x,y,z)
+        position_uniform_max = [0.4, 0.05, 0.045]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
