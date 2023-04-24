@@ -56,7 +56,8 @@ class CameraCfg:
     lookat: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     """Initial camera target position (in m). Default is (0.0, 0.0, 0.0)."""
     # position: Tuple[float, float, float] = (2.2, 0, 1.6)
-    position: Tuple[float, float, float] = (1.8, 0, 1.4)
+    # position: Tuple[float, float, float] = (1.8, 0, 1.4)
+    position: Tuple[float, float, float] = (1.7, 0, 1.24)
     orientation: Tuple[float, float, float, float] = (-0.3069373, 0.6372103, 0.6362135, -0.3081962)
     height: int = 480
     width: int = 640
