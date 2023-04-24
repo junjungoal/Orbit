@@ -27,13 +27,19 @@ class TableCfg:
     # note: we use instanceable asset since it consumes less memory
     usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table_instanceable.usd")
 
+@configclass
+class BackgroundCfg:
+    """Properties for the table."""
+
+    # note: we use instanceable asset since it consumes less memory
+    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/background.usd")
 
 @configclass
 class ManipulationObjectCfg(RigidObjectCfg):
     """Properties for the object to manipulate in the scene."""
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
-        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_instanceable.usd"),
+        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_small_instanceable.usd"),
         scale=(1, 1, 1),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
@@ -99,7 +105,7 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
+        position_default = [0.4, 0.0, 0.045]  # position default (x,y,z)
         position_uniform_min = [0.35, -0.05, 0.045]  # position (x,y,z)
         position_uniform_max = [0.4, 0.05, 0.045]  # position (x,y,z)
 
@@ -110,9 +116,9 @@ class RandomizationCfg:
         # category
         position_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.4, 0.2, 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.2, 0.]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.2, 0.]  # position (x,y,z)
+        position_default = [0.6, 0.0, 0.0]  # position default (x,y,z)
+        position_uniform_min = [0.45, -0.05, 0.]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.05, 0.]  # position (x,y,z)
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
@@ -240,6 +246,7 @@ class PushEnvCfg(IsaacEnvCfg):
     goal: GoalMarkerCfg = GoalMarkerCfg()
     # -- table
     table: TableCfg = TableCfg()
+    background: BackgroundCfg = BackgroundCfg()
     # -- visualization marker
     frame_marker: FrameMarkerCfg = FrameMarkerCfg()
 

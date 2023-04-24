@@ -84,7 +84,10 @@ class PushEnv(IsaacEnv):
         # kit_utils.create_ground_plane("/World/defaultGroundPlane", z_position=-1.05)
         kit_utils.create_ground_plane("/World/defaultGroundPlane", z_position=-0.65)
         # table
-        prim_utils.create_prim(self.template_env_ns + "/Table", usd_path=self.cfg.table.usd_path)
+        prim_utils.create_prim(self.template_env_ns + "/Table", usd_path=self.cfg.table.usd_path,
+                               translation=(0.2, 0, 0))
+        prim_utils.create_prim(self.template_env_ns + "/Background", usd_path=self.cfg.background.usd_path,
+                               translation=(-0.4, 0, 0))
 
         # goal_geom = GeometryPrim(prim_path=self.template_env_ns+'/GoalMarker')
         # goal_geom.disable_collision(torch.arange(self.num_envs).to(self.device))
