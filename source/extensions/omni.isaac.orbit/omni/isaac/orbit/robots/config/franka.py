@@ -43,6 +43,16 @@ FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
             "panda_joint7": np.pi/4,
             "panda_finger_joint*": 0.04,
         },
+        # dof_pos={
+        #     "panda_joint1": 0.0,
+        #     "panda_joint2": np.pi/16.,
+        #     "panda_joint3": 0.0,
+        #     "panda_joint4": -np.pi/2. - np.pi/3.,
+        #     "panda_joint5": 0.0,
+        #     "panda_joint6": np.pi - 0.2,
+        #     "panda_joint7": np.pi/4,
+        #     "panda_finger_joint*": 0.04,
+        # },
         dof_vel={".*": 0.0},
     ),
     ee_info=SingleArmManipulatorCfg.EndEffectorFrameCfg(

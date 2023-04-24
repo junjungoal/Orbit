@@ -27,13 +27,19 @@ class TableCfg:
     # note: we use instanceable asset since it consumes less memory
     usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table_instanceable.usd")
 
+@configclass
+class BackgroundCfg:
+    """Properties for the table."""
+
+    # note: we use instanceable asset since it consumes less memory
+    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/background.usd")
 
 @configclass
 class ManipulationObjectCfg(RigidObjectCfg):
     """Properties for the object to manipulate in the scene."""
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
-        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_instanceable.usd"),
+        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_small_instanceable.usd"),
         scale=(1, 1, 1),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
@@ -240,6 +246,7 @@ class PushEnvCfg(IsaacEnvCfg):
     goal: GoalMarkerCfg = GoalMarkerCfg()
     # -- table
     table: TableCfg = TableCfg()
+    background: BackgroundCfg = BackgroundCfg()
     # -- visualization marker
     frame_marker: FrameMarkerCfg = FrameMarkerCfg()
 
