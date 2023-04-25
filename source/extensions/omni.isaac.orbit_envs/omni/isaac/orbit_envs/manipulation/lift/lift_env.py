@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import numpy as np
 import gym.spaces
 import math
 import torch
@@ -20,8 +21,11 @@ from omni.isaac.orbit.utils.math import quat_inv, quat_mul, random_orientation, 
 from omni.isaac.orbit.utils.mdp import ObservationManager, RewardManager
 
 from omni.isaac.orbit_envs.isaac_env import IsaacEnv, VecEnvIndices, VecEnvObs
+from omni.isaac.core.prims import GeometryPrimView, RigidPrimView, GeometryPrim, RigidPrim
 
 from .lift_cfg import LiftEnvCfg, RandomizationCfg
+from pxr import Gf, PhysxSchema, UsdPhysics, UsdShade, Sdf
+import omni
 
 
 class LiftEnv(IsaacEnv):
@@ -136,6 +140,18 @@ class LiftEnv(IsaacEnv):
         if self.cfg.control.control_type == "inverse_kinematics":
             self._ik_controller.reset_idx(env_ids)
 
+        if self.cfg.domain_randomization.randomize_object:
+            self.randomize_object()
+
+        if self.cfg.domain_randomization.randomize_light:
+            self.randomize_light()
+
+        if self.cfg.domain_randomization.randomize_robot:
+            self.randomize_robot()
+
+        if self.cfg.domain_randomization.randomize_table:
+            self.randomize_table()
+
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
@@ -154,8 +170,6 @@ class LiftEnv(IsaacEnv):
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
             # we assume last command is tool action so don't change that
-            import pdb
-            pdb.set_trace()
             self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
@@ -353,6 +367,46 @@ class LiftEnv(IsaacEnv):
             )
         # transform command from local env to world
         self.object_des_pose_w[env_ids, 0:3] += self.envs_positions[env_ids]
+
+    def randomize_object(self):
+        default_color = np.array([0.949, 0.8, 0.21])
+        random_color = np.random.uniform(0, 1, size=3)
+        local_rgb_interpolation = 0.3
+        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
+        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+    def randomize_table(self):
+        rgb = np.ones(3) * np.random.uniform(0.5, 0.8)
+        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visuals/OmniPBR')
+        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+    def randomize_robot(self):
+        default_color = np.array([1., 1, 1])
+
+        prim_paths = prim_utils.find_matching_prim_paths('/World/envs/env_0/Robot/*/visuals/Looks/PlasticWhite')[:-2]
+        for prim_path in prim_paths:
+            prim = prim_utils.get_prim_at_path(prim_path)
+            if np.random.rand() > 0.5:
+                rgb = default_color
+            else:
+                random_color = np.random.uniform(0, 1, size=3)
+                local_rgb_interpolation = 0.3
+                rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+            omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+
+    def randomize_light(self):
+        intensity = np.random.choice(np.linspace(300, 1000, 7))
+        # print('Intensity: ', intensity)
+        # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensi4y', intensity)
+        prim_path = '/World/defaultGroundPlane'
+        prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
+        default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')
+        random_color = np.random.uniform(0, 1, size=3)
+        local_rgb_interpolation = 0.2
+        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'color', tuple(rgb))
 
 
 class LiftObservationManager(ObservationManager):
