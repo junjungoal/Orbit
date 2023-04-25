@@ -416,7 +416,7 @@ class PushEnv(IsaacEnv):
 
 
     def randomize_light(self):
-        intensity = np.random.choice(np.linspace(300, 1000, 7))
+        intensity = np.random.choice(np.linspace(500, 2000, 15))
         # print('Intensity: ', intensity)
         # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensi4y', intensity)
         prim_path = '/World/defaultGroundPlane'
