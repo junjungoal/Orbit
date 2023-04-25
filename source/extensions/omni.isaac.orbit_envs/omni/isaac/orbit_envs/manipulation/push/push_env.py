@@ -198,7 +198,7 @@ class PushEnv(IsaacEnv):
         # -- add information to extra if task completed
         object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - self.goal.data.root_pos_w[:, :2], dim=1)
         # self.extras["is_success"] = torch.where(object_position_error < 0.005, 1, self.reset_buf)
-        self.extras["is_success"] = object_position_error < 0.05
+        self.extras["is_success"] = object_position_error < 0.03
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -305,7 +305,7 @@ class PushEnv(IsaacEnv):
         if self.cfg.terminations.is_success:
             goal_positions = env.goal.get_world_poses()[0]
             object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - goal_positions[:, :2], dim=1)
-            self.reset_buf = torch.where(object_position_error < 0.05, 1, self.reset_buf)
+            self.reset_buf = torch.where(object_position_error < 0.03, 1, self.reset_buf)
         # -- object fell off the table (table at height: 0.0 m)
         if self.cfg.terminations.object_falling:
             self.reset_buf = torch.where(object_pos[:, 2] < -0.05, 1, self.reset_buf)
