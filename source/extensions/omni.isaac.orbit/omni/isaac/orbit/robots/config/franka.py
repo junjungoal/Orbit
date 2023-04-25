@@ -13,6 +13,7 @@ Reference: https://github.com/frankaemika/franka_ros
 """
 
 
+import os, sys
 import numpy as np
 from omni.isaac.orbit.actuators.config.franka import PANDA_HAND_MIMIC_GROUP_CFG
 from omni.isaac.orbit.actuators.group import ActuatorGroupCfg
@@ -22,7 +23,8 @@ from omni.isaac.orbit.utils.assets import ISAAC_ORBIT_NUCLEUS_DIR
 
 from ..single_arm import SingleArmManipulatorCfg
 
-_FRANKA_PANDA_ARM_INSTANCEABLE_USD = f"{ISAAC_ORBIT_NUCLEUS_DIR}/Robots/FrankaEmika/panda_instanceable.usd"
+# _FRANKA_PANDA_ARM_INSTANCEABLE_USD = f"{ISAAC_ORBIT_NUCLEUS_DIR}/Robots/FrankaEmika/panda_instanceable.usd"
+_FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/panda_instanceable.usd')
 
 
 FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(

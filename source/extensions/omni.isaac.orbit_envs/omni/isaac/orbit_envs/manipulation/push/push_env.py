@@ -156,6 +156,9 @@ class PushEnv(IsaacEnv):
         if self.cfg.domain_randomization.randomize_light:
             self.randomize_light()
 
+        if self.cfg.domain_randomization.randomize_robot:
+            self.randomize_robot()
+
     def _step_impl(self, actions: torch.Tensor):
         self.previous_object_root_pos_w = self.object.data.root_pos_w.clone()
         # pre-step: set actions into buffer
@@ -378,11 +381,27 @@ class PushEnv(IsaacEnv):
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
+    def randomize_robot(self):
+        default_color = np.array([1., 1, 1])
+
+        prim_paths = prim_utils.find_matching_prim_paths('/World/envs/env_0/Robot/*/visuals/Looks/PlasticWhite')[:-2]
+        for prim_path in prim_paths:
+            print(prim_path)
+            prim = prim_utils.get_prim_at_path(prim_path)
+            if np.random.rand() > 0.5:
+                rgb = default_color
+            else:
+                random_color = np.random.uniform(0, 1, size=3)
+                local_rgb_interpolation = 0.5
+                rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+            omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+        print('hi')
 
     def randomize_light(self):
         intensity = np.random.choice(np.linspace(0, 300, 5))
         # print('Intensity: ', intensity)
-        # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensity', intensity)
+        # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensi4y', intensity)
         prim_path = '/World/defaultGroundPlane'
         prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
         default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')
@@ -390,6 +409,8 @@ class PushEnv(IsaacEnv):
         local_rgb_interpolation = 0.4
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'color', tuple(rgb))
+
+
 
 class PushObservationManager(ObservationManager):
     """Reward manager for single-arm reaching environment."""

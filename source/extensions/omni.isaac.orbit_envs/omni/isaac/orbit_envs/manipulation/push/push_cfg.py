@@ -191,6 +191,7 @@ class TerminationsCfg:
 class DomainRandomizationCfg:
     randomize_object_color = True
     randomize_light = True
+    randomize_robot = True
 
 @configclass
 class ControlCfg:
