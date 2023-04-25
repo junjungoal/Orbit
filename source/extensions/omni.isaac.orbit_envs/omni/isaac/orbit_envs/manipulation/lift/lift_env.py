@@ -400,7 +400,7 @@ class LiftEnv(IsaacEnv):
 
 
     def randomize_light(self):
-        intensity = np.random.choice(np.linspace(500, 2000, 15))
+        intensity = np.random.choice(np.linspace(1000, 2500, 15))
         # print('Intensity: ', intensity)
         # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensi4y', intensity)
         prim_path = '/World/defaultGroundPlane'
