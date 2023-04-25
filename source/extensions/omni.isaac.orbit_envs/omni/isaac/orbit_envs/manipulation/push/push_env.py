@@ -370,7 +370,7 @@ class PushEnv(IsaacEnv):
         elif cfg.position_cat == "uniform":
             # sample uniformly from box
             # note: this should be within in the workspace of the robot
-            root_state[:, 0:3] += sample_uniform(
+            root_state[:, 0:3] = sample_uniform(
                 cfg.position_uniform_min, cfg.position_uniform_max, (len(env_ids), 3), device=self.device
             )
         else:
