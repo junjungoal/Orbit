@@ -27,7 +27,7 @@ from .lift_cfg import LiftEnvCfg, RandomizationCfg
 class LiftEnv(IsaacEnv):
     """Environment for lifting an object off a table with a single-arm manipulator."""
 
-    def __init__(self, cfg: LiftEnvCfg = None, headless: bool = False):
+    def __init__(self, cfg: LiftEnvCfg = None, headless: bool = False, enable_camera=False, enable_render=False):
         # copy configuration
         self.cfg = cfg
         # parse the configuration for controller configuration
@@ -38,7 +38,7 @@ class LiftEnv(IsaacEnv):
         self.object = RigidObject(cfg=self.cfg.object)
 
         # initialize the base class to setup the scene.
-        super().__init__(self.cfg, headless=headless)
+        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera, enable_render=enable_render)
         # parse the configuration for information
         self._process_cfg()
         # initialize views for the cloned scenes
@@ -154,6 +154,8 @@ class LiftEnv(IsaacEnv):
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
             # we assume last command is tool action so don't change that
+            import pdb
+            pdb.set_trace()
             self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions

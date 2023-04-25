@@ -13,6 +13,7 @@ from typing import List
 import omni.isaac.core.utils.prims as prim_utils
 
 import omni.isaac.orbit.utils.kit as kit_utils
+import omni.isaac.core.utils.prims as prim_utils
 from omni.isaac.orbit.controllers.differential_inverse_kinematics import DifferentialInverseKinematics
 from omni.isaac.orbit.controllers.inverse_kinematics import InverseKinematics
 from omni.isaac.orbit.markers import StaticMarker
@@ -27,6 +28,8 @@ from omni.isaac.orbit_envs.isaac_env import IsaacEnv, VecEnvIndices, VecEnvObs
 from .push_cfg import PushEnvCfg, RandomizationCfg
 from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.isaac.core.prims import GeometryPrimView, RigidPrimView, GeometryPrim, RigidPrim
+from pxr import Gf, PhysxSchema, UsdPhysics, UsdShade, Sdf
+import omni
 
 
 class PushEnv(IsaacEnv):
@@ -146,6 +149,12 @@ class PushEnv(IsaacEnv):
         # controller reset
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             self._ik_controller.reset_idx(env_ids)
+
+        if self.cfg.domain_randomization.randomize_object_color:
+            self.randomize_object_color()
+
+        if self.cfg.domain_randomization.randomize_light:
+            self.randomize_light()
 
     def _step_impl(self, actions: torch.Tensor):
         self.previous_object_root_pos_w = self.object.data.root_pos_w.clone()
@@ -361,6 +370,26 @@ class PushEnv(IsaacEnv):
         root_state[:, 0:3] += self.envs_positions[env_ids]
         self.goal.set_root_state(root_state, env_ids=env_ids)
 
+    def randomize_object_color(self):
+        default_color = np.array([0, 1, 0])
+        random_color = np.random.uniform(0, 1, size=3)
+        local_rgb_interpolation = 0.5
+        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
+        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+
+    def randomize_light(self):
+        intensity = np.random.choice(np.linspace(0, 300, 5))
+        # print('Intensity: ', intensity)
+        # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensity', intensity)
+        prim_path = '/World/defaultGroundPlane'
+        prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
+        default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')
+        random_color = np.random.uniform(0, 1, size=3)
+        local_rgb_interpolation = 0.4
+        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'color', tuple(rgb))
 
 class PushObservationManager(ObservationManager):
     """Reward manager for single-arm reaching environment."""

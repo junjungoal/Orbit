@@ -23,7 +23,7 @@ INSTALL_REQUIRES = [
     "torch",
     "protobuf==3.20.2",
     # gym
-    "gym==0.21.0",
+    # "gym==0.21.0",
     "importlib-metadata~=4.13.0",
     # data collection
     "h5py",
