@@ -29,7 +29,7 @@ def load_default_env_cfg(task_name: str) -> Union[dict, Any]:
         Union[dict, Any]: The parsed configuration object.
     """
     # retrieve the configuration file to load
-    cfg_entry_point: str = gym.spec(task_name).kwargs.pop("cfg_entry_point")
+    cfg_entry_point: str = gym.spec(task_name)._kwargs.pop("cfg_entry_point")
 
     # parse the default config file
     if cfg_entry_point.endswith(".yaml"):
