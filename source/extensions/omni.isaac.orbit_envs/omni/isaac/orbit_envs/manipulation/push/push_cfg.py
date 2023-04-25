@@ -187,6 +187,13 @@ class TerminationsCfg:
     object_falling = True  # reset when object falls off the table
     is_success = False  # reset when object is lifted
 
+@configclass
+class DomainRandomizationCfg:
+    randomize_object = True
+    randomize_table = True
+    randomize_goal_marker = True
+    randomize_light = True
+    randomize_robot = True
 
 @configclass
 class ControlCfg:
@@ -255,6 +262,7 @@ class PushEnvCfg(IsaacEnvCfg):
     observations: ObservationsCfg = ObservationsCfg()
     rewards: RewardsCfg = RewardsCfg()
     terminations: TerminationsCfg = TerminationsCfg()
+    domain_randomization: DomainRandomizationCfg = DomainRandomizationCfg()
 
     # Controller settings
     control: ControlCfg = ControlCfg()

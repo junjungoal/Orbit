@@ -23,7 +23,7 @@ class TableCfg:
 
     # note: we use instanceable asset since it consumes less memory
     # usd_path = f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"
-    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table.usd")
+    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table_instanceable.usd")
 
 
 @configclass
@@ -33,7 +33,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     meta_info = RigidObjectCfg.MetaInfoCfg(
         # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
-        scale=(0.8, 0.8, 0.8),
+        scale=(1, 1, 1),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
         pos=(0.4, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
@@ -85,11 +85,11 @@ class RandomizationCfg:
         """Randomization of object initial pose."""
 
         # category
-        position_cat: str = "default"  # randomize position: "default", "uniform"
+        position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_uniform_min = [0.4, -0.25, 0.075]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.25, 0.075]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.03, 0.075]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.03, 0.075]  # position (x,y,z)
 
     @configclass
     class ObjectDesiredPoseCfg:
@@ -136,9 +136,6 @@ class ObservationsCfg:
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_desired_positions = {"scale": 1.0}
-        # -- previous action
-        arm_actions = {"scale": 1.0}
-        tool_actions = {"scale": 1.0}
 
     # global observation settings
     return_dict_obs_in_group = False
@@ -181,16 +178,18 @@ class ControlCfg:
     """Processing of MDP actions."""
 
     # action space
-    control_type = "default"  # "default", "inverse_kinematics"
+    control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
     decimation = 2
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
-        command_type="pose_rel",
+        command_type="position_rel_z",
         ik_method="dls",
-        position_command_scale=(0.1, 0.1, 0.1),
+        position_command_scale=(0.05, 0.05, 0.05),
         rotation_command_scale=(0.1, 0.1, 0.1),
+        ee_min_limit=(0.15, -0.4, 0),
+        ee_max_limit=(0.7, 0.4, 0.5)
     )
 
 
@@ -205,7 +204,7 @@ class LiftEnvCfg(IsaacEnvCfg):
 
     # General Settings
     env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=5.0)
-    viewer: ViewerCfg = ViewerCfg(debug_vis=True, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
+    viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         dt=0.01,
