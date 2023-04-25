@@ -150,14 +150,20 @@ class PushEnv(IsaacEnv):
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             self._ik_controller.reset_idx(env_ids)
 
-        if self.cfg.domain_randomization.randomize_object_color:
-            self.randomize_object_color()
+        if self.cfg.domain_randomization.randomize_object:
+            self.randomize_object()
+
+        if self.cfg.domain_randomization.randomize_goal_marker:
+            self.randomize_goal_marker()
 
         if self.cfg.domain_randomization.randomize_light:
             self.randomize_light()
 
         if self.cfg.domain_randomization.randomize_robot:
             self.randomize_robot()
+
+        if self.cfg.domain_randomization.randomize_table:
+            self.randomize_table()
 
     def _step_impl(self, actions: torch.Tensor):
         self.previous_object_root_pos_w = self.object.data.root_pos_w.clone()
@@ -373,7 +379,7 @@ class PushEnv(IsaacEnv):
         root_state[:, 0:3] += self.envs_positions[env_ids]
         self.goal.set_root_state(root_state, env_ids=env_ids)
 
-    def randomize_object_color(self):
+    def randomize_object(self):
         default_color = np.array([0, 1, 0])
         random_color = np.random.uniform(0, 1, size=3)
         local_rgb_interpolation = 0.5
@@ -381,32 +387,43 @@ class PushEnv(IsaacEnv):
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
+    def randomize_table(self):
+        rgb = np.ones(3) * np.random.uniform(0.5, 0.8)
+        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visuals/OmniPBR')
+        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+    def randomize_goal_marker(self):
+        default_color = np.array([1., 0, 0])
+        random_color = np.random.uniform(0, 1, size=3)
+        local_rgb_interpolation = 0.5
+        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/GoalMarker/visuals/OmniPBR')
+        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
     def randomize_robot(self):
         default_color = np.array([1., 1, 1])
 
         prim_paths = prim_utils.find_matching_prim_paths('/World/envs/env_0/Robot/*/visuals/Looks/PlasticWhite')[:-2]
         for prim_path in prim_paths:
-            print(prim_path)
             prim = prim_utils.get_prim_at_path(prim_path)
             if np.random.rand() > 0.5:
                 rgb = default_color
             else:
                 random_color = np.random.uniform(0, 1, size=3)
-                local_rgb_interpolation = 0.5
+                local_rgb_interpolation = 0.3
                 rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
             omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
-        print('hi')
 
     def randomize_light(self):
-        intensity = np.random.choice(np.linspace(0, 300, 5))
+        intensity = np.random.choice(np.linspace(300, 1000, 7))
         # print('Intensity: ', intensity)
         # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensi4y', intensity)
         prim_path = '/World/defaultGroundPlane'
         prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
         default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.4
+        local_rgb_interpolation = 0.2
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'color', tuple(rgb))
 

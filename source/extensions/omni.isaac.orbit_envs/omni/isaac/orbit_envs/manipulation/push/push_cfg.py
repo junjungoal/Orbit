@@ -189,7 +189,9 @@ class TerminationsCfg:
 
 @configclass
 class DomainRandomizationCfg:
-    randomize_object_color = True
+    randomize_object = True
+    randomize_table = True
+    randomize_goal_marker = True
     randomize_light = True
     randomize_robot = True
 
