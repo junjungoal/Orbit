@@ -370,7 +370,7 @@ class PushEnv(IsaacEnv):
         elif cfg.position_cat == "uniform":
             # sample uniformly from box
             # note: this should be within in the workspace of the robot
-            root_state[:, 0:3] += sample_uniform(
+            root_state[:, 0:3] = sample_uniform(
                 cfg.position_uniform_min, cfg.position_uniform_max, (len(env_ids), 3), device=self.device
             )
         else:
@@ -416,7 +416,7 @@ class PushEnv(IsaacEnv):
 
 
     def randomize_light(self):
-        intensity = np.random.choice(np.linspace(300, 1000, 7))
+        intensity = np.random.choice(np.linspace(500, 2000, 15))
         # print('Intensity: ', intensity)
         # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensi4y', intensity)
         prim_path = '/World/defaultGroundPlane'

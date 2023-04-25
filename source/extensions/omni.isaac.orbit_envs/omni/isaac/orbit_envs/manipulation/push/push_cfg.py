@@ -116,9 +116,9 @@ class RandomizationCfg:
         # category
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.4, 0.2, 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.4, -0.1, 0.]  # position (x,y,z)
-        position_uniform_max = [0.4, 0.1, 0.]  # position (x,y,z)
+        position_default = [0.55, 0.2, 0.0]  # position default (x,y,z)
+        position_uniform_min = [0.55, -0.1, 0.]  # position (x,y,z)
+        position_uniform_max = [0.55, 0.1, 0.]  # position (x,y,z)
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
@@ -146,7 +146,7 @@ class ObservationsCfg:
         tool_orientations = {"scale": 1.0}
         # -- object state
         object_positions = {"scale": 1.0}
-        # object_orientations = {"scale": 1.0}
+        object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
