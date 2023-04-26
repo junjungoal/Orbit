@@ -26,6 +26,7 @@ class TableCfg:
 
     # note: we use instanceable asset since it consumes less memory
     usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table_instanceable.usd")
+    # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/table.usd")
 
 @configclass
 class BackgroundCfg:

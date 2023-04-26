@@ -59,9 +59,8 @@ def create_ground_plane(
             carb.log_error("Unable to access the Isaac Sim assets folder on Nucleus server.")
             return
         # prepend path to the grid plane
-        # usd_path = f"{assets_root_path}/Isaac/Environments/Grid/default_environment.usd"
-        # usd_path = f"{assets_root_path}/Isaac/Environments/Grid/default_environment.usd"
-        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/default_environment.usd")
+        usd_path = f"{assets_root_path}/Isaac/Environments/Grid/default_environment.usd"
+        # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/default_environment.usd")
     # Spawn Ground-plane
     prim_utils.create_prim(prim_path, usd_path=usd_path, translation=(0.0, 0.0, z_position))
     # Create physics material
@@ -131,7 +130,8 @@ def create_ground_plane(
         prim_utils.create_prim(
             f"{prim_path}/AmbientLight",
             "DistantLight",
-            attributes={"intensity": 600.0},
+            attributes={"intensity": 600.0,
+                        "angle": 5.},
         )
 
 
