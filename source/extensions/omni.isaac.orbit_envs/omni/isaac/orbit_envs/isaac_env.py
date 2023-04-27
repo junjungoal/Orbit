@@ -360,6 +360,10 @@ class IsaacEnv(gym.Env):
         self.camera.update_buffers(dt=0.0)
         return self.camera.data.output['rgb']
 
+    def render_visual_observations(self):
+        self.camera.update_buffers(dt=0.0)
+        return self.camera.data.output['rgb']
+
     def close(self):
         """Cleanup for the environment."""
         if not self._is_closed:
