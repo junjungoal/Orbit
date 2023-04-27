@@ -473,6 +473,11 @@ class LiftObservationManager(ObservationManager):
         quat_ee[quat_ee[:, 0] < 0] *= -1
         return quat_ee
 
+    def object_to_goal_positions(self, env: PushEnv):
+        object_positions = env.object.data.root_pos_w
+        goal_positions = env.goal.data.root_pos_w
+        return (goal_positions - object_positions)
+
     def object_desired_positions(self, env: LiftEnv):
         """Desired object position."""
         return env.object_des_pose_w[:, 0:3] - env.envs_positions
