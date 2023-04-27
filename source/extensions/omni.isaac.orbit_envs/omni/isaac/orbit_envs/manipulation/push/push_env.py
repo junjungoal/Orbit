@@ -35,7 +35,8 @@ import omni
 class PushEnv(IsaacEnv):
     """Environment for lifting an object off a table with a single-arm manipulator."""
 
-    def __init__(self, cfg: PushEnvCfg = None, headless: bool = False, enable_camera=False, enable_render=False):
+    def __init__(self, cfg: PushEnvCfg = None, headless: bool = False, enable_camera=False,
+                 viewport=False):
         # copy configuration
         self.cfg = cfg
         # parse the configuration for controller configuration
@@ -47,7 +48,8 @@ class PushEnv(IsaacEnv):
         self.goal = RigidObject(cfg=self.cfg.goal)
 
         # initialize the base class to setup the scene.
-        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera, enable_render=enable_render)
+        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera,
+                         viewport=viewport)
         # parse the configuration for information
         self._process_cfg()
         # initialize views for the cloned scenes

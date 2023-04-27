@@ -73,7 +73,7 @@ class IsaacEnv(gym.Env):
     metadata: ClassVar[Dict[str, Any]] = {"render.modes": ["human", "rgb_array"]}
     """Metadata for the environment."""
 
-    def __init__(self, cfg: IsaacEnvCfg, headless: bool = False, viewport: bool = False, enable_render=False, enable_camera=False, **kwargs):
+    def __init__(self, cfg: IsaacEnvCfg, headless: bool = False, viewport: bool = False, enable_camera=False, **kwargs):
         """Initialize the environment.
 
         We currently support only PyTorch backend for the environment. In the future, we plan to extend this to use
@@ -95,7 +95,7 @@ class IsaacEnv(gym.Env):
         """
         # store inputs to class
         self.cfg = cfg
-        self.enable_render = not headless or enable_render
+        self.enable_render = not headless
         self.enable_viewport = viewport or self.enable_render
         self.enable_camera = enable_camera
         # extract commonly used parameters
@@ -174,8 +174,7 @@ class IsaacEnv(gym.Env):
             physics_scene_path, "/World/collisions", prim_paths=self.envs_prim_paths, global_paths=global_prim_paths
         )
 
-        # if self.cfg.env.enable_camera and self.enable_render:
-        if self.enable_camera and self.enable_render:
+        if self.enable_camera and self.enable_viewport:
             camera_cfg = PinholeCameraCfg(
                 sensor_tick=0,
                 height=self.cfg.camera.height,
@@ -357,10 +356,12 @@ class IsaacEnv(gym.Env):
             )
 
     def render_visual_observations(self):
-        self.camera.update_buffers(dt=0.0)
-        return self.camera.data.output['rgb']
-
-    def render_visual_observations(self):
+        if not self.enable_render:
+            # manually flush the flatcache data to update Hydra textures
+            if self.sim.get_physics_context().use_flatcache:
+                self._flatcache_iface.update(0.0, 0.0)
+            # render the scene
+            self.sim.render()
         self.camera.update_buffers(dt=0.0)
         return self.camera.data.output['rgb']
 
