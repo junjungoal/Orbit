@@ -172,13 +172,17 @@ class IsaacEnv(gym.Env):
                     focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 1.0e5)
                 ),
             )
-            self.camera = Camera(cfg=camera_cfg, device=self.cfg.camera.device)
-            self.camera.spawn("/World/CameraSensor")
-            self.camera.initialize()
+            self.camera = Camera(cfg=camera_cfg)
+            for i in range(self.num_envs):
+                self.camera.spawn("/World/CameraSensor/Cam_{}".format(i))
+            self.camera.initialize("/World/CameraSensor/Cam_*")
 
             if self.cfg.camera.set_type == 'ros':
-                self.camera.set_world_pose_ros(self.cfg.camera.position, self.cfg.camera.orientation)
+                position = torch.tensor(self.cfg.camera.position, device=self.device) + self.envs_positions
+                orientation = torch.tensor(self.cfg.camera.orientation, device=self.device).unsqueeze(0).repeat(self.num_envs, 1)
+                self.camera.set_world_poses_ros(position.cpu().numpy(), orientation.cpu().numpy())
             else:
+                raise NotImplementedError
                 self.camera.set_world_pose_from_view(eye=self.cfg.camera.eye, target=self.cfg.camera.lookat)
 
     """
@@ -303,8 +307,8 @@ class IsaacEnv(gym.Env):
         self.sim.render()
 
     def render_visual_observations(self):
-        self.camera.update(dt=0.0)
-        return self.camera.data.output
+        self.camera.update_buffers(dt=0.0)
+        return self.camera.data.output['rgb']
 
     def close(self):
         """Cleanup for the environment."""

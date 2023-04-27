@@ -170,13 +170,16 @@ class RewardsCfg:
 
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
+    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
+    reaching_object_position_tanh = {"weight": 1, "sigma": 0.15}
+    tracking_object_position_tanh = {"weight": 1.5, "sigma": 0.2, "threshold": 0.1}
     # tracking_object_position_diff = {'weight': 10.}
     # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.1}
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
-    reaching_object_position_negative = {"weight": 1.,}
-    push_object_success = {"weight": 3.5, "threshold": 0.03}
+    # reaching_object_position_negative = {"weight": 1.,}
+    # push_object_success = {"weight": 3.5, "threshold": 0.03}
+    push_object_success = {"weight": 2.5, "threshold": 0.03}
 
 
 @configclass
@@ -228,7 +231,7 @@ class PushEnvCfg(IsaacEnvCfg):
     """Configuration for the Push environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4.0)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=4.0)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
