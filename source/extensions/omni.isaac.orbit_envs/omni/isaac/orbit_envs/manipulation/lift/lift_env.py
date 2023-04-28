@@ -31,7 +31,7 @@ import omni
 class LiftEnv(IsaacEnv):
     """Environment for lifting an object off a table with a single-arm manipulator."""
 
-    def __init__(self, cfg: LiftEnvCfg = None, headless: bool = False, enable_camera=False, enable_render=False):
+    def __init__(self, cfg: LiftEnvCfg = None, headless: bool = False, enable_camera=False, viewport=False):
         # copy configuration
         self.cfg = cfg
         # parse the configuration for controller configuration
@@ -42,7 +42,7 @@ class LiftEnv(IsaacEnv):
         self.object = RigidObject(cfg=self.cfg.object)
 
         # initialize the base class to setup the scene.
-        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera, enable_render=enable_render)
+        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera, viewport=viewport)
         # parse the configuration for information
         self._process_cfg()
         # initialize views for the cloned scenes
@@ -202,7 +202,7 @@ class LiftEnv(IsaacEnv):
         self.extras["time_outs"] = self.episode_length_buf >= self.max_episode_length
         # -- add information to extra if task completed
         object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
-        self.extras["is_success"] = torch.where(object_position_error < 0.02, 1, self.reset_buf)
+        self.extras["is_success"] = object_position_error < 0.02
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -473,9 +473,9 @@ class LiftObservationManager(ObservationManager):
         quat_ee[quat_ee[:, 0] < 0] *= -1
         return quat_ee
 
-    def object_to_goal_positions(self, env: PushEnv):
+    def object_to_goal_positions(self, env: LiftEnv):
         object_positions = env.object.data.root_pos_w
-        goal_positions = env.goal.data.root_pos_w
+        goal_positions = env.object_des_pose_w[:, 0:3]
         return (goal_positions - object_positions)
 
     def object_desired_positions(self, env: LiftEnv):
