@@ -561,7 +561,7 @@ class LiftRewardManager(RewardManager):
         """Penalize tracking object position error using tanh-kernel."""
         # distance of the end-effector to the object: (num_envs,)
         # distance = torch.norm(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
-        distance = torch.clamp(self.object_des_pose_w[:, 2] - self.object.data.root_pos_w[:, 2], min=0)
+        distance = torch.clamp(env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2], min=0)
         # rewarded if the object is lifted above the threshold
         return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
 
