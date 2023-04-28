@@ -201,8 +201,9 @@ class LiftEnv(IsaacEnv):
         # Note: this is used by algorithms like PPO where time-outs are handled differently
         self.extras["time_outs"] = self.episode_length_buf >= self.max_episode_length
         # -- add information to extra if task completed
-        object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
-        self.extras["is_success"] = object_position_error < 0.02
+        # object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
+        # self.extras["is_success"] = object_position_error < 0.02
+        self.extras["is_success"] = self.object.data.root_pos_w[:, 2] > self.object_des_pose_w[:, 2]
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -559,7 +560,8 @@ class LiftRewardManager(RewardManager):
     def tracking_object_position_tanh(self, env: LiftEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using tanh-kernel."""
         # distance of the end-effector to the object: (num_envs,)
-        distance = torch.norm(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        # distance = torch.norm(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        distance = torch.clamp(self.object_des_pose_w[:, 2] - self.object.data.root_pos_w[:, 2], min=0)
         # rewarded if the object is lifted above the threshold
         return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
 

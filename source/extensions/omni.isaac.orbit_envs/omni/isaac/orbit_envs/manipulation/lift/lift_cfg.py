@@ -54,7 +54,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=0.5, dynamic_friction=0.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -106,9 +106,9 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.5]  # position default (x,y,z)
-        position_uniform_min = [0.55, -0.05, 0.25]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.05, 0.5]  # position (x,y,z)
+        position_default = [0.5, 0.0, 0.2]  # position default (x,y,z)
+        position_uniform_min = [0.55, -0.05, 0.2]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.05, 0.2]  # position (x,y,z)
         # randomize orientation
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
 
@@ -159,7 +159,7 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_l2 = {"weight": 0.0}
     # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
+    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
     # reaching_object_position_negative = {"weight": 1,}
     # penalizing_arm_dof_velocity_l2 = {"weight": 1e-5}
     # penalizing_tool_dof_velocity_l2 = {"weight": 1e-5}
@@ -168,8 +168,7 @@ class RewardsCfg:
     # penalizing_arm_action_rate_l2 = {"weight": 1e-2}
     # penalizing_tool_action_l2 = {"weight": 1e-2}
     # -- object-centric
-    # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.09}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.08}
     lifting_object_success = {"weight": 3.5, "threshold": 0.08}
 
 
@@ -196,9 +195,9 @@ class ControlCfg:
         command_type="position_rel",
         ik_method="dls",
         position_command_scale=(0.05, 0.05, 0.05),
-        rotation_command_scale=(0.1, 0.1, 0.1),
+        rotation_command_scale=(0.2, 0.2, 0.2),
         ee_min_limit=(0.15, -0.4, 0),
-        ee_max_limit=(0.7, 0.4, 0.5)
+        ee_max_limit=(0.7, 0.4, 0.6)
     )
 
 @configclass
