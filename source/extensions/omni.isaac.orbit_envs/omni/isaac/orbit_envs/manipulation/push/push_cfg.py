@@ -55,8 +55,8 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial",
-        mass=0.2
+        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial",
+        # mass=0.2
     )
 
 @configclass
@@ -118,8 +118,8 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.55, 0.2, 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.6, -0.05, 0.]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.05, 0.]  # position (x,y,z)
+        position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
