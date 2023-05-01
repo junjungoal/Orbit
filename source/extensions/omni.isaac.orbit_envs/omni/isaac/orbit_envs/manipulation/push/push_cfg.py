@@ -178,7 +178,7 @@ class RewardsCfg:
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
     # push_object_success = {"weight": 3.5, "threshold": 0.04}
     # reaching_object_position_negative = {"weight": 1.,}
-    push_object_success = {"weight": 7.5, "threshold": 0.03}
+    push_object_success = {"weight": 7.5, "threshold": 0.04}
     # push_object_success = {"weight": 3, "threshold": 0.03}
 
 
@@ -215,7 +215,7 @@ class ControlCfg:
         command_type="position_rel",
         ik_method="dls",
         position_command_scale=(0.05, 0.05, 0.05),
-        rotation_command_scale=(0.2, 0.2, 0.2),
+        rotation_command_scale=(0.1, 0.1, 0.1),
         ee_min_limit=(0.15, -0.4, 0),
         ee_max_limit=(0.7, 0.4, 0.5)
     )
