@@ -565,6 +565,18 @@ class LiftRewardManager(RewardManager):
         # rewarded if the object is lifted above the threshold
         return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
 
+    def grasp_object_success(self, env: LiftEnv):
+        # dist = torch.norm(env.object.data.root_pos_w[:, :3].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, :3], dim=-1)
+        # dist = torch.norm(env.object.data.root_pos_w[:, 2].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, 2], dim=-1)
+        # dist = dist.mean(-1)
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.045, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.02
+        # print('grasped?: ', mask, '  close?: ', dist < 0.01, '  dist: ', dist)
+        # print(torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0))
+        return torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
+
     def lifting_object_success(self, env: LiftEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
         return torch.where(env.object.data.root_pos_w[:, 2] > threshold, 1.0, 0.0)
