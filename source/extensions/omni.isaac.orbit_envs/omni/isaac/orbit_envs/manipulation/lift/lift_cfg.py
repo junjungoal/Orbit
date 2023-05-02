@@ -137,13 +137,13 @@ class ObservationsCfg:
         tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
-        # object_positions = {"scale": 1.0}
+        object_positions = {"scale": 1.0}
         # object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         # object_to_goal_positions = {"scale": 1.0}
-        object_desired_positions = {"scale": 1.0}
+        # object_desired_positions = {"scale": 1.0}
 
     # global observation settings
     return_dict_obs_in_group = False
@@ -159,7 +159,7 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_l2 = {"weight": 0.0}
     # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
+    reaching_object_position_tanh = {"weight": 2., "sigma": 0.1}
     # reaching_object_position_negative = {"weight": 1,}
     # penalizing_arm_dof_velocity_l2 = {"weight": 1e-5}
     # penalizing_tool_dof_velocity_l2 = {"weight": 1e-5}
@@ -168,8 +168,9 @@ class RewardsCfg:
     # penalizing_arm_action_rate_l2 = {"weight": 1e-2}
     # penalizing_tool_action_l2 = {"weight": 1e-2}
     # -- object-centric
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.08}
-    lifting_object_success = {"weight": 3.5, "threshold": 0.08}
+    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.08}
+    tracking_object_position_tanh = {"weight": 3.5, "sigma": 0.2, "threshold": 0.04}
+    lifting_object_success = {"weight": 5., "threshold": 0.08}
     grasp_object_success = {'weight': 2.5}
 
 
