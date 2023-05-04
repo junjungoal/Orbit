@@ -535,7 +535,8 @@ class LiftRewardManager(RewardManager):
         num_tool_sites = tool_sites_distance.shape[1]
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        return 1 - torch.tanh(average_distance / sigma)
+        # return 1 - torch.tanh(average_distance / sigma)
+        return 1 - torch.tanh(ee_distance / sigma)
 
     def penalizing_arm_dof_velocity_l2(self, env: LiftEnv):
         """Penalize large movements of the robot arm."""

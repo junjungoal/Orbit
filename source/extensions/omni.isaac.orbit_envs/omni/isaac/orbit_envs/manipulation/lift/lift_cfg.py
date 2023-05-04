@@ -54,7 +54,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -160,6 +160,7 @@ class RewardsCfg:
     # reaching_object_position_l2 = {"weight": 0.0}
     # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.25}
     reaching_object_position_tanh = {"weight": 2., "sigma": 0.1}
+    # reaching_object_position_tanh = {"weight": 2., "sigma": 0.15}
     # reaching_object_position_negative = {"weight": 1,}
     # penalizing_arm_dof_velocity_l2 = {"weight": 1e-5}
     # penalizing_tool_dof_velocity_l2 = {"weight": 1e-5}
@@ -220,7 +221,7 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=5.0)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3.0)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(

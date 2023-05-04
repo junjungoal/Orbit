@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # enable motion generation extension
-from omni.isaac.core.utils.extensions import enable_extension
+# from omni.isaac.core.utils.extensions import enable_extension
 
 # TODO: Maybe keep this extension enabled by default? -- Fix the app experience.
-enable_extension("omni.isaac.motion_generation")
+# enable_extension("omni.isaac.motion_generation")
 
 
 # get module libraries
