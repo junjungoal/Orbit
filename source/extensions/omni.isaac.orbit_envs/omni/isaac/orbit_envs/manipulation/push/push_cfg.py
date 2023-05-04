@@ -115,7 +115,7 @@ class RandomizationCfg:
         """Randomization of object desired pose."""
 
         # category
-        position_cat: str = "default"  # randomize position: "default", "uniform"
+        position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.6, 0., 0.0]  # position default (x,y,z)
         position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
@@ -171,7 +171,7 @@ class RewardsCfg:
     # -- robot-centric
     reaching_object_position_tanh = {"weight": 2., "sigma": 0.15}
     # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.05, "threshold": 0.07}
+    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.05, "threshold": 0.08}
     # reaching_object_position_tanh = {"weight": 1, "sigma": 0.15}
     # tracking_object_position_tanh = {"weight": 2, "sigma": 0.2, "threshold": 0.1}
     # tracking_object_position_diff = {'weight': 10.}
