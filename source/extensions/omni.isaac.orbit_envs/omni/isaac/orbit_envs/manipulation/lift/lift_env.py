@@ -173,7 +173,9 @@ class LiftEnv(IsaacEnv):
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
             # we assume last command is tool action so don't change that
-            self.robot_actions[:, -1] = self.actions[:, -1]
+            gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
+            self.robot_actions[:, -1] = gripper_action
+            # self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
@@ -475,13 +477,14 @@ class LiftObservationManager(ObservationManager):
         return quat_ee
 
     def object_to_goal_positions(self, env: LiftEnv):
-        object_positions = env.object.data.root_pos_w
-        goal_positions = env.object_des_pose_w[:, 0:3]
+        object_positions = env.object.data.root_pos_w[:, 2:3]
+        goal_positions = env.object_des_pose_w[:, 2:3]
         return (goal_positions - object_positions)
 
     def object_desired_positions(self, env: LiftEnv):
         """Desired object position."""
-        return env.object_des_pose_w[:, 0:3] - env.envs_positions
+        # return env.object_des_pose_w[:, 0:3] - env.envs_positions
+        return env.object_des_pose_w[:, 2:3] - env.envs_positions[:, 2:3]
 
     def object_desired_orientations(self, env: LiftEnv):
         """Desired object orientation."""
@@ -559,11 +562,23 @@ class LiftRewardManager(RewardManager):
 
     def tracking_object_position_tanh(self, env: LiftEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using tanh-kernel."""
+
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.045, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.02
+        # print('grasped?: ', mask, '  close?: ', dist < 0.01, '  dist: ', dist)
+        # print(torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0))
+        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
+
         # distance of the end-effector to the object: (num_envs,)
         # distance = torch.norm(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         distance = torch.clamp(env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2], min=0)
         # rewarded if the object is lifted above the threshold
-        return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
+        ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
+        # return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
+        # return (ee_to_obj < threshold) * (1 - torch.tanh(distance / sigma))
+        return grasped * (1 - torch.tanh(distance / sigma))
 
     def grasp_object_success(self, env: LiftEnv):
         # dist = torch.norm(env.object.data.root_pos_w[:, :3].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, :3], dim=-1)
