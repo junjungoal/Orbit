@@ -390,7 +390,7 @@ class PushEnv(IsaacEnv):
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
     def randomize_table(self):
-        rgb = np.ones(3) * np.random.uniform(0.5, 0.8)
+        rgb = np.ones(3) * np.random.uniform(0.3, 0.9)
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
@@ -412,7 +412,7 @@ class PushEnv(IsaacEnv):
                 rgb = default_color
             else:
                 random_color = np.random.uniform(0, 1, size=3)
-                local_rgb_interpolation = 0.3
+                local_rgb_interpolation = 0.5
                 rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
             omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
@@ -425,7 +425,7 @@ class PushEnv(IsaacEnv):
         prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
         default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.2
+        local_rgb_interpolation = 0.4
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'color', tuple(rgb))
 
