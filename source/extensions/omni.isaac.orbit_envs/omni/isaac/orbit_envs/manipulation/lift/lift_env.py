@@ -173,9 +173,9 @@ class LiftEnv(IsaacEnv):
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
             # we assume last command is tool action so don't change that
-            gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
-            self.robot_actions[:, -1] = gripper_action
-            # self.robot_actions[:, -1] = self.actions[:, -1]
+            # gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
+            # self.robot_actions[:, -1] = gripper_action
+            self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
