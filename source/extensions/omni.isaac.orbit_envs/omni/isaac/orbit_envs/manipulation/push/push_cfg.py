@@ -107,8 +107,8 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
-        position_uniform_min = [0.45, -0.05, 0.045]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.05, 0.045]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.15, 0.045]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.15, 0.045]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
@@ -118,8 +118,8 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.6, 0., 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
+        position_uniform_min = [0.6, -0.1, 0.]  # position (x,y,z)
+        position_uniform_max = [0.65, 0.1, 0.]  # position (x,y,z)
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
