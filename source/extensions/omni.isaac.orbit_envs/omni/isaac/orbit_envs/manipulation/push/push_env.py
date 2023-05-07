@@ -544,7 +544,8 @@ class PushRewardManager(RewardManager):
         num_tool_sites = tool_sites_distance.shape[1]
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        return 1 - torch.tanh(ee_distance / sigma)
+        return 1 - torch.tanh(ee_distance * sigma)
+        # return 1 - torch.tanh(ee_distance / sigma)
         # return 1 - torch.tanh(average_distance / sigma)
 
     def penalizing_arm_dof_velocity_l2(self, env: PushEnv):
@@ -583,7 +584,8 @@ class PushRewardManager(RewardManager):
         obj_to_goal = torch.norm(env.goal.data.root_pos_w[:, :2] - env.object.data.root_pos_w[:, :2], dim=1)
         ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
         # rewarded if the object is lifted above the threshold
-        return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
+        # return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
+        return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal * sigma))
 
     def tracking_object_position_diff(self, env: PushEnv):
         prev_obj_to_goal = torch.norm(env.previous_object_root_pos_w[:, :2] - env.goal.data.root_pos_w[:, :2])
