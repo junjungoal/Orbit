@@ -377,13 +377,13 @@ class LiftEnv(IsaacEnv):
     def randomize_object(self):
         default_color = np.array([0.949, 0.8, 0.21])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.3
+        local_rgb_interpolation = 0.5
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
     def randomize_table(self):
-        rgb = np.ones(3) * np.random.uniform(0.5, 0.8)
+        rgb = np.ones(3) * np.random.uniform(0.3, 0.9)
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
@@ -397,7 +397,7 @@ class LiftEnv(IsaacEnv):
                 rgb = default_color
             else:
                 random_color = np.random.uniform(0, 1, size=3)
-                local_rgb_interpolation = 0.3
+                local_rgb_interpolation = 0.5
                 rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
             omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
@@ -536,7 +536,8 @@ class LiftRewardManager(RewardManager):
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
         # return 1 - torch.tanh(average_distance / sigma)
-        return 1 - torch.tanh(ee_distance / sigma)
+        # return 1 - torch.tanh(ee_distance / sigma)
+        return 1 - torch.tanh(ee_distance * sigma)
 
     def penalizing_arm_dof_velocity_l2(self, env: LiftEnv):
         """Penalize large movements of the robot arm."""
@@ -561,7 +562,7 @@ class LiftRewardManager(RewardManager):
         # rewarded if the object is lifted above the threshold
         return (env.object.data.root_pos_w[:, 2] > threshold) * torch.exp(-error / sigma)
 
-    def tracking_object_position_tanh(self, env: LiftEnv, sigma: float, threshold: float):
+    def tracking_object_position_tanh(self, env: LiftEnv, sigma: float):
         """Penalize tracking object position error using tanh-kernel."""
 
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
@@ -578,8 +579,9 @@ class LiftRewardManager(RewardManager):
         # rewarded if the object is lifted above the threshold
         ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
         # return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
-        # return (ee_to_obj < threshold) * (1 - torch.tanh(distance / sigma))
-        return grasped * (1 - torch.tanh(distance / sigma))
+        # return (ee_to_obj < threshold) * (1 - torch.anh(distance / sigma))
+        # return grasped * (1 - torch.tanh(distance / sigma))
+        return grasped * (1 - torch.tanh((distance / 0.1) * sigma))
 
     def grasp_object_success(self, env: LiftEnv):
         # dist = torch.norm(env.object.data.root_pos_w[:, :3].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, :3], dim=-1)
@@ -587,8 +589,8 @@ class LiftRewardManager(RewardManager):
         # dist = dist.mean(-1)
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
-        mask = torch.logical_and(tool_pos.sum(-1) < 0.045, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.02
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.046, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.03
         # print('grasped?: ', mask, '  close?: ', dist < 0.01, '  dist: ', dist)
         # print(torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0))
         return torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)

@@ -54,7 +54,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=0.9, dynamic_friction=0.9, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -106,9 +106,9 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.2]  # position default (x,y,z)
-        position_uniform_min = [0.55, -0.05, 0.2]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.05, 0.2]  # position (x,y,z)
+        position_default = [0.5, 0.0, 0.1]  # position default (x,y,z)
+        position_uniform_min = [0.55, -0.05, 0.1]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.05, 0.1]  # position (x,y,z)
         # randomize orientation
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
 
@@ -157,22 +157,12 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    # reaching_object_position_l2 = {"weight": 0.0}
-    # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
-    # reaching_object_position_tanh = {"weight": 2., "sigma": 0.15}
-    # reaching_object_position_negative = {"weight": 1,}
-    # penalizing_arm_dof_velocity_l2 = {"weight": 1e-5}
-    # penalizing_tool_dof_velocity_l2 = {"weight": 1e-5}
-    # penalizing_robot_dof_acceleration_l2 = {"weight": 1e-7}
-    # -- action-centric
-    # penalizing_arm_action_rate_l2 = {"weight": 1e-2}
-    # penalizing_tool_action_l2 = {"weight": 1e-2}
-    # -- object-centric
-    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    lifting_object_success = {"weight": 2.25, "threshold": 0.08}
+    # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 10}
+    # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
+    tracking_object_position_tanh = {"weight": 1., "sigma": 5}
     grasp_object_success = {'weight': 0.25}
+    lifting_object_success = {"weight": 2.25, "threshold": 0.1}
 
 
 @configclass
@@ -221,7 +211,7 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3.0)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2.0)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(

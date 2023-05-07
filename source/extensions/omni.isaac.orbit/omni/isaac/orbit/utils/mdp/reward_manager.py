@@ -257,7 +257,9 @@ class RewardManager:
                 if term_cfg["weight"] == 0:
                     self._cfg.pop(term_name)
                 else:
-                    term_cfg["weight"] *= self._dt
+                    pass
+                    # term_cfg["weight"] *= self._dt
+                    # term_cfg["weight"] *= self._dt
             else:
                 raise KeyError(f"The key 'weight' not found for reward term: '{term_name}'.")
 
