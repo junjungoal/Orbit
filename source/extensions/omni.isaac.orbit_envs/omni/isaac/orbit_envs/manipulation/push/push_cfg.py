@@ -173,11 +173,11 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    # reaching_object_position_tanh = {"weight": 2., "sigma": 0.2}
-    # tracking_object_position_tanh = {"weight": 5, "sigma": 0.05, "threshold": 0.08}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 0.2}
+    tracking_object_position_tanh = {"weight": 2.5, "sigma": 0.05, "threshold": 0.08}
     # push_object_success = {"weight": 7, "threshold": 0.04}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 5}
-    tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
+    # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
+    # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
     push_object_success = {"weight": 3.5, "threshold": 0.04}
 
 
