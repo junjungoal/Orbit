@@ -138,11 +138,11 @@ class ObservationsCfg:
         # tool_orientations = {"scale": 1.0}
         # -- object state
         object_positions = {"scale": 1.0}
-        # object_orientations = {"scale": 1.0}
+        object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        # object_to_goal_positions = {"scale": 1.0}
+        object_to_goal_positions = {"scale": 1.0}
         # object_desired_positions = {"scale": 1.0}
 
     # global observation settings
@@ -160,7 +160,7 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 1., "sigma": 10}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 1., "sigma": 5}
+    tracking_object_position_tanh = {"weight": 1., "sigma": 15}
     grasp_object_success = {'weight': 0.25}
     lifting_object_success = {"weight": 2.25, "threshold": 0.1}
 
@@ -211,7 +211,7 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2.0)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3.)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
