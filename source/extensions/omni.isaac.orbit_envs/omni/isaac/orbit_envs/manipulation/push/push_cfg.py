@@ -107,8 +107,10 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
-        position_uniform_min = [0.45, -0.05, 0.045]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.05, 0.045]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.1, 0.045]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.1, 0.045]  # position (x,y,z)
+        # position_uniform_min = [0.45, -0.05, 0.045]  # position (x,y,z)
+        # position_uniform_max = [0.5, 0.05, 0.045]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
@@ -118,8 +120,10 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.6, 0., 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
+        position_uniform_min = [0.55, -0.1, 0.]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.1, 0.]  # position (x,y,z)
+        # position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
+        # position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
@@ -169,9 +173,12 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2., "sigma": 0.2}
-    tracking_object_position_tanh = {"weight": 5, "sigma": 0.05, "threshold": 0.08}
-    push_object_success = {"weight": 7, "threshold": 0.04}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 0.2}
+    tracking_object_position_tanh = {"weight": 2.5, "sigma": 0.05, "threshold": 0.08}
+    # push_object_success = {"weight": 7, "threshold": 0.04}
+    # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
+    # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
+    push_object_success = {"weight": 3.5, "threshold": 0.04}
 
 
 @configclass
