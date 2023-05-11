@@ -54,7 +54,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=0.9, dynamic_friction=0.9, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -106,9 +106,9 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.1]  # position default (x,y,z)
-        position_uniform_min = [0.55, -0.05, 0.1]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.05, 0.1]  # position (x,y,z)
+        position_default = [0.5, 0.0, 0.05]  # position default (x,y,z)
+        position_uniform_min = [0.55, -0.05, 0.05]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.05, 0.05]  # position (x,y,z)
         # randomize orientation
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
 
@@ -160,7 +160,7 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 1., "sigma": 10}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 1., "sigma": 15}
+    tracking_object_position_tanh = {"weight": 1., "sigma": 5}
     grasp_object_success = {'weight': 0.25}
     lifting_object_success = {"weight": 2.25, "threshold": 0.1}
 
@@ -181,13 +181,13 @@ class ControlCfg:
     # action space
     control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 2
+    decimation = 4
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="position_rel",
         ik_method="dls",
-        position_command_scale=(0.05, 0.05, 0.05),
+        position_command_scale=(0.1, 0.1, 0.1),
         rotation_command_scale=(0.1, 0.1, 0.1),
         ee_min_limit=(0.15, -0.4, 0),
         ee_max_limit=(0.7, 0.4, 0.6)
@@ -195,11 +195,11 @@ class ControlCfg:
 
 @configclass
 class DomainRandomizationCfg:
-    randomize_object = True
-    randomize_table = True
-    randomize_goal_marker = True
-    randomize_light = True
-    randomize_robot = True
+    randomize_object = False
+    randomize_table = False
+    randomize_goal_marker = False
+    randomize_light = False
+    randomize_robot = False
 
 ##
 # Environment configuration

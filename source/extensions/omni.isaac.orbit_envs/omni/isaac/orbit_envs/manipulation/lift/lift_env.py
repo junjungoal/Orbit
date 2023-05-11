@@ -82,8 +82,8 @@ class LiftEnv(IsaacEnv):
         # table
         prim_utils.create_prim(self.template_env_ns + "/Table", usd_path=self.cfg.table.usd_path,
                                translation=(0.2, 0, 0))
-        prim_utils.create_prim(self.template_env_ns + "/Background", usd_path=self.cfg.background.usd_path,
-                               translation=(-0.4, 0, 0))
+        # prim_utils.create_prim(self.template_env_ns + "/Background", usd_path=self.cfg.background.usd_path,
+        #                        translation=(-0.4, 0, 0))
         # robot
         self.robot.spawn(self.template_env_ns + "/Robot")
         # object
@@ -158,6 +158,8 @@ class LiftEnv(IsaacEnv):
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
+        current = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
+        desired = current + self.actions[:, :-1] * 0.1
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
@@ -173,9 +175,9 @@ class LiftEnv(IsaacEnv):
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
             # we assume last command is tool action so don't change that
-            # gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
+            gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
             # self.robot_actions[:, -1] = gripper_action
-            self.robot_actions[:, -1] = self.actions[:, -1]
+            # self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
@@ -192,6 +194,7 @@ class LiftEnv(IsaacEnv):
         self.robot.update_buffers(self.dt)
         self.object.update_buffers(self.dt)
         # -- compute MDP signals
+        target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
         # reward
         self.reward_buf = self._reward_manager.compute()
         # terminations
@@ -535,9 +538,9 @@ class LiftRewardManager(RewardManager):
         num_tool_sites = tool_sites_distance.shape[1]
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        # return 1 - torch.tanh(average_distance / sigma)
+        return 1 - torch.tanh(average_distance * sigma)
         # return 1 - torch.tanh(ee_distance / sigma)
-        return 1 - torch.tanh(ee_distance * sigma)
+        # return 1 - torch.tanh(ee_distance * sigma)
 
     def penalizing_arm_dof_velocity_l2(self, env: LiftEnv):
         """Penalize large movements of the robot arm."""
@@ -582,7 +585,8 @@ class LiftRewardManager(RewardManager):
         # return (ee_to_obj < threshold) * (1 - torch.anh(distance / sigma))
         # return grasped * (1 - torch.tanh(distance / sigma))
         # return grasped * (1 - torch.tanh((distance / 0.1) * sigma))
-        return grasped * (1 - torch.tanh(distance * sigma))
+        under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
+        return under * grasped * (1 - torch.tanh(distance * sigma)) + (1-under) * grasped
 
     def grasp_object_success(self, env: LiftEnv):
         # dist = torch.norm(env.object.data.root_pos_w[:, :3].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, :3], dim=-1)
@@ -598,4 +602,4 @@ class LiftRewardManager(RewardManager):
 
     def lifting_object_success(self, env: LiftEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
-        return torch.where(env.object.data.root_pos_w[:, 2] > threshold, 1.0, 0.0)
+        return torch.where(env.object.data.root_pos_w[:, 2] > env.object_des_pose_w[:, 2], 1.0 ,0.0)
