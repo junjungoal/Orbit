@@ -169,15 +169,15 @@ class LiftEnv(IsaacEnv):
                 self.robot.data.ee_jacobian,
                 self.robot.data.arm_dof_pos,
             )
-            prev_joint = self.robot_actions[:, :self.robot.arm_num_dof].clone()
+            # prev_joint = self.robot_actions[:, :self.robot.arm_num_dof].clone()
             # offset actuator command with position offsets
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
             # we assume last command is tool action so don't change that
             gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
 
-            desired = self._ik_controller.desired_ee_pos
-            # self.robot_actions[:, -1] = gripper_action
+            # desired = self._ik_controller.desired_ee_pos
+            self.robot_actions[:, -1] = gripper_action
             # self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
@@ -194,11 +194,11 @@ class LiftEnv(IsaacEnv):
         # -- compute common buffers
         self.robot.update_buffers(self.dt)
         self.object.update_buffers(self.dt)
-        current_joint = self.robot.data.arm_dof_pos
-        target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
-        print(current_joint - prev_joint)
-        print(target-desired)
-        print('----')
+        # current_joint = self.robot.data.arm_dof_pos
+        # target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
+        # print(current_joint - prev_joint)
+        # print(target-desired)
+        # print('----')
         # -- compute MDP signals
         # reward
         self.reward_buf = self._reward_manager.compute()
