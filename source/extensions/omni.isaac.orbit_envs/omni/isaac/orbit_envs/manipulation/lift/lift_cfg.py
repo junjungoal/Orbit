@@ -41,9 +41,10 @@ class ManipulationObjectCfg(RigidObjectCfg):
         # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
         scale=(1, 1, 1),
+        # scale=(0.8, 0.8, 0.8),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.4, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.4, 0.0, 0.04), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -95,8 +96,8 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_uniform_min = [0.45, -0.03, 0.075]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.03, 0.075]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.03, 0.04]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.03, 0.04]  # position (x,y,z)
 
     @configclass
     class ObjectDesiredPoseCfg:
@@ -106,9 +107,9 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.05]  # position default (x,y,z)
-        position_uniform_min = [0.55, -0.05, 0.05]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.05, 0.05]  # position (x,y,z)
+        position_default = [0.5, 0.0, 0.08]  # position default (x,y,z)
+        position_uniform_min = [0.55, -0.05, 0.08]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.05, 0.08]  # position (x,y,z)
         # randomize orientation
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
 
@@ -160,9 +161,9 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 1., "sigma": 10}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 1., "sigma": 5}
+    tracking_object_position_tanh = {"weight": 2., "sigma": 5}
     grasp_object_success = {'weight': 0.25}
-    lifting_object_success = {"weight": 2.25, "threshold": 0.1}
+    lifting_object_success = {"weight": 3.25, "threshold": 0.05}
 
 
 @configclass
@@ -181,7 +182,7 @@ class ControlCfg:
     # action space
     control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 2
+    decimation = 5
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
@@ -211,7 +212,7 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3.)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=10.)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(

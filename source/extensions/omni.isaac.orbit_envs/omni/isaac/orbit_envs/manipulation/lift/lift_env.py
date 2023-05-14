@@ -176,7 +176,7 @@ class LiftEnv(IsaacEnv):
             # we assume last command is tool action so don't change that
             gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
 
-            # desired = self._ik_controller.desired_ee_pos
+            desired = self._ik_controller.desired_ee_pos
             self.robot_actions[:, -1] = gripper_action
             # self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
@@ -195,7 +195,7 @@ class LiftEnv(IsaacEnv):
         self.robot.update_buffers(self.dt)
         self.object.update_buffers(self.dt)
         # current_joint = self.robot.data.arm_dof_pos
-        # target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
+        target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
         # print(current_joint - prev_joint)
         # print(target-desired)
         # print('----')
@@ -213,7 +213,7 @@ class LiftEnv(IsaacEnv):
         # -- add information to extra if task completed
         # object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
         # self.extras["is_success"] = object_position_error < 0.02
-        self.extras["is_success"] = self.object.data.root_pos_w[:, 2] > self.object_des_pose_w[:, 2]
+        self.extras["is_success"] = self.is_grasped() * torch.where(self.object.data.root_pos_w[:, 2] > self.object_des_pose_w[:, 2], 1.0 ,0.0)
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -422,6 +422,14 @@ class LiftEnv(IsaacEnv):
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'color', tuple(rgb))
 
+    def is_grasped(self):
+        dist = torch.norm(self.robot.data.ee_state_w[:, 0:3] - self.object.data.root_pos_w, dim=1)
+        tool_pos = self.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.03
+        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
+        return grasped
+
 
 class LiftObservationManager(ObservationManager):
     """Reward manager for single-arm reaching environment."""
@@ -544,8 +552,6 @@ class LiftRewardManager(RewardManager):
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
         return 1 - torch.tanh(average_distance * sigma)
-        # return 1 - torch.tanh(ee_distance / sigma)
-        # return 1 - torch.tanh(ee_distance * sigma)
 
     def penalizing_arm_dof_velocity_l2(self, env: LiftEnv):
         """Penalize large movements of the robot arm."""
@@ -582,16 +588,10 @@ class LiftRewardManager(RewardManager):
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
 
         # distance of the end-effector to the object: (num_envs,)
-        # distance = torch.norm(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         distance = torch.clamp(env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2], min=0)
-        # rewarded if the object is lifted above the threshold
-        # ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
-        # return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
-        # return (ee_to_obj < threshold) * (1 - torch.anh(distance / sigma))
-        # return grasped * (1 - torch.tanh(distance / sigma))
-        # return grasped * (1 - torch.tanh((distance / 0.1) * sigma))
         under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
-        return under * grasped * (1 - torch.tanh(distance * sigma)) + (1-under) * grasped
+        # print(distance, under)
+        return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
 
     def grasp_object_success(self, env: LiftEnv):
         # dist = torch.norm(env.object.data.root_pos_w[:, :3].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, :3], dim=-1)
@@ -607,4 +607,9 @@ class LiftRewardManager(RewardManager):
 
     def lifting_object_success(self, env: LiftEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
-        return torch.where(env.object.data.root_pos_w[:, 2] > env.object_des_pose_w[:, 2], 1.0 ,0.0)
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.03
+        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
+        return grasped * torch.where(env.object.data.root_pos_w[:, 2] > env.object_des_pose_w[:, 2], 1.0 ,0.0)
