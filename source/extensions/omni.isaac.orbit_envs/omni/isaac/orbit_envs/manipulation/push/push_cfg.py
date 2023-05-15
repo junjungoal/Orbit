@@ -232,7 +232,7 @@ class PushEnvCfg(IsaacEnvCfg):
     """Configuration for the Push environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=9.0)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=6.0)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
