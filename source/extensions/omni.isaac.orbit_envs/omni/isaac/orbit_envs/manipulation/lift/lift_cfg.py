@@ -161,9 +161,9 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 1., "sigma": 10}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 5}
-    grasp_object_success = {'weight': 0.25}
-    lifting_object_success = {"weight": 3.25, "threshold": 0.05}
+    tracking_object_position_tanh = {"weight": 4., "sigma": 5}
+    grasp_object_success = {'weight': 2}
+    lifting_object_success = {"weight": 7, "threshold": 0.05}
 
 
 @configclass
@@ -182,7 +182,7 @@ class ControlCfg:
     # action space
     control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 5
+    decimation = 6
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
@@ -212,7 +212,7 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=10.)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=9.)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(

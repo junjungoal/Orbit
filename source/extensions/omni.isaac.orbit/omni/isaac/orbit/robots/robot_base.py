@@ -242,7 +242,7 @@ class RobotBase:
         self.articulations._physics_sim_view.enable_warnings(False)
         # apply actions into sim
         if self.sim_dof_control_modes["position"]:
-            self.articulations.set_joint_positions(self._data.dof_pos_targets[:, :-2], indices=self._ALL_INDICES, joint_indices=torch.arange(self._data.dof_pos_targets.shape[1]-2))
+            # self.articulations.set_joint_positions(self._data.dof_pos_targets[:, :-2], indices=self._ALL_INDICES, joint_indices=torch.arange(self._data.dof_pos_targets.shape[1]-2))
             self.articulations._physics_view.set_dof_position_targets(self._data.dof_pos_targets, self._ALL_INDICES)
             # self.articulations.set_joint_position_targets(self._data.dof_pos_targets[:, -2:], indices=self._ALL_INDICES, joint_indices=torch.arange(self._data.dof_pos_targets.shape[1]-2, self._data.dof_pos_targets.shape[1]))
         if self.sim_dof_control_modes["velocity"]:
