@@ -40,7 +40,8 @@ class ManipulationObjectCfg(RigidObjectCfg):
     """Properties for the object to manipulate in the scene."""
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
-        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_small_instanceable.usd"),
+        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
+        # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_small_instanceable.usd"),
         scale=(1, 1, 1),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
@@ -142,7 +143,7 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        # arm_dof_pos = {"scale": 1.0}
+        arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
@@ -151,11 +152,11 @@ class ObservationsCfg:
         # tool_orientations = {"scale": 1.0}
         # -- object state
         object_positions = {"scale": 1.0}
-        # object_orientations = {"scale": 1.0}
+        object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        # object_desired_positions = {"scale": 1.0}
+        object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
         # arm_actions = {"scale": 1.0}
