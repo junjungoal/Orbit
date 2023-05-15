@@ -197,6 +197,7 @@ class DomainRandomizationCfg:
     randomize_goal_marker = True
     randomize_light = True
     randomize_robot = True
+    randomize_background = True
 
 @configclass
 class ControlCfg:

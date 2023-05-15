@@ -200,6 +200,7 @@ class DomainRandomizationCfg:
     randomize_table = True
     randomize_light = True
     randomize_robot = True
+    randomize_background = True
 
 ##
 # Environment configuration

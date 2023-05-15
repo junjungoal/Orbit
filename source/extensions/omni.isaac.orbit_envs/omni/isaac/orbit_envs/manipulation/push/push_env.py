@@ -155,6 +155,9 @@ class PushEnv(IsaacEnv):
         if self.cfg.domain_randomization.randomize_object:
             self.randomize_object()
 
+        if self.cfg.domain_randomization.randomize_background:
+            self.randomize_background()
+
         if self.cfg.domain_randomization.randomize_goal_marker:
             self.randomize_goal_marker()
 
@@ -387,6 +390,14 @@ class PushEnv(IsaacEnv):
         local_rgb_interpolation = 0.5
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
+        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+    def randomize_background(self):
+        default_color = np.array([0.05, 0.129, 0.3176])
+        random_color = np.random.uniform(0, 1, size=3)
+        local_rgb_interpolation = 0.5
+        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Background/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
     def randomize_table(self):
