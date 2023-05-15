@@ -208,7 +208,7 @@ class ControlCfg:
     # control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     control_type = "differential_inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 6
+    decimation = 4
 
     # configuration loaded when control_type == "inverse_kinematics"
     # inverse_kinematics: InverseKinematicsCfg = InverseKinematicsCfg(
