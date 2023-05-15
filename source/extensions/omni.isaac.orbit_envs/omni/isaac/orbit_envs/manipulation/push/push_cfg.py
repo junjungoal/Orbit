@@ -33,7 +33,7 @@ class BackgroundCfg:
     """Properties for the table."""
 
     # note: we use instanceable asset since it consumes less memory
-    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/background.usd")
+    usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/background_instanceable.usd")
 
 @configclass
 class ManipulationObjectCfg(RigidObjectCfg):
