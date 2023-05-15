@@ -194,7 +194,7 @@ class TerminationsCfg:
 class DomainRandomizationCfg:
     randomize_object = True
     randomize_table = True
-    randomize_goal_marker = False
+    randomize_goal_marker = True
     randomize_light = True
     randomize_robot = True
 

@@ -196,11 +196,10 @@ class ControlCfg:
 
 @configclass
 class DomainRandomizationCfg:
-    randomize_object = False
-    randomize_table = False
-    randomize_goal_marker = False
-    randomize_light = False
-    randomize_robot = False
+    randomize_object = True
+    randomize_table = True
+    randomize_light = True
+    randomize_robot = True
 
 ##
 # Environment configuration
