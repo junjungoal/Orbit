@@ -35,7 +35,7 @@ def load_default_env_cfg(task_name: str) -> Union[dict, Any]:
     if task_name is None:
         raise ValueError("Please provide a valid task name. Hint: Use --task <task_name>.")
     # retrieve the configuration file to load
-    cfg_entry_point: str = gym.spec(task_name)._kwargs.pop("cfg_entry_point")
+    cfg_entry_point: str = gym.spec(task_name).kwargs.pop("cfg_entry_point")
 
     # parse the default config file
     if cfg_entry_point.endswith(".yaml"):
