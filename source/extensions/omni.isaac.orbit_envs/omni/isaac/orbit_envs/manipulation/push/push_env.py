@@ -558,21 +558,9 @@ class PushRewardManager(RewardManager):
         return 1 - torch.tanh(ee_distance / sigma)
         # return 1 - torch.tanh(average_distance / sigma)
 
-    def penalizing_arm_dof_velocity_l2(self, env: PushEnv):
-        """Penalize large movements of the robot arm."""
-        return -torch.sum(torch.square(env.robot.data.arm_dof_vel), dim=1)
-
-    def penalizing_tool_dof_velocity_l2(self, env: PushEnv):
-        """Penalize large movements of the robot tool."""
-        return -torch.sum(torch.square(env.robot.data.tool_dof_vel), dim=1)
-
-    def penalizing_arm_action_rate_l2(self, env: PushEnv):
-        """Penalize large variations in action commands besides tool."""
-        return -torch.sum(torch.square(env.actions[:, :-1] - env.previous_actions[:, :-1]), dim=1)
-
-    def penalizing_tool_action_l2(self, env: PushEnv):
-        """Penalize large values in action commands for the tool."""
-        return -torch.square(env.actions[:, -1])
+    def penalizing_action_rate_l2(self, env: PushEnv):
+        """Penalize large variations in action commands."""
+        return -torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
 
     def tracking_object_position_negative(self, env: PushEnv):
         """Penalize tracking object position error using exp-kernel."""
