@@ -200,7 +200,7 @@ class LiftEnv(IsaacEnv):
         # current_joint = self.robot.data.arm_dof_pos
         target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
         # print(current_joint - prev_joint)
-        # print(target-desired)
+        print(target-desired)
         # print('----')
         # -- compute MDP signals
         # reward
@@ -248,6 +248,8 @@ class LiftEnv(IsaacEnv):
         """Post processing of configuration parameters."""
         # compute constants for environment
         self.dt = self.cfg.control.decimation * self.physics_dt  # control-dt
+        import pdb
+        pdb.set_trace()
         self.max_episode_length = math.ceil(self.cfg.env.episode_length_s / self.dt)
 
         # convert configuration parameters to torchee
