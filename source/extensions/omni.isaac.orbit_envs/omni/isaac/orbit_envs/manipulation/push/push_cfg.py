@@ -208,7 +208,7 @@ class ControlCfg:
     # control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     control_type = "differential_inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 3
+    decimation = 5
 
     # configuration loaded when control_type == "inverse_kinematics"
     # inverse_kinematics: InverseKinematicsCfg = InverseKinematicsCfg(
@@ -232,7 +232,7 @@ class PushEnvCfg(IsaacEnvCfg):
     """Configuration for the Push environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=4.5)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=7.5)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
