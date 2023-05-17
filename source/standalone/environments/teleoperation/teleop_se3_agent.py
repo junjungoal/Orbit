@@ -62,7 +62,7 @@ def main():
     env_cfg = parse_env_cfg(args_cli.task, use_gpu=not args_cli.cpu, num_envs=args_cli.num_envs)
     # modify configuration
     env_cfg.control.control_type = "inverse_kinematics"
-    env_cfg.control.inverse_kinematics.command_type = "pose_rel"
+    env_cfg.control.inverse_kinematics.command_type = "position_rel"
     env_cfg.terminations.episode_timeout = False
     # create environment
     env = gym.make(args_cli.task, cfg=env_cfg, headless=args_cli.headless)
@@ -103,7 +103,7 @@ def main():
         # convert to torch
         delta_pose = torch.tensor(delta_pose, dtype=torch.float, device=env.device).repeat(env.num_envs, 1)
         # pre-process actions
-        actions = pre_process_actions(delta_pose, gripper_command)
+        actions = pre_process_actions(delta_pose[:, :3], gripper_command)
         # apply actions
         _, _, _, _ = env.step(actions)
         # check if simulator is stopped
