@@ -248,8 +248,6 @@ class LiftEnv(IsaacEnv):
         """Post processing of configuration parameters."""
         # compute constants for environment
         self.dt = self.cfg.control.decimation * self.physics_dt  # control-dt
-        import pdb
-        pdb.set_trace()
         self.max_episode_length = math.ceil(self.cfg.env.episode_length_s / self.dt)
 
         # convert configuration parameters to torchee
