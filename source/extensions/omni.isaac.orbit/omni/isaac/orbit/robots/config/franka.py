@@ -24,7 +24,8 @@ from omni.isaac.orbit.utils.assets import ISAAC_ORBIT_NUCLEUS_DIR
 from ..single_arm import SingleArmManipulatorCfg
 
 # _FRANKA_PANDA_ARM_INSTANCEABLE_USD = f"{ISAAC_ORBIT_NUCLEUS_DIR}/Robots/FrankaEmika/panda_instanceable.usd"
-_FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/FrankaEmikaOriginal/panda_instanceable.usd')
+# _FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/FrankaEmika/panda_instanceable.usd')
+_FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/FrankaEmika/panda_instanceable.usd')
 
 
 FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
@@ -99,10 +100,10 @@ FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
             # model_cfg=ImplicitActuatorCfg(velocity_limit=150.0, torque_limit=160.0),
             control_cfg=ActuatorControlCfg(
                 command_types=["p_abs"],
-                stiffness={".*": 80000.0},
-                damping={".*": 4000.0},
-                # stiffness={".*": 572957800.0},
-                # damping={".*": 5729578.0},
+                # stiffness={".*": 80000.0},
+                # damping={".*": 4000.0},
+                stiffness={".*": 572957800.0},
+                damping={".*": 5729578.0},
                 dof_pos_offset={
                     "panda_joint1": 0.0,
                     "panda_joint2": -0.318,
@@ -117,10 +118,10 @@ FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
             # model_cfg=ImplicitActuatorCfg(velocity_limit=120.0, torque_limit=32.0),
             control_cfg=ActuatorControlCfg(
                 command_types=["p_abs"],
-                stiffness={".*": 80000.0},
-                damping={".*": 4000.0},
-                # stiffness={".*": 572957800.0},
-                # damping={".*": 5729578.0},
+                # stiffness={".*": 80000.0},
+                # damping={".*": 4000.0},
+                stiffness={".*": 572957800.0},
+                damping={".*": 5729578.0},
                 dof_pos_offset={"panda_joint5": 0.0, "panda_joint6": np.pi * 3 / 4, "panda_joint7": np.pi / 4.},
             ),
         ),
