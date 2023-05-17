@@ -6,7 +6,7 @@
 """Script to run a keyboard teleoperation with Orbit manipulation environments."""
 
 """Launch Isaac Sim Simulator first."""
-
+import os
 
 import argparse
 
@@ -15,6 +15,7 @@ from omni.isaac.kit import SimulationApp
 # add argparse arguments
 parser = argparse.ArgumentParser("Welcome to Orbit: Omniverse Robotics Environments!")
 parser.add_argument("--headless", action="store_true", default=False, help="Force display off at all times.")
+parser.add_argument("--livestream", action="store_true", default=False, help="Force display off at all times.")
 parser.add_argument("--cpu", action="store_true", default=False, help="Use CPU pipeline.")
 parser.add_argument("--num_envs", type=int, default=1, help="Number of environments to simulate.")
 parser.add_argument("--device", type=str, default="keyboard", help="Device for interacting with environment")
@@ -23,8 +24,26 @@ parser.add_argument("--sensitivity", type=float, default=1.0, help="Sensitivity 
 args_cli = parser.parse_args()
 
 # launch the simulator
+experience = ''
+if args_cli.livestream:
+    experience = f'{os.environ["ISAAC_PATH"]}/apps/omni.isaac.sim.python.kit'
+
 config = {"headless": args_cli.headless}
-simulation_app = SimulationApp(config)
+simulation_app = SimulationApp(config, experience=experience)
+
+if args_cli.livestream:
+    from omni.isaac.core.utils.extensions import enable_extension
+
+    # Default Livestream settings
+    simulation_app.set_setting("/app/window/drawMouse", True)
+    simulation_app.set_setting("/app/livestream/proto", "ws")
+    simulation_app.set_setting("/app/livestream/websocket/framerate_limit", 120)
+    simulation_app.set_setting("/ngx/enabled", False)
+
+    # Note: Only one livestream extension can be enabled at a time
+    # Enable Native Livestream extension
+    # Default App: Streaming Client from the Omniverse Launcher
+    enable_extension("omni.kit.livestream.native")
 
 """Rest everything follows."""
 
