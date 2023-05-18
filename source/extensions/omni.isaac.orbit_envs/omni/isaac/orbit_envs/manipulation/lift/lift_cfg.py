@@ -159,7 +159,7 @@ class RewardsCfg:
 
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 10}
+    reaching_object_position_tanh = {"weight": 2., "sigma": 10}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
     tracking_object_position_tanh = {"weight": 4., "sigma": 5}
     grasp_object_success = {'weight': 2}
