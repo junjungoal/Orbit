@@ -118,7 +118,7 @@ class RandomizationCfg:
         """Randomization of object desired pose."""
 
         # category
-        position_cat: str = "uniform"  # randomize position: "default", "uniform"
+        position_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.6, 0., 0.0]  # position default (x,y,z)
         position_uniform_min = [0.55, -0.1, 0.]  # position (x,y,z)
@@ -175,7 +175,7 @@ class RewardsCfg:
 
     # -- robot-centric
     reaching_object_position_tanh = {"weight": 2., "sigma": 0.2}
-    tracking_object_position_tanh = {"weight": 5., "sigma": 0.05, "threshold": 0.08}
+    tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
@@ -232,11 +232,11 @@ class PushEnvCfg(IsaacEnvCfg):
     """Configuration for the Push environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=10 * (1/200) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=4 * (1/100) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        dt=1/200,
+        dt=1/100,
         substeps=1,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
