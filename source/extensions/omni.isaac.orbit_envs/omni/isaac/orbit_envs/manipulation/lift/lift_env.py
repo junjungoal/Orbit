@@ -17,7 +17,7 @@ from omni.isaac.orbit.markers import StaticMarker
 from omni.isaac.orbit.objects import RigidObject
 from omni.isaac.orbit.robots.single_arm import SingleArmManipulator
 from omni.isaac.orbit.utils.dict import class_to_dict
-from omni.isaac.orbit.utils.math import quat_inv, quat_mul, random_orientation, sample_uniform, scale_transform
+from omni.isaac.orbit.utils.math import quat_inv, quat_mul, random_orientation, sample_uniform, scale_transform, axis_angle_from_quat, quat_from_angle_axis, random_axis_angle, quaternion_to_matrix, matrix_from_quat, quat_from_axis_angle
 from omni.isaac.orbit.utils.mdp import ObservationManager, RewardManager
 
 from omni.isaac.orbit_envs.isaac_env import IsaacEnv, VecEnvIndices, VecEnvObs
