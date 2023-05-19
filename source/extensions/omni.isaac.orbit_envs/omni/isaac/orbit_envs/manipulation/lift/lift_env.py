@@ -163,7 +163,7 @@ class LiftEnv(IsaacEnv):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
         if self.cfg.control.moving_average:
-            self.actions = self.cfg.control.decay * self.averaged_actions + (1- self.cfg.control.decay) * self.actions
+            self.actions[:, :3] = self.cfg.control.decay * self.averaged_actions[:, :3] + (1- self.cfg.control.decay) * self.actions[:, :3]
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
