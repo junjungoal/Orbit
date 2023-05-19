@@ -160,7 +160,7 @@ class PushEnv(IsaacEnv):
             random_axis, random_angle = random_axis_angle(angle_limit=self.cfg.domain_randomization.camera_ori_noise, batch_size=len(env_ids), device=self.device)
 
             random_quat = quat_from_axis_angle(random_angle * random_axis)
-            new_camera_quat = quat_mul(random_quat.to(self.device), self.default_camera_ori)
+            new_camera_quat = quat_mul(random_quat.to(self.device), self.default_camera_ori[env_ids])
             self.camera.set_world_poses_ros(camera_pos.cpu().numpy(),
                                             new_camera_quat.cpu().numpy(),
                                             env_ids)
