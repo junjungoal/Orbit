@@ -22,6 +22,7 @@ from omni.isaac.core.simulation_context import SimulationContext
 from omni.isaac.core.utils.extensions import enable_extension
 from omni.isaac.core.utils.viewports import set_camera_view
 
+from pxr import Gf, PhysxSchema, UsdPhysics, UsdShade, Sdf
 from omni.isaac.orbit.sensors.camera import Camera, PinholeCameraCfg
 
 from .isaac_env_cfg import IsaacEnvCfg
@@ -193,6 +194,8 @@ class IsaacEnv(gym.Env):
             if self.cfg.camera.set_type == 'ros':
                 position = torch.tensor(self.cfg.camera.position, device=self.device) + self.envs_positions
                 orientation = torch.tensor(self.cfg.camera.orientation, device=self.device).unsqueeze(0).repeat(self.num_envs, 1)
+                self.default_camera_pos = position
+                self.default_camera_ori = orientation
                 self.camera.set_world_poses_ros(position.cpu().numpy(), orientation.cpu().numpy())
             else:
                 raise NotImplementedError
@@ -541,3 +544,48 @@ class IsaacEnv(gym.Env):
             self._rgb_annotator.attach([self._render_product])
         else:
             carb.log_info("Viewport is disabled. Skipping creation of render product.")
+
+    def randomize_table(self):
+        # rgb = np.ones(3) * np.random.uniform(0.2, 0.9)
+        default_color = np.ones(3) * np.random.uniform(0.2, 0.9)
+        local_rgb_interpolation = 0.5
+        random_color = np.random.uniform(0, 1, size=3)
+        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visuals/OmniPBR')
+        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+
+    def randomize_robot(self):
+        default_color = np.array([1., 1, 1])
+
+        prim_paths = prim_utils.find_matching_prim_paths('/World/envs/env_0/Robot/*/visuals/Looks/PlasticWhite')[:-2]
+        for prim_path in prim_paths:
+            prim = prim_utils.get_prim_at_path(prim_path)
+            # if np.random.rand() > 0.5:
+            #     rgb = default_color
+            # else:
+            random_color = np.random.uniform(0, 1, size=3)
+            local_rgb_interpolation = 0.7
+            rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+            omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+
+    def randomize_light(self):
+        intensity = np.random.choice(np.linspace(1000, 3000, 15))
+        # print('Intensity: ', intensity)
+        # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensi4y', intensity)
+        prim_path = '/World/defaultGroundPlane'
+        prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
+        default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')
+        random_color = np.random.uniform(0, 1, size=3)
+        local_rgb_interpolation = 0.4
+        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'color', tuple(rgb))
+
+    def randomize_background(self):
+        default_color = np.array([0.05, 0.129, 0.3176])
+        random_color = np.random.uniform(0, 1, size=3)
+        local_rgb_interpolation = 0.8
+        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Background/visuals/OmniPBR')
+        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)

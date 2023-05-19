@@ -144,6 +144,11 @@ class LiftEnv(IsaacEnv):
         if self.cfg.control.control_type == "inverse_kinematics":
             self._ik_controller.reset_idx(env_ids)
 
+        if self.cfg.domain_randomization.randomize_camera and self.enable_camera:
+            camera_pos = self.default_camera_pos + (torch.randn_like(self.default_camera_pos) * 2 - 1) * self.cfg.domain_randomization.camera_pos_noise
+            camera_orientation_noise = torch.randn_like(self.default_camera_ori) * self.cfg.domain_randomization.camera_ori_noise
+            camera_ori = quat_mul(camera_orientation_noise, self.default_camera_ori)
+
         if self.cfg.domain_randomization.randomize_object:
             self.randomize_object()
 
@@ -397,46 +402,6 @@ class LiftEnv(IsaacEnv):
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
-
-    def randomize_background(self):
-        default_color = np.array([0.05, 0.129, 0.3176])
-        random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.5
-        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
-        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Background/visuals/OmniPBR')
-        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
-
-    def randomize_table(self):
-        rgb = np.ones(3) * np.random.uniform(0.3, 0.9)
-        prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visuals/OmniPBR')
-        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
-
-    def randomize_robot(self):
-        default_color = np.array([1., 1, 1])
-
-        prim_paths = prim_utils.find_matching_prim_paths('/World/envs/env_0/Robot/*/visuals/Looks/PlasticWhite')[:-2]
-        for prim_path in prim_paths:
-            prim = prim_utils.get_prim_at_path(prim_path)
-            if np.random.rand() > 0.5:
-                rgb = default_color
-            else:
-                random_color = np.random.uniform(0, 1, size=3)
-                local_rgb_interpolation = 0.5
-                rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
-            omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
-
-
-    def randomize_light(self):
-        intensity = np.random.choice(np.linspace(1000, 2500, 15))
-        # print('Intensity: ', intensity)
-        # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensi4y', intensity)
-        prim_path = '/World/defaultGroundPlane'
-        prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
-        default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')
-        random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.2
-        rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
-        prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'color', tuple(rgb))
 
     def is_grasped(self):
         dist = torch.norm(self.robot.data.ee_state_w[:, 0:3] - self.object.data.root_pos_w, dim=1)

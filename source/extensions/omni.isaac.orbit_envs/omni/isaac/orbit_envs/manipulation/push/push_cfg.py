@@ -198,6 +198,9 @@ class DomainRandomizationCfg:
     randomize_light = True
     randomize_robot = True
     randomize_background = True
+    randomize_camera = True
+    camera_pos_noise = 0.0015
+    camera_ori_noise = 0.003
 
 @configclass
 class ControlCfg:
