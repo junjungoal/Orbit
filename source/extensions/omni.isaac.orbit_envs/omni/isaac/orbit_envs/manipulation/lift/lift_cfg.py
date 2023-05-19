@@ -184,6 +184,9 @@ class ControlCfg:
     # decimation: Number of control action updates @ sim dt per policy dt
     decimation = 4
 
+    moving_average = True
+    decay = 0.7
+
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="position_rel",

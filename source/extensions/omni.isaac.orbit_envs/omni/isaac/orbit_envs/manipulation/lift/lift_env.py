@@ -136,6 +136,7 @@ class LiftEnv(IsaacEnv):
         self._observation_manager.reset_idx(env_ids)
         # -- reset history
         self.previous_actions[env_ids] = 0
+        self.averaged_actions[env_ids] = 0
         # -- MDP reset
         self.reset_buf[env_ids] = 0
         self.episode_length_buf[env_ids] = 0
@@ -161,6 +162,8 @@ class LiftEnv(IsaacEnv):
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
+        if self.cfg.control.moving_average:
+            self.actions = self.cfg.control.decay * self.averaged_actions + (1- self.cfg.control.decay) * self.actions
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
@@ -283,6 +286,7 @@ class LiftEnv(IsaacEnv):
         # history
         self.actions = torch.zeros((self.num_envs, self.num_actions), device=self.device)
         self.previous_actions = torch.zeros((self.num_envs, self.num_actions), device=self.device)
+        self.averaged_actions = torch.zeros((self.num_envs, self.num_actions), device=self.device)
         # robot joint actions
         self.robot_actions = torch.zeros((self.num_envs, self.robot.num_actions), device=self.device)
         # commands
