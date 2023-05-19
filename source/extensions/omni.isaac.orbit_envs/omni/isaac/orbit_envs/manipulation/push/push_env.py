@@ -583,8 +583,8 @@ class PushRewardManager(RewardManager):
         ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
         # rewarded if the object is lifted above the threshold
         object_init_pos_to_goal  = torch.norm(env.object_init_pose_w[:, :2] - env.object.data.root_pos_w[:, :2], dim=1)
-        # return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
-        return (1 - torch.tanh((obj_to_goal / object_init_pos_to_goal) / sigma))
+        return (ee_to_obj < threshold) * (1 - torch.tanh(obj_to_goal / sigma))
+        # return (1 - torch.tanh((obj_to_goal / object_init_pos_to_goal) / sigma))
 
     def tracking_object_position_diff(self, env: PushEnv):
         prev_obj_to_goal = torch.norm(env.previous_object_root_pos_w[:, :2] - env.goal.data.root_pos_w[:, :2])
