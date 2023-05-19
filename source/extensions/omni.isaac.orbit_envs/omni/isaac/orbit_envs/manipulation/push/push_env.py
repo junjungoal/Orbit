@@ -176,7 +176,8 @@ class PushEnv(IsaacEnv):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
         if self.cfg.control.moving_average:
-            self.actions = self.cfg.control.decay * self.averaged_actions + (1- self.cfg.control.decay) * self.actions
+            self.averaged_actions = self.cfg.control.decay * self.averaged_actions + (1- self.cfg.control.decay) * self.actions
+            self.actions = self.averaged_actions
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             # set the controller commands

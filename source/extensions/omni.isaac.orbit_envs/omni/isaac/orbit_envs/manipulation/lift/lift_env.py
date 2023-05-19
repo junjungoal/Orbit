@@ -163,7 +163,8 @@ class LiftEnv(IsaacEnv):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
         if self.cfg.control.moving_average:
-            self.actions[:, :3] = self.cfg.control.decay * self.averaged_actions[:, :3] + (1- self.cfg.control.decay) * self.actions[:, :3]
+            self.averaged_actions[:, :3] = self.cfg.control.decay * self.averaged_actions[:, :3] + (1- self.cfg.control.decay) * self.actions[:, :3]
+            self.actions[:, :3] = self.averaged_actions[:, :3]
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
@@ -203,7 +204,7 @@ class LiftEnv(IsaacEnv):
         # current_joint = self.robot.data.arm_dof_pos
         target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
         # print(current_joint - prev_joint)
-        # print(target-desired)
+        # print(target-desired, ' action: ', self.actions)
         # print('----')
         # -- compute MDP signals
         # reward
