@@ -65,6 +65,10 @@ __all__ = [
     "random_yaw_orientation",
     "sample_triangle",
     "sample_uniform",
+
+    # mis
+    "random_axis_angle",
+    "quat_from_axis_angle"
 ]
 
 """
@@ -850,3 +854,55 @@ def make_poses(translation, rotation):
     poses[:, :3, 3] = translation
     poses[:, 3, 3] = 1.0
     return poses
+
+
+def random_axis_angle(angle_limit=None, batch_size=1, device=None):
+    """
+    Samples an axis-angle rotation by first sampling a random axis
+    and then sampling an angle. If @angle_limit is provided, the size
+    of the rotation angle is constrained.
+
+    If @random_state is provided (instance of np.random.RandomState), it
+    will be used to generate random numbers.
+
+    Args:
+        angle_limit (None or float): If set, determines magnitude limit of angles to generate
+        random_state (None or RandomState): RNG to use if specified
+
+    Raises:
+        AssertionError: [Invalid RNG]
+    """
+    if angle_limit is None:
+        angle_limit = 2.0 * np.pi
+
+
+    # sample random axis using a normalized sample from spherical Gaussian.
+    # see (http://extremelearning.com.au/how-to-generate-uniformly-random-points-on-n-spheres-and-n-balls/)
+    # for why it works.
+    random_axis = torch.randn((batch_size, 3), device=device)
+    random_axis /= torch.norm(random_axis, dim=-1)[:, None]
+    random_angle = torch.rand((batch_size, 1), device=device) * angle_limit
+    return random_axis, random_angle
+
+def quat_from_axis_angle(vec):
+    """
+    Converts scaled axis-angle to quat.
+    Args:
+        vec (np.array): (ax,ay,az) axis-angle exponential coordinates
+    Returns:
+        np.array: (x,y,z,w) vec4 float angles
+    """
+    # Grab angle
+    angle = torch.norm(vec, dim=-1)[:, None]
+
+    # # handle zero-rotation case
+    # if math.isclose(angle, 0.):
+    #     return np.array([0., 0., 0., 1.])
+
+    # make sure that axis is a unit vector
+    axis = vec / angle
+
+    q = torch.zeros((len(vec), 4))
+    q[:, :1] = torch.cos(angle / 2.)
+    q[:, 1:] = axis * torch.sin(angle / 2.)
+    return q

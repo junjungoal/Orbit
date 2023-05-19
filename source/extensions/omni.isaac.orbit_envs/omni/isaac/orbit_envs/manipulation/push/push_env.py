@@ -20,7 +20,7 @@ from omni.isaac.orbit.markers import StaticMarker
 from omni.isaac.orbit.objects import RigidObject
 from omni.isaac.orbit.robots.single_arm import SingleArmManipulator
 from omni.isaac.orbit.utils.dict import class_to_dict
-from omni.isaac.orbit.utils.math import quat_inv, quat_mul, random_orientation, sample_uniform, scale_transform
+from omni.isaac.orbit.utils.math import quat_inv, quat_mul, random_orientation, sample_uniform, scale_transform, axis_angle_from_quat, quat_from_angle_axis, random_axis_angle, quaternion_to_matrix, matrix_from_quat, quat_from_axis_angle
 from omni.isaac.orbit.utils.mdp import ObservationManager, RewardManager
 
 from omni.isaac.orbit_envs.isaac_env import IsaacEnv, VecEnvIndices, VecEnvObs
@@ -154,10 +154,17 @@ class PushEnv(IsaacEnv):
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             self._ik_controller.reset_idx(env_ids)
 
-        if self.cfg.domain_randomization.randomize_camera:
-            camera_pos = torch.tensor(self.cfg.camera.position, device=self.device) + (torch.randn(self.cfg.camera.positions.shape, device=self.device) * 2 - 1) * self.cfg.domain_randomization.camera_pos_noise
-            camera_orientation_noise = torch.randn(self.cfg.camera.orientation.shape, device=self.device) * self.cfg.domain_randomization.camera_ori_noise
-            camera_ori = quat_mul(camera_orientation_noise, torch.tensor(self.cfg.camera.orientation, device=self.device))
+        if self.cfg.domain_randomization.randomize_camera and self.enable_camera:
+            camera_pos = self.default_camera_pos[env_ids] + (torch.randn((len(env_ids), 3), device=self.device) * 2 - 1) * self.cfg.domain_randomization.camera_pos_noise
+
+            random_axis, random_angle = random_axis_angle(angle_limit=self.cfg.domain_randomization.camera_ori_noise, batch_size=len(env_ids), device=self.device)
+
+            random_quat = quat_from_axis_angle(random_angle * random_axis)
+            new_camera_quat = quat_mul(random_quat.to(self.device), self.default_camera_ori)
+            self.camera.set_world_poses_ros(camera_pos.cpu().numpy(),
+                                            new_camera_quat.cpu().numpy(),
+                                            env_ids)
+
 
         if self.cfg.domain_randomization.randomize_object:
             self.randomize_object()
