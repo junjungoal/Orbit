@@ -143,7 +143,7 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        # arm_dof_pos = {"scale": 1.0}
+        arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
@@ -238,7 +238,7 @@ class PushEnvCfg(IsaacEnvCfg):
     """Configuration for the Push environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=4 * (1/100) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=4 * (1/100) * 100)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
