@@ -192,6 +192,7 @@ class TerminationsCfg:
 
 @configclass
 class DomainRandomizationCfg:
+    randomize = False
     randomize_object = True
     randomize_table = True
     randomize_goal_marker = True

@@ -166,23 +166,24 @@ class PushEnv(IsaacEnv):
                                             env_ids)
 
 
-        if self.cfg.domain_randomization.randomize_object:
-            self.randomize_object()
+        if self.cfg.domain_randomization.randomize:
+            if self.cfg.domain_randomization.randomize_object:
+                self.randomize_object()
 
-        if self.cfg.domain_randomization.randomize_background:
-            self.randomize_background()
+            if self.cfg.domain_randomization.randomize_background:
+                self.randomize_background()
 
-        if self.cfg.domain_randomization.randomize_goal_marker:
-            self.randomize_goal_marker()
+            if self.cfg.domain_randomization.randomize_goal_marker:
+                self.randomize_goal_marker()
 
-        if self.cfg.domain_randomization.randomize_light:
-            self.randomize_light()
+            if self.cfg.domain_randomization.randomize_light:
+                self.randomize_light()
 
-        if self.cfg.domain_randomization.randomize_robot:
-            self.randomize_robot()
+            if self.cfg.domain_randomization.randomize_robot:
+                self.randomize_robot()
 
-        if self.cfg.domain_randomization.randomize_table:
-            self.randomize_table()
+            if self.cfg.domain_randomization.randomize_table:
+                self.randomize_table()
 
     def _step_impl(self, actions: torch.Tensor):
         self.previous_object_root_pos_w = self.object.data.root_pos_w.clone()
