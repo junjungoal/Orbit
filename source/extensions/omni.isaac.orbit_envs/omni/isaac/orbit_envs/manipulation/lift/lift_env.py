@@ -193,10 +193,11 @@ class LiftEnv(IsaacEnv):
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
             # we assume last command is tool action so don't change that
             gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
+            print(gripper_action)
 
-            desired = self._ik_controller.desired_ee_pos
+            # desired = self._ik_controller.desired_ee_pos
             self.robot_actions[:, -1] = gripper_action
-            # self.robot_actions[:, -1] = self.actions[:, -1]
+            self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
@@ -215,7 +216,7 @@ class LiftEnv(IsaacEnv):
         # current_joint = self.robot.data.arm_dof_pos
         target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
         # print(current_joint - prev_joint)
-        print(target-desired, ' action: ', self.actions)
+        # print(target-desired, ' action: ', self.actions)
         # print('----')
         # -- compute MDP signals
         # reward
@@ -404,7 +405,7 @@ class LiftEnv(IsaacEnv):
     def randomize_object(self):
         default_color = np.array([0.949, 0.8, 0.21])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.5
+        local_rgb_interpolation = 0.6
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
@@ -538,7 +539,8 @@ class LiftRewardManager(RewardManager):
         num_tool_sites = tool_sites_distance.shape[1]
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        return 1 - torch.tanh(average_distance * sigma)
+        return 1 - torch.tanh(ee_distance * sigma)
+        # return 1 - torch.tanh(average_distance * sigma)
 
     def penalizing_action_rate_l2(self, env: LiftEnv):
         """Penalize large variations in action commands."""
