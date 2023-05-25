@@ -193,7 +193,7 @@ class LiftEnv(IsaacEnv):
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
             # we assume last command is tool action so don't change that
             gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
-            print(gripper_action)
+            # print(gripper_action)
 
             # desired = self._ik_controller.desired_ee_pos
             self.robot_actions[:, -1] = gripper_action
