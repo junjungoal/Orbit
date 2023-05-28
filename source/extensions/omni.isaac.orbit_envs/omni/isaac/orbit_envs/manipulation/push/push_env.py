@@ -404,9 +404,9 @@ class PushEnv(IsaacEnv):
         self.goal.set_root_state(root_state, env_ids=env_ids)
 
     def randomize_object(self):
-        default_color = np.array([0, 1, 0])
+        default_color = np.array([0.949, 0.8, 0.2])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.6
+        local_rgb_interpolation = 0.4
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
@@ -415,7 +415,7 @@ class PushEnv(IsaacEnv):
     def randomize_goal_marker(self):
         default_color = np.array([1., 0, 0])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.5
+        local_rgb_interpolation = 0.4
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/GoalMarker/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
@@ -486,6 +486,9 @@ class PushObservationManager(ObservationManager):
     def arm_actions(self, env: PushEnv):
         """Last arm actions provided to env."""
         return env.actions[:, :-1]
+
+    def ee_actions(self, env: PushEnv):
+        return env.averaged_actions
 
     def tool_actions(self, env: PushEnv):
         """Last tool actions provided to env."""
