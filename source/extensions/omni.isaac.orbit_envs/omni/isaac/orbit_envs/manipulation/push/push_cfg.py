@@ -153,8 +153,8 @@ class ObservationsCfg:
         # -- object state
         object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         object_orientations = {"scale": 1.0}
-        object_relative_tool_positions = {"scale": 1.0}
-        # object_relative_tool_orientations = {"scale": 1.0}
+        # object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
@@ -202,6 +202,7 @@ class DomainRandomizationCfg:
     randomize_camera = True
     camera_pos_noise = 0.01
     camera_ori_noise = 0.03
+    random_obs_amplitude = False
 
 @configclass
 class ControlCfg:

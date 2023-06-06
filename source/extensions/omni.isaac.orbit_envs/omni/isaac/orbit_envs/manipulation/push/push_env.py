@@ -8,6 +8,7 @@ import os, sys
 import gym.spaces
 import math
 import torch
+from torch.distributions.uniform import Uniform
 from typing import List
 
 import omni.isaac.core.utils.prims as prim_utils
@@ -246,7 +247,12 @@ class PushEnv(IsaacEnv):
 
     def _get_observations(self) -> VecEnvObs:
         # compute observations
-        return self._observation_manager.compute()
+        obs = self._observation_manager.compute()
+        if self.cfg.domain_randomization.randomize and  self.cfg.domain_randomization.random_obs_amplitude:
+            dist = Uniform(torch.tensor([0.8]).to(self.device), torch.tensor([1.2]).to(self.device))
+            scaling = dist.sample()
+            obs['policy'] = obs['policy'] * scaling
+        return obs
 
     """
     Helper functions - Scene handling.
@@ -406,7 +412,7 @@ class PushEnv(IsaacEnv):
     def randomize_object(self):
         default_color = np.array([0.949, 0.8, 0.2])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.4
+        local_rgb_interpolation = 0.3
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
@@ -415,7 +421,7 @@ class PushEnv(IsaacEnv):
     def randomize_goal_marker(self):
         default_color = np.array([1., 0, 0])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.4
+        local_rgb_interpolation = 0.3
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/GoalMarker/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
