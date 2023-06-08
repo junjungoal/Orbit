@@ -151,19 +151,19 @@ class ObservationsCfg:
         tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         # tool_orientations = {"scale": 1.0}
         # -- object state
-        object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         object_orientations = {"scale": 1.0}
-        # object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
-        object_relative_tool_orientations = {"scale": 1.0}
+        object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        object_desired_positions = {"scale": 1.0}
+        # object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
         # arm_actions = {"scale": 1.0}
         ee_actions = {"scale": 1.0}
 
     # global observation settings
-    return_dict_obs_in_group = True
+    return_dict_obs_in_group = False
     """Whether to return observations as dictionary or flattened vector within groups."""
     # observation groups
     policy: PolicyCfg = PolicyCfg()
@@ -179,7 +179,7 @@ class RewardsCfg:
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
-    push_object_success = {"weight": 7., "threshold": 0.04}
+    push_object_success = {"weight": 7., "threshold": 0.05}
 
 
 @configclass
