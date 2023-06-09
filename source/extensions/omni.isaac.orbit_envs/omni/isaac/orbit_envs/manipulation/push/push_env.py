@@ -8,6 +8,7 @@ import os, sys
 import gym.spaces
 import math
 import torch
+from torch.distributions.uniform import Uniform
 from typing import List
 
 import omni.isaac.core.utils.prims as prim_utils
@@ -239,14 +240,19 @@ class PushEnv(IsaacEnv):
         # -- add information to extra if task completed
         object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - self.goal.data.root_pos_w[:, :2], dim=1)
         # self.extras["is_success"] = torch.where(object_position_error < 0.005, 1, self.reset_buf)
-        self.extras["is_success"] = object_position_error < 0.04
+        self.extras["is_success"] = object_position_error < 0.05
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
 
     def _get_observations(self) -> VecEnvObs:
         # compute observations
-        return self._observation_manager.compute()
+        obs = self._observation_manager.compute()
+        if self.cfg.domain_randomization.randomize and  self.cfg.domain_randomization.random_obs_amplitude:
+            dist = Uniform(torch.tensor([0.8]).to(self.device), torch.tensor([1.2]).to(self.device))
+            scaling = dist.sample()
+            obs['policy'] = obs['policy'] * scaling
+        return obs
 
     """
     Helper functions - Scene handling.
@@ -347,7 +353,7 @@ class PushEnv(IsaacEnv):
         if self.cfg.terminations.is_success:
             goal_positions = env.goal.get_world_poses()[0]
             object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - goal_positions[:, :2], dim=1)
-            self.reset_buf = torch.where(object_position_error < 0.04, 1, self.reset_buf)
+            self.reset_buf = torch.where(object_position_error < 0.05, 1, self.reset_buf)
         # -- object fell off the table (table at height: 0.0 m)
         if self.cfg.terminations.object_falling:
             self.reset_buf = torch.where(object_pos[:, 2] < -0.05, 1, self.reset_buf)
@@ -404,9 +410,9 @@ class PushEnv(IsaacEnv):
         self.goal.set_root_state(root_state, env_ids=env_ids)
 
     def randomize_object(self):
-        default_color = np.array([0, 1, 0])
+        default_color = np.array([0.949, 0.8, 0.2])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.6
+        local_rgb_interpolation = 0.3
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
@@ -415,7 +421,7 @@ class PushEnv(IsaacEnv):
     def randomize_goal_marker(self):
         default_color = np.array([1., 0, 0])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.5
+        local_rgb_interpolation = 0.3
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/GoalMarker/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
@@ -486,6 +492,9 @@ class PushObservationManager(ObservationManager):
     def arm_actions(self, env: PushEnv):
         """Last arm actions provided to env."""
         return env.actions[:, :-1]
+
+    def ee_actions(self, env: PushEnv):
+        return env.averaged_actions
 
     def tool_actions(self, env: PushEnv):
         """Last tool actions provided to env."""

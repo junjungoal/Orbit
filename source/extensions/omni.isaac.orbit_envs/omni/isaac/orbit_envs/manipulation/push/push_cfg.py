@@ -108,8 +108,8 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
-        position_uniform_min = [0.45, -0.1, 0.045]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.1, 0.045]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.15, 0.045]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.15, 0.045]  # position (x,y,z)
         # position_uniform_min = [0.45, -0.05, 0.045]  # position (x,y,z)
         # position_uniform_max = [0.5, 0.05, 0.045]  # position (x,y,z)
 
@@ -121,8 +121,8 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.6, 0., 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.55, -0.1, 0.]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.1, 0.]  # position (x,y,z)
+        position_uniform_min = [0.55, -0.15, 0.]  # position (x,y,z)
+        position_uniform_max = [0.65, 0.15, 0.]  # position (x,y,z)
         # position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
         # position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
 
@@ -143,24 +143,24 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        arm_dof_pos = {"scale": 1.0}
+        # arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
-        tool_positions = {"scale": 1.0}
+        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         # tool_orientations = {"scale": 1.0}
         # -- object state
-        object_positions = {"scale": 1.0}
+        # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         object_orientations = {"scale": 1.0}
-        object_relative_tool_positions = {"scale": 1.0}
+        object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        object_desired_positions = {"scale": 1.0}
+        # object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
         # arm_actions = {"scale": 1.0}
-        # tool_actions = {"scale": 1.0}
+        ee_actions = {"scale": 1.0}
 
     # global observation settings
     return_dict_obs_in_group = False
@@ -179,7 +179,7 @@ class RewardsCfg:
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
-    push_object_success = {"weight": 7., "threshold": 0.04}
+    push_object_success = {"weight": 7., "threshold": 0.05}
 
 
 @configclass
@@ -199,9 +199,10 @@ class DomainRandomizationCfg:
     randomize_light = True
     randomize_robot = True
     randomize_background = True
-    randomize_camera = False
+    randomize_camera = True
     camera_pos_noise = 0.01
-    camera_ori_noise = 0.04
+    camera_ori_noise = 0.03
+    random_obs_amplitude = False
 
 @configclass
 class ControlCfg:
