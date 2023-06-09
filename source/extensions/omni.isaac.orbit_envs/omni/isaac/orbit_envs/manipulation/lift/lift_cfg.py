@@ -41,7 +41,6 @@ class ManipulationObjectCfg(RigidObjectCfg):
         # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
         scale=(1, 1, 1),
-        # scale=(0.8, 0.8, 0.8),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
         pos=(0.4, 0.0, 0.04), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
@@ -55,7 +54,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=1.2, dynamic_friction=1.2, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -130,7 +129,7 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        arm_dof_pos = {"scale": 1.0}
+        # arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         tool_dof_pos_scaled = {"scale": 1.0}
@@ -144,6 +143,8 @@ class ObservationsCfg:
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_to_goal_positions = {"scale": 1.0}
+        # tool_actions_bool = {'scale': 1.0}
+        # ee_actions = {'scale': 1.0}
         # object_desired_positions = {"scale": 1.0}
 
     # global observation settings
@@ -161,9 +162,9 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 1., "sigma": 10}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 5}
-    grasp_object_success = {'weight': 2}
-    lifting_object_success = {"weight": 5, "threshold": 0.05}
+    tracking_object_position_tanh = {"weight": 2., "sigma": 10}
+    grasp_object_success = {'weight': 0.5}
+    # lifting_object_success = {"weight": 0.5, "threshold": 0.05}
 
 
 @configclass
@@ -193,7 +194,7 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.1, 0.1, 0.1),
-        ee_min_limit=(0.15, -0.4, 0.01),
+        ee_min_limit=(0.15, -0.4, 0.005),
         ee_max_limit=(0.7, 0.4, 0.6)
     )
 
@@ -204,9 +205,9 @@ class DomainRandomizationCfg:
     randomize_light = True
     randomize_robot = True
     randomize_background = True
-    randomize_camera = False
+    randomize_camera = True
     camera_pos_noise = 0.01
-    camera_ori_noise = 0.04
+    camera_ori_noise = 0.03
 
 ##
 # Environment configuration
@@ -218,7 +219,7 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4 * (1/100) * 60)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4 * (1/100) * 100)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(

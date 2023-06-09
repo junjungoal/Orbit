@@ -197,7 +197,7 @@ class LiftEnv(IsaacEnv):
 
             # desired = self._ik_controller.desired_ee_pos
             self.robot_actions[:, -1] = gripper_action
-            self.robot_actions[:, -1] = self.actions[:, -1]
+            # self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
@@ -500,6 +500,9 @@ class LiftObservationManager(ObservationManager):
     def arm_actions(self, env: LiftEnv):
         """Last arm actions provided to env."""
         return env.actions[:, :-1]
+
+    def ee_actions(self, env: LiftEnv):
+        return env.averaged_actions[:, :3]
 
     def tool_actions(self, env: LiftEnv):
         """Last tool actions provided to env."""
