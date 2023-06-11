@@ -162,7 +162,7 @@ class ObservationsCfg:
         # object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
-        arm_actions = {"scale": 1.0}
+        previous_actions = {"scale": 1.0}
         # ee_actions = {"scale": 1.0}
 
     # global observation settings

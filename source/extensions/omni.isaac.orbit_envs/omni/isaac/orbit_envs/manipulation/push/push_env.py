@@ -501,6 +501,9 @@ class PushObservationManager(ObservationManager):
         """Last arm actions provided to env."""
         return env.actions
 
+    def previous_actions(self, env: PushEnv):
+        return env.previous_actions
+
     def ee_actions(self, env: PushEnv):
         return env.averaged_actions
 
