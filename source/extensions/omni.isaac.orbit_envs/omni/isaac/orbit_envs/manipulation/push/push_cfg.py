@@ -162,7 +162,7 @@ class ObservationsCfg:
         # object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
-        # arm_actions = {"scale": 1.0}
+        arm_actions = {"scale": 1.0}
         # ee_actions = {"scale": 1.0}
 
     # global observation settings
@@ -183,7 +183,7 @@ class RewardsCfg:
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
-    penalizing_action_rate_l2 = {"weight": 0.1}
+    # penalizing_action_rate_l2 = {"weight": 0.5}
     push_object_success = {"weight": 7., "threshold": 0.05}
 
 
@@ -221,7 +221,7 @@ class ControlCfg:
     # decimation: Number of control action updates @ sim dt per policy dt
     decimation = 4
 
-    moving_average = False
+    moving_average = True
     decay = 0.7
 
     # configuration loaded when control_type == "inverse_kinematics"
