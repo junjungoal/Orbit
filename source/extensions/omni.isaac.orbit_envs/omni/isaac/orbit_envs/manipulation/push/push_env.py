@@ -155,6 +155,9 @@ class PushEnv(IsaacEnv):
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             self._ik_controller.reset_idx(env_ids)
 
+        self.randomize()
+
+    def randomize(self):
         if self.cfg.domain_randomization.randomize:
             if self.cfg.domain_randomization.randomize_object:
                 self.randomize_object()
@@ -245,6 +248,8 @@ class PushEnv(IsaacEnv):
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
+        if self.cfg.domain_randomization.randomize and self.cfg.domain_randomization.every_step:
+            self.randomize()
 
     def _get_observations(self) -> VecEnvObs:
         # compute observations

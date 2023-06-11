@@ -40,6 +40,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     """Properties for the object to manipulate in the scene."""
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
+        # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_big_instanceable.usd"),
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
         # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_small_instanceable.usd"),
         scale=(1, 1, 1),
@@ -148,12 +149,14 @@ class ObservationsCfg:
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
-        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
-        # tool_orientations = {"scale": 1.0}
+        # tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        tool_positions = {"scale": 1.0}
+        tool_orientations = {"scale": 1.0}
         # -- object state
         # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
-        object_orientations = {"scale": 1.0}
-        object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        # object_orientations = {"scale": 1.0}
+        # object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         # object_desired_positions = {"scale": 1.0}
@@ -175,10 +178,12 @@ class RewardsCfg:
 
     # -- robot-centric
     reaching_object_position_tanh = {"weight": 2., "sigma": 0.2}
+    # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.12}
     tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
+    penalizing_action_rate_l2 = {"weight": 0.1}
     push_object_success = {"weight": 7., "threshold": 0.05}
 
 
@@ -193,13 +198,14 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = False
+    every_step = True
     randomize_object = True
     randomize_table = True
     randomize_goal_marker = True
     randomize_light = True
     randomize_robot = True
     randomize_background = True
-    randomize_camera = True
+    randomize_camera = False
     camera_pos_noise = 0.01
     camera_ori_noise = 0.03
     random_obs_amplitude = False
@@ -215,7 +221,7 @@ class ControlCfg:
     # decimation: Number of control action updates @ sim dt per policy dt
     decimation = 4
 
-    moving_average = True
+    moving_average = False
     decay = 0.7
 
     # configuration loaded when control_type == "inverse_kinematics"
@@ -225,8 +231,8 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.1, 0.1, 0.1),
-        ee_min_limit=(0.15, -0.4, 0.01),
-        ee_max_limit=(0.7, 0.4, 0.5)
+        ee_min_limit=(0.15, -0.45, 0.01),
+        ee_max_limit=(0.7, 0.45, 0.5)
     )
 
 
