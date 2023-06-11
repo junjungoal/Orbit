@@ -237,7 +237,8 @@ class PushEnv(IsaacEnv):
         # terminations
         self._check_termination()
         # -- store history
-        self.previous_actions = self.actions.clone()
+        # self.previous_actions = self.actions.clone()
+        self.previous_actions = actions.clone().to(device=self.device)
 
         # -- add information to extra if timeout occurred due to episode length
         # Note: this is used by algorithms like PPO where time-outs are handled differently
