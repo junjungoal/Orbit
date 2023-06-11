@@ -166,7 +166,9 @@ class PushEnv(IsaacEnv):
                                             new_camera_quat.cpu().numpy(),
                                             env_ids)
 
+        self.randomize()
 
+    def randomize(self):
         if self.cfg.domain_randomization.randomize:
             if self.cfg.domain_randomization.randomize_object:
                 self.randomize_object()
@@ -244,6 +246,8 @@ class PushEnv(IsaacEnv):
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
+        if self.cfg.domain_randomization.randomize and self.cfg.domain_randomization.every_step:
+            self.randomize()
 
     def _get_observations(self) -> VecEnvObs:
         # compute observations
