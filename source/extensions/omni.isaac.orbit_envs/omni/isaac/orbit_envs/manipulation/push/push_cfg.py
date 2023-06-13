@@ -144,25 +144,25 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        # arm_dof_pos = {"scale": 1.0}
+        arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
         # tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         tool_positions = {"scale": 1.0}
-        tool_orientations = {"scale": 1.0}
+        # tool_orientations = {"scale": 1.0}
         # -- object state
-        # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
-        # object_orientations = {"scale": 1.0}
+        object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        object_orientations = {"scale": 1.0}
         # object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        # object_desired_positions = {"scale": 1.0}
+        object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
-        previous_actions = {"scale": 1.0}
+        # previous_actions = {"scale": 1.0}
         # ee_actions = {"scale": 1.0}
 
     # global observation settings
@@ -197,8 +197,8 @@ class TerminationsCfg:
 
 @configclass
 class DomainRandomizationCfg:
-    randomize = False
-    every_step = True
+    randomize = True
+    every_step = False
     randomize_object = True
     randomize_table = True
     randomize_goal_marker = True

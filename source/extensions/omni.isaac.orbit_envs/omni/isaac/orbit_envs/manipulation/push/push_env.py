@@ -476,7 +476,7 @@ class PushObservationManager(ObservationManager):
 
     def object_positions(self, env: PushEnv):
         """Current object position."""
-        return env.object.data.root_pos_w - env.envs_positions
+        return env.object.data.root_pos_w[:, :2] - env.envs_positions[:, :2]
 
     def object_orientations(self, env: PushEnv):
         """Current object orientation."""
