@@ -155,9 +155,9 @@ class PushEnv(IsaacEnv):
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             self._ik_controller.reset_idx(env_ids)
 
-        self.randomize()
+        self.randomize(env_ids)
 
-    def randomize(self):
+    def randomize(self, env_ids):
         if self.cfg.domain_randomization.randomize:
             if self.cfg.domain_randomization.randomize_object:
                 self.randomize_object()
@@ -195,8 +195,8 @@ class PushEnv(IsaacEnv):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
         if self.cfg.control.moving_average:
-            # self.averaged_actions = self.cfg.control.decay * self.averaged_actions + (1- self.cfg.control.decay) * self.actions
-            self.averaged_actions = self.cfg.control.decay * self.previous_actions + (1- self.cfg.control.decay) * self.actions
+            self.averaged_actions = self.cfg.control.decay * self.averaged_actions + (1- self.cfg.control.decay) * self.actions
+            # self.averaged_actions = self.cfg.control.decay * self.previous_actions + (1- self.cfg.control.decay) * self.actions
             self.actions = self.averaged_actions
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
@@ -251,7 +251,7 @@ class PushEnv(IsaacEnv):
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
         if self.cfg.domain_randomization.randomize and self.cfg.domain_randomization.every_step:
-            self.randomize()
+            self.randomize(torch.arange(self.num_envs).to(self.device))
 
     def _get_observations(self) -> VecEnvObs:
         # compute observations

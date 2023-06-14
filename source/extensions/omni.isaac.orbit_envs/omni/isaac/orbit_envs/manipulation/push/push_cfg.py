@@ -198,14 +198,14 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = False
+    every_step = True
     randomize_object = True
     randomize_table = True
     randomize_goal_marker = True
     randomize_light = True
     randomize_robot = True
     randomize_background = True
-    randomize_camera = False
+    randomize_camera = True
     camera_pos_noise = 0.01
     camera_ori_noise = 0.03
     random_obs_amplitude = False
