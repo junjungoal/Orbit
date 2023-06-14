@@ -153,7 +153,8 @@ class ObservationsCfg:
         tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
-        object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        object_positions = {"scale": 1.0}
         object_orientations = {"scale": 1.0}
         # object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         object_relative_tool_positions = {"scale": 1.0}
@@ -183,7 +184,7 @@ class RewardsCfg:
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
-    # penalizing_action_rate_l2 = {"weight": 0.5}
+    penalizing_action_rate_l2 = {"weight": 1.}
     push_object_success = {"weight": 7., "threshold": 0.05}
 
 
@@ -221,8 +222,8 @@ class ControlCfg:
     # decimation: Number of control action updates @ sim dt per policy dt
     decimation = 4
 
-    moving_average = True
-    decay = 0.7
+    moving_average = False
+    decay = 0.5
 
     # configuration loaded when control_type == "inverse_kinematics"
     # inverse_kinematics: InverseKinematicsCfg = InverseKinematicsCfg(
