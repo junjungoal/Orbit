@@ -144,25 +144,26 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        # arm_dof_pos = {"scale": 1.0}
+        arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
         # tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         tool_positions = {"scale": 1.0}
-        tool_orientations = {"scale": 1.0}
+        # tool_orientations = {"scale": 1.0}
         # -- object state
         # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
-        # object_orientations = {"scale": 1.0}
+        object_positions = {"scale": 1.0}
+        object_orientations = {"scale": 1.0}
         # object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        # object_desired_positions = {"scale": 1.0}
+        object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
-        previous_actions = {"scale": 1.0}
+        # previous_actions = {"scale": 1.0}
         # ee_actions = {"scale": 1.0}
 
     # global observation settings
@@ -183,7 +184,7 @@ class RewardsCfg:
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
-    # penalizing_action_rate_l2 = {"weight": 0.5}
+    penalizing_action_rate_l2 = {"weight": 1.}
     push_object_success = {"weight": 7., "threshold": 0.05}
 
 
@@ -197,8 +198,8 @@ class TerminationsCfg:
 
 @configclass
 class DomainRandomizationCfg:
-    randomize = False
-    every_step = True
+    randomize = True
+    every_step = False
     randomize_object = True
     randomize_table = True
     randomize_goal_marker = True
@@ -221,8 +222,8 @@ class ControlCfg:
     # decimation: Number of control action updates @ sim dt per policy dt
     decimation = 4
 
-    moving_average = True
-    decay = 0.7
+    moving_average = False
+    decay = 0.5
 
     # configuration loaded when control_type == "inverse_kinematics"
     # inverse_kinematics: InverseKinematicsCfg = InverseKinematicsCfg(

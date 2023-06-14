@@ -196,8 +196,7 @@ class PushEnv(IsaacEnv):
         self.actions = actions.clone().to(device=self.device)
         if self.cfg.control.moving_average:
             # self.averaged_actions = self.cfg.control.decay * self.averaged_actions + (1- self.cfg.control.decay) * self.actions
-            self.averaged_actions = self.cfg.control.decay * self.previous_actions + (1- self.cfg.control.decay) * self.actions
-            self.actions = self.averaged_actions
+            self.actions = self.cfg.control.decay * self.previous_actions + (1- self.cfg.control.decay) * self.actions
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             # set the controller commands
@@ -476,7 +475,7 @@ class PushObservationManager(ObservationManager):
 
     def object_positions(self, env: PushEnv):
         """Current object position."""
-        return env.object.data.root_pos_w - env.envs_positions
+        return env.object.data.root_pos_w[:, :2] - env.envs_positions[:, :2]
 
     def object_orientations(self, env: PushEnv):
         """Current object orientation."""
