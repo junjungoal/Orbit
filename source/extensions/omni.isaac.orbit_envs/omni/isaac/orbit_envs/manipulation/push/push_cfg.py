@@ -149,8 +149,8 @@ class ObservationsCfg:
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
-        # tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
-        tool_positions = {"scale": 1.0}
+        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        # tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
         # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
@@ -207,9 +207,9 @@ class DomainRandomizationCfg:
     randomize_robot = True
     randomize_background = True
     randomize_camera = True
-    camera_pos_noise = 0.01
+    camera_pos_noise = 0.015
     camera_ori_noise = 0.03
-    random_obs_amplitude = False
+    random_obs_amplitude = True
 
 @configclass
 class ControlCfg:
