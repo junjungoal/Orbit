@@ -109,8 +109,8 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
-        position_uniform_min = [0.45, -0.15, 0.045]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.15, 0.045]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.2, 0.045]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.2, 0.045]  # position (x,y,z)
         # position_uniform_min = [0.45, -0.05, 0.045]  # position (x,y,z)
         # position_uniform_max = [0.5, 0.05, 0.045]  # position (x,y,z)
 
@@ -122,8 +122,8 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.6, 0., 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.55, -0.15, 0.]  # position (x,y,z)
-        position_uniform_max = [0.65, 0.15, 0.]  # position (x,y,z)
+        position_uniform_min = [0.5, -0.2, 0.]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.2, 0.]  # position (x,y,z)
         # position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
         # position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
 
@@ -180,6 +180,7 @@ class RewardsCfg:
     # -- robot-centric
     reaching_object_position_tanh = {"weight": 2., "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.12}
+    # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
     tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
@@ -200,6 +201,7 @@ class TerminationsCfg:
 class DomainRandomizationCfg:
     randomize = True
     every_step = True
+    perlin_noise = False
     randomize_object = True
     randomize_table = True
     randomize_goal_marker = True
@@ -209,7 +211,7 @@ class DomainRandomizationCfg:
     randomize_camera = True
     camera_pos_noise = 0.015
     camera_ori_noise = 0.03
-    random_obs_amplitude = True
+    random_obs_amplitude = False
 
 @configclass
 class ControlCfg:
@@ -232,8 +234,8 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.1, 0.1, 0.1),
-        ee_min_limit=(0.15, -0.45, 0.01),
-        ee_max_limit=(0.7, 0.45, 0.5)
+        ee_min_limit=(0.15, -0.5, 0.01),
+        ee_max_limit=(0.7, 0.5, 0.5)
     )
 
 

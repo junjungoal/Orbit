@@ -97,7 +97,7 @@ class IsaacEnv(gym.Env):
         # store inputs to class
         self.cfg = cfg
         self.enable_render = not headless
-        # self.enable_render = True
+        self.enable_render = True
         self.enable_viewport = viewport or self.enable_render
         self.enable_camera = enable_camera
         # extract commonly used parameters
@@ -554,11 +554,13 @@ class IsaacEnv(gym.Env):
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         # prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visual/OmniPBR')
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visual/Vinyl')
-        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+        # omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
         omni.usd.create_material_input(prim, 'diffuse_color_constant', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
-        if np.random.rand() < 0.5:
+        if np.random.rand() < 0.3 and self.cfg.domain_randomization.perlin_noise:
             idx = np.random.randint(200)
             omni.usd.create_material_input(prim, 'diffuse_texture', '/home/jyamada/orbit/textures/perlin_texture_{}.png'.format(idx), Sdf.ValueTypeNames.Asset)
+        else:
+            omni.usd.create_material_input(prim, 'diffuse_texture', '', Sdf.ValueTypeNames.Asset)
 
 
     def randomize_robot(self):
@@ -579,17 +581,16 @@ class IsaacEnv(gym.Env):
                 local_rgb_interpolation = 0.4
                 rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
             prim = prim_utils.get_prim_at_path(prim_path)
-            if np.random.rand() < 0.5:
-                idx = np.random.randint(200)
-                omni.usd.create_material_input(prim, 'diffuse_texture', '/home/jyamada/orbit/textures/perlin_texture_{}.png'.format(idx), Sdf.ValueTypeNames.Asset)
-            else:
-                omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
-                omni.usd.create_material_input(prim, 'diffuse_color_constant', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+            # if np.random.rand() < 0.5:
+            #     idx = np.random.randint(200)
+            #     omni.usd.create_material_input(prim, 'diffuse_texture', '/home/jyamada/orbit/textures/perlin_texture_{}.png'.format(idx), Sdf.ValueTypeNames.Asset)
+            # else:
+            # omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+            omni.usd.create_material_input(prim, 'diffuse_color_constant', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
 
     def randomize_light(self):
-        # intensity = np.random.choice(np.linspace(1000, 20000, 15))
-        intensity = np.random.choice(np.linspace(1000, 10000, 50))
+        intensity = np.random.choice(np.linspace(1000, 20000, 15))
         # print('Intensity: ', intensity)
         prim_path = '/World/defaultGroundPlane'
         prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
@@ -610,12 +611,14 @@ class IsaacEnv(gym.Env):
     def randomize_background(self):
         default_color = np.array([0.05, 0.129, 0.3176])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.4
+        local_rgb_interpolation = 0.6
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Background/visuals/OmniPBR')
-        if np.random.rand() < 0.5:
+        omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+        omni.usd.create_material_input(prim, 'diffuse_color_constant', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+        if np.random.rand() < 0.3 and self.cfg.domain_randomization.perlin_noise:
             idx = np.random.randint(200)
             omni.usd.create_material_input(prim, 'diffuse_texture', '/home/jyamada/orbit/textures/perlin_texture_{}.png'.format(idx), Sdf.ValueTypeNames.Asset)
         else:
-            omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
-            omni.usd.create_material_input(prim, 'diffuse_color_constant', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+            omni.usd.create_material_input(prim, 'diffuse_texture', '', Sdf.ValueTypeNames.Asset)
