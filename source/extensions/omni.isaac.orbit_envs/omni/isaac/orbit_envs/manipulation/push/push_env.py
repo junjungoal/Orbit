@@ -155,27 +155,27 @@ class PushEnv(IsaacEnv):
         if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
             self._ik_controller.reset_idx(env_ids)
 
-        self.randomize(env_ids)
+        self.randomize(env_ids, True)
 
-    def randomize(self, env_ids):
+    def randomize(self, env_ids, reset=False):
         if self.cfg.domain_randomization.randomize:
             if self.cfg.domain_randomization.randomize_object:
-                self.randomize_object()
+                self.randomize_object(reset)
 
             if self.cfg.domain_randomization.randomize_background:
-                self.randomize_background()
+                self.randomize_background(reset)
 
             if self.cfg.domain_randomization.randomize_goal_marker:
-                self.randomize_goal_marker()
+                self.randomize_goal_marker(reset)
 
             if self.cfg.domain_randomization.randomize_light:
-                self.randomize_light()
+                self.randomize_light(reset)
 
             if self.cfg.domain_randomization.randomize_robot:
-                self.randomize_robot()
+                self.randomize_robot(reset)
 
             if self.cfg.domain_randomization.randomize_table:
-                self.randomize_table()
+                self.randomize_table(reset)
 
             if self.cfg.domain_randomization.randomize_camera and self.enable_camera:
                 camera_pos = self.default_camera_pos[env_ids] + (torch.randn((len(env_ids), 3), device=self.device) * 2 - 1) * self.cfg.domain_randomization.camera_pos_noise
@@ -417,7 +417,7 @@ class PushEnv(IsaacEnv):
         root_state[:, 0:3] += self.envs_positions[env_ids]
         self.goal.set_root_state(root_state, env_ids=env_ids)
 
-    def randomize_object(self):
+    def randomize_object(self, reset=False):
         default_color = np.array([0.949, 0.8, 0.2])
         random_color = np.random.uniform(0, 1, size=3)
         local_rgb_interpolation = 0.5
@@ -427,7 +427,7 @@ class PushEnv(IsaacEnv):
         omni.usd.create_material_input(prim, 'diffuse_color_constant', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
 
-    def randomize_goal_marker(self):
+    def randomize_goal_marker(self, reset=False):
         default_color = np.array([1., 0, 0])
         random_color = np.random.uniform(0, 1, size=3)
         local_rgb_interpolation = 0.3
