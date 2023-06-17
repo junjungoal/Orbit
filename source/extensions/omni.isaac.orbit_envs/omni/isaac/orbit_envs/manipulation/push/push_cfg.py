@@ -149,7 +149,7 @@ class ObservationsCfg:
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
-        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
         # tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
@@ -167,7 +167,7 @@ class ObservationsCfg:
         # ee_actions = {"scale": 1.0}
 
     # global observation settings
-    return_dict_obs_in_group = False
+    return_dict_obs_in_group = True
     """Whether to return observations as dictionary or flattened vector within groups."""
     # observation groups
     policy: PolicyCfg = PolicyCfg()
@@ -200,7 +200,7 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = True
+    every_step = False
     perlin_noise = False
     randomize_object = True
     randomize_table = True
