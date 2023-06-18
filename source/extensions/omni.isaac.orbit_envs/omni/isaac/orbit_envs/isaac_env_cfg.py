@@ -61,10 +61,10 @@ class CameraCfg:
     """Initial camera position (in m). Default is (7.5, 7.5, 7.5)."""
     lookat: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     """Initial camera target position (in m). Default is (0.0, 0.0, 0.0)."""
-    # position: Tuple[float, float, float] = (1.7, 0, 1.24)
     position: Tuple[float, float, float] = (1.35, 0, 0.8)
-    # orientation: Tuple[float, float, float, float] = (-0.3069373, 0.6372103, 0.6362135, -0.3081962)
-    orientation: Tuple[float, float, float, float] = (-0.32275, 0.6290272, 0.6290272, -0.3246339)
+    # position: Tuple[float, float, float] = (1.15, 0, 1.)
+    orientation: Tuple[float, float, float, float] = (-0.3069373, 0.6372103, 0.6362135, -0.3081962)
+    # orientation: Tuple[float, float, float, float] = (-0.2583664, 0.6584361, 0.6574997, -0.2596206,)
     height: int = 480
     width: int = 640
     device: str = 'cuda'
