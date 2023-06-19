@@ -130,10 +130,18 @@ class PushEnv(IsaacEnv):
         # -- robot DOF state
         dof_pos, dof_vel = self.robot.get_default_dof_state(env_ids=env_ids)
         self.robot.set_dof_state(dof_pos, dof_vel, env_ids=env_ids)
-        # -- object pose
-        self._randomize_object_initial_pose(env_ids=env_ids, cfg=self.cfg.randomization.object_initial_pose)
-        # -- goal pose
-        self._randomize_goal_pose(env_ids=env_ids, cfg=self.cfg.randomization.goal_pose)
+
+        invalid = True
+        while invalid:
+            # -- object pose
+            self._randomize_object_initial_pose(env_ids=env_ids, cfg=self.cfg.randomization.object_initial_pose)
+            # -- goal pose
+            self._randomize_goal_pose(env_ids=env_ids, cfg=self.cfg.randomization.goal_pose)
+            object_position_error = torch.norm(self.object_init_pose_w[:, :2] - self.goal_init_pose_w[:, :2], dim=1)
+            invalid_idxs = torch.where(object_position_error < 0.05, 1.0, 0.0)
+
+            if torch.sum(invalid_idxs) == 0:
+                invalid = False
 
         # -- Reward logging
         # fill extras with episode information
@@ -333,6 +341,7 @@ class PushEnv(IsaacEnv):
         self.object_root_pose_ee = torch.zeros((self.num_envs, 7), device=self.device)
         # time-step = 0
         self.object_init_pose_w = torch.zeros((self.num_envs, 7), device=self.device)
+        self.goal_init_pose_w = torch.zeros((self.num_envs, 7), device=self.device)
 
     def _debug_vis(self):
         """Visualize the environment in debug mode."""
@@ -415,6 +424,7 @@ class PushEnv(IsaacEnv):
             raise ValueError(f"Invalid category for randomizing the desired object positions '{cfg.position_cat}'.")
 
         root_state[:, 0:3] += self.envs_positions[env_ids]
+        self.goal_init_pose_w[env_ids, :3] = root_state[:, :3]
         self.goal.set_root_state(root_state, env_ids=env_ids)
 
     def randomize_object(self, reset=False):
@@ -545,7 +555,7 @@ class PushRewardManager(RewardManager):
         error = torch.sum(torch.square(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
         return torch.exp(-error / sigma)
 
-    def reaching_object_position_tanh(self, env: PushEnv, sigma: float):
+    def reaching_object_position_tanh(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tool sites tracking position error using tanh-kernel."""
         # distance of end-effector to the object: (num_envs,)
         ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
@@ -557,8 +567,14 @@ class PushRewardManager(RewardManager):
         num_tool_sites = tool_sites_distance.shape[1]
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        return 1 - torch.tanh(ee_distance / sigma)
-        # return 1 - torch.tanh(average_distance / sigma)
+        success = torch.where(torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1) < threshold, True, False)
+        ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
+        not_too_far_away = ee_to_obj < 0.1
+        idx = torch.logical_and(success, ee_to_obj)
+        reward = 1 - torch.tanh(ee_distance / sigma)
+        reward[idx] = 1.
+        return reward
+        # return 1 - torch.tanh(ee_distance / sigma)
 
     def penalizing_action_rate_l2(self, env: PushEnv):
         """Penalize large variations in action commands."""

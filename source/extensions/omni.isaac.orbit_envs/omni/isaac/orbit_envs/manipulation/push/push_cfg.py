@@ -178,7 +178,7 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2., "sigma": 0.2}
+    reaching_object_position_tanh = {"weight": 2., "sigma": 0.2, "threshold": 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.12}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
     tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
@@ -200,7 +200,7 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = True
+    every_step = False
     perlin_noise = True
     randomize_object = True
     randomize_table = True
