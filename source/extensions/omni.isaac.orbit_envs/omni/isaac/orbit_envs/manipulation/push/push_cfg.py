@@ -149,8 +149,8 @@ class ObservationsCfg:
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
-        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
-        # tool_positions = {"scale": 1.0}
+        # tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
+        tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
         # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
@@ -167,7 +167,7 @@ class ObservationsCfg:
         # ee_actions = {"scale": 1.0}
 
     # global observation settings
-    return_dict_obs_in_group = True
+    return_dict_obs_in_group = False
     """Whether to return observations as dictionary or flattened vector within groups."""
     # observation groups
     policy: PolicyCfg = PolicyCfg()
@@ -178,10 +178,10 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2., "sigma": 0.2, "threshold": 0.05}
+    reaching_object_position_tanh = {"weight": 2., "sigma": 0.3, "threshold": 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.12}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
+    tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.1}
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
@@ -200,7 +200,7 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = False
+    every_step = True
     perlin_noise = True
     randomize_object = True
     randomize_table = True
@@ -209,7 +209,7 @@ class DomainRandomizationCfg:
     randomize_robot = True
     randomize_background = True
     randomize_camera = True
-    camera_pos_noise = 0.015
+    camera_pos_noise = 0.01
     camera_ori_noise = 0.03
     random_obs_amplitude = False
 
@@ -234,7 +234,7 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.1, 0.1, 0.1),
-        ee_min_limit=(0.15, -0.5, 0.012),
+        ee_min_limit=(0.15, -0.5, 0.01),
         ee_max_limit=(0.7, 0.5, 0.5)
     )
 
