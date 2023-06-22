@@ -153,12 +153,12 @@ class ObservationsCfg:
         # tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
-        object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
-        # object_positions = {"scale": 1.0}
+        # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
+        object_positions = {"scale": 1.0}
         object_orientations = {"scale": 1.0}
         # object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         object_relative_tool_positions = {"scale": 1.0}
-        object_relative_tool_orientations = {"scale": 1.0}
+        # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
@@ -178,7 +178,7 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2., "sigma": 0.5, "threshold": 0.05}
+    reaching_object_position_tanh = {"weight": 2., "sigma": 0.3, "threshold": 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.12}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
     tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
@@ -186,7 +186,7 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
     penalizing_action_rate_l2 = {"weight": 1.}
-    push_object_success = {"weight": 7., "threshold": 0.05}
+    # push_object_success = {"weight": 7., "threshold": 0.05}
 
 
 @configclass
@@ -206,7 +206,7 @@ class DomainRandomizationCfg:
     randomize_table = True
     randomize_goal_marker = True
     randomize_light = True
-    randomize_robot = False
+    randomize_robot = True
     randomize_background = True
     randomize_camera = True
     camera_pos_noise = 0.015

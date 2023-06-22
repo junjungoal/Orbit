@@ -566,21 +566,21 @@ class IsaacEnv(gym.Env):
 
     def randomize_robot(self, reset=False):
         default_color = np.array([1., 1, 1])
-        # if np.random.rand() > 0.7:
-        #     rgb = default_color
-        # else:
-        #     random_color = np.random.uniform(0, 1, size=3)
-        #     local_rgb_interpolation = 0.6
-        #     rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+        if np.random.rand() > 0.7:
+            rgb = default_color
+        else:
+            random_color = np.random.uniform(0, 1, size=3)
+            local_rgb_interpolation = 0.6
+            rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
 
         prim_paths = prim_utils.find_matching_prim_paths('/World/envs/env_0/Robot/*/visuals/Looks/PlasticWhite')[:-2]
         for prim_path in prim_paths:
-            if np.random.rand() > 0.7:
-                rgb = default_color
-            else:
-                random_color = np.random.uniform(0, 1, size=3)
-                local_rgb_interpolation = 0.4
-                rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
+            # if np.random.rand() > 0.7:
+            #     rgb = default_color
+            # else:
+            #     random_color = np.random.uniform(0, 1, size=3)
+            #     local_rgb_interpolation = 0.4
+            #     rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
             prim = prim_utils.get_prim_at_path(prim_path)
             omni.usd.create_material_input(prim, 'diffuse_color_constant', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
             omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
@@ -608,7 +608,7 @@ class IsaacEnv(gym.Env):
     def randomize_background(self, reset=False):
         default_color = np.array([0.05, 0.129, 0.3176])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.6
+        local_rgb_interpolation = 0.4
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Background/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
