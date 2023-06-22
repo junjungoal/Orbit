@@ -109,8 +109,8 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
-        position_uniform_min = [0.45, -0.2, 0.045]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.2, 0.045]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.15, 0.045]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.15, 0.045]  # position (x,y,z)
         # position_uniform_min = [0.45, -0.05, 0.045]  # position (x,y,z)
         # position_uniform_max = [0.5, 0.05, 0.045]  # position (x,y,z)
 
@@ -122,8 +122,8 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.6, 0., 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.5, -0.2, 0.]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.2, 0.]  # position (x,y,z)
+        position_uniform_min = [0.5, -0.15, 0.]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.15, 0.]  # position (x,y,z)
         # position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
         # position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
 
@@ -144,21 +144,21 @@ class ObservationsCfg:
         enable_corruption: bool = True
         # observation terms
         # -- joint state
-        arm_dof_pos = {"scale": 1.0}
+        # arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
-        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
+        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
         # tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
-        # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
-        object_positions = {"scale": 1.0}
+        object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
+        # object_positions = {"scale": 1.0}
         object_orientations = {"scale": 1.0}
         # object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         object_relative_tool_positions = {"scale": 1.0}
-        # object_relative_tool_orientations = {"scale": 1.0}
+        object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
@@ -167,7 +167,7 @@ class ObservationsCfg:
         # ee_actions = {"scale": 1.0}
 
     # global observation settings
-    return_dict_obs_in_group = True
+    return_dict_obs_in_group = False
     """Whether to return observations as dictionary or flattened vector within groups."""
     # observation groups
     policy: PolicyCfg = PolicyCfg()
@@ -178,7 +178,7 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2., "sigma": 0.2, "threshold": 0.05}
+    reaching_object_position_tanh = {"weight": 2., "sigma": 0.5, "threshold": 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.12}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
     tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
@@ -200,13 +200,13 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = False
+    every_step = True
     perlin_noise = True
     randomize_object = True
     randomize_table = True
     randomize_goal_marker = True
     randomize_light = True
-    randomize_robot = True
+    randomize_robot = False
     randomize_background = True
     randomize_camera = True
     camera_pos_noise = 0.015
@@ -234,7 +234,7 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.1, 0.1, 0.1),
-        ee_min_limit=(0.15, -0.5, 0.012),
+        ee_min_limit=(0.15, -0.5, 0.01),
         ee_max_limit=(0.7, 0.5, 0.5)
     )
 
