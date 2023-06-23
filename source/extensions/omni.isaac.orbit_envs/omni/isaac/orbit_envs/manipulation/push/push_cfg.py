@@ -167,7 +167,7 @@ class ObservationsCfg:
         # ee_actions = {"scale": 1.0}
 
     # global observation settings
-    return_dict_obs_in_group = False
+    return_dict_obs_in_group = True
     """Whether to return observations as dictionary or flattened vector within groups."""
     # observation groups
     policy: PolicyCfg = PolicyCfg()
@@ -200,7 +200,7 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = True
+    every_step = False
     perlin_noise = True
     randomize_object = True
     randomize_table = True
