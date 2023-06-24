@@ -123,7 +123,7 @@ class RandomizationCfg:
         # randomize position
         position_default = [0.6, 0., 0.0]  # position default (x,y,z)
         position_uniform_min = [0.5, -0.15, 0.]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.15, 0.]  # position (x,y,z)
+        position_uniform_max = [0.65, 0.15, 0.]  # position (x,y,z)
         # position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
         # position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
 
@@ -149,7 +149,7 @@ class ObservationsCfg:
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
-        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
+        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
         # tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
@@ -178,7 +178,7 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2., "sigma": 0.3, "threshold": 0.05}
+    reaching_object_position_tanh = {"weight": 2., "sigma": 0.2, "threshold": 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.12}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
     tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
@@ -186,7 +186,7 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
     penalizing_action_rate_l2 = {"weight": 1.}
-    # push_object_success = {"weight": 7., "threshold": 0.05}
+    push_object_success = {"weight": 8., "threshold": 0.02}
 
 
 @configclass
