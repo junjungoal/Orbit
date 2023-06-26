@@ -250,8 +250,8 @@ class PushEnv(IsaacEnv):
         # self.previous_actions = self.actions.clone()
         self.previous_actions = actions.clone().to(device=self.device)
 
-        print("desired: ", self._ik_controller.desired_ee_pos, "action: ", actions)
-        print(self.robot.data.ee_state_w[:, 0:3] - self.envs_positions)
+        # print("desired: ", self._ik_controller.desired_ee_pos, "action: ", actions)
+        # print(self.robot.data.ee_state_w[:, 0:3] - self.envs_positions)
 
         # -- add information to extra if timeout occurred due to episode length
         # Note: this is used by algorithms like PPO where time-outs are handled differently
