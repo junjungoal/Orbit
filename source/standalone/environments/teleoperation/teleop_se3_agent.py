@@ -80,8 +80,8 @@ def main():
     # parse configuration
     env_cfg = parse_env_cfg(args_cli.task, use_gpu=not args_cli.cpu, num_envs=args_cli.num_envs)
     # modify configuration
-    env_cfg.control.control_type = "inverse_kinematics"
-    env_cfg.control.inverse_kinematics.command_type = "position_rel"
+    # env_cfg.control.control_type = "inverse_kinematics"
+    # env_cfg.control.inverse_kinematics.command_type = "position_rel"
     env_cfg.terminations.episode_timeout = False
     # create environment
     env = gym.make(args_cli.task, cfg=env_cfg, headless=args_cli.headless, enable_camera=False)

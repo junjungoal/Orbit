@@ -16,7 +16,6 @@ import omni.isaac.core.utils.prims as prim_utils
 import omni.isaac.orbit.utils.kit as kit_utils
 import omni.isaac.core.utils.prims as prim_utils
 from omni.isaac.orbit.controllers.differential_inverse_kinematics import DifferentialInverseKinematics
-from omni.isaac.orbit.controllers.inverse_kinematics import InverseKinematics
 from omni.isaac.orbit.markers import StaticMarker
 from omni.isaac.orbit.objects import RigidObject
 from omni.isaac.orbit.robots.single_arm import SingleArmManipulator
@@ -160,7 +159,7 @@ class PushEnv(IsaacEnv):
         self.previous_object_root_pos_w = self.object.data.root_pos_w.clone()
 
         # controller reset
-        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
+        if self.cfg.control.control_type == "inverse_kinematics":
             self._ik_controller.reset_idx(env_ids)
 
         self.randomize(env_ids, True)
@@ -209,7 +208,7 @@ class PushEnv(IsaacEnv):
             # self.averaged_actions = self.cfg.control.decay * self.previous_actions + (1- self.cfg.control.decay) * self.actions
             self.actions = self.averaged_actions
         # transform actions based on controller
-        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
+        if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
             self._ik_controller.set_command(self.actions)
             # use IK to convert to joint-space commands
@@ -282,7 +281,7 @@ class PushEnv(IsaacEnv):
     def _pre_process_cfg(self) -> None:
         """Pre-processing of configuration parameters."""
         # set configuration for task-space controller
-        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
+        if self.cfg.control.control_type == "inverse_kinematics":
             print("Using inverse kinematics controller...")
             # enable jacobian computation
             self.cfg.robot.data_info.enable_jacobian = True
@@ -323,13 +322,8 @@ class PushEnv(IsaacEnv):
         self.goal.initialize(self.env_ns + '/.*/GoalMarker')
 
         # create controller
-        if self.cfg.control.control_type == "differential_inverse_kinematics":
+        if self.cfg.control.control_type == "inverse_kinematics":
             self._ik_controller = DifferentialInverseKinematics(
-                self.cfg.control.inverse_kinematics, self.robot.count, self.device
-            )
-            self.num_actions = self._ik_controller.num_actions
-        elif self.cfg.control.control_type == 'inverse_kinematics':
-            self._ik_controller = InverseKinematics(
                 self.cfg.control.inverse_kinematics, self.robot.count, self.device
             )
             self.num_actions = self._ik_controller.num_actions
@@ -354,7 +348,7 @@ class PushEnv(IsaacEnv):
         # -- end-effector
         self._ee_markers.set_world_poses(self.robot.data.ee_state_w[:, 0:3], self.robot.data.ee_state_w[:, 3:7])
         # -- task-space commands
-        if self.cfg.control.control_type == "inverse_kinematics" or self.cfg.control.control_type == 'differential_inverse_kinematics':
+        if self.cfg.control.control_type == "inverse_kinematics":
             # convert to world frame
             ee_positions = self._ik_controller.desired_ee_pos + self.envs_positions
             ee_orientations = self._ik_controller.desired_ee_rot
@@ -483,7 +477,6 @@ class PushObservationManager(ObservationManager):
     def tool_positions(self, env: PushEnv):
         """Current end-effector position of the arm."""
         tool_pos = torch.clone(env.robot.data.ee_state_w[:, :3] - env.envs_positions)
-        # tool_pos[:, -1] -= 0.15
         return tool_pos
         # return env.robot.data.ee_state_w[:, :3] - env.envs_positions
 
@@ -508,7 +501,6 @@ class PushObservationManager(ObservationManager):
     def object_relative_tool_positions(self, env: PushEnv):
         """Current object position w.r.t. end-effector frame."""
         ee_pos = torch.clone(env.robot.data.ee_state_w[:, :3])
-        # ee_pos[:, -1] -= 0.15
         return env.object.data.root_pos_w - ee_pos
         # return env.object.data.root_pos_w - env.robot.data.ee_state_w[:, :3]
 
@@ -570,7 +562,6 @@ class PushRewardManager(RewardManager):
         """Penalize tool sites tracking position error using tanh-kernel."""
         # distance of end-effector to the object: (num_envs,)
         ee_pos = torch.clone(env.robot.data.ee_state_w[:, :3])
-        # ee_pos[:, -1] -= 0.15
         ee_distance = torch.norm(ee_pos - env.object.data.root_pos_w, dim=1)
         # ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         # distance of the tool sites to the object: (num_envs, num_tool_sites)
@@ -612,7 +603,6 @@ class PushRewardManager(RewardManager):
         """Penalize tracking object position error using tanh-kernel."""
         # distance of the end-effector to the object: (num_envs,)
         ee_pos = torch.clone(env.robot.data.ee_state_w[:, :3])
-        # ee_pos[:, -1] -= 0.15
         obj_to_goal = torch.norm(env.goal.data.root_pos_w[:, :2] - env.object.data.root_pos_w[:, :2], dim=1)
         ee_to_obj = torch.norm(env.object.data.root_pos_w-ee_pos, dim=1)
         # rewarded if the object is lifted above the threshold

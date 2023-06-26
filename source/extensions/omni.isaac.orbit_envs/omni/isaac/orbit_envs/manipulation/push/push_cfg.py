@@ -221,7 +221,7 @@ class ControlCfg:
     # action space
     # control_type = "default"  # "default", "inverse_kinematics"
     # control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
-    control_type = "differential_inverse_kinematics"  # "default", "inverse_kinematics"
+    control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
     decimation = 2
 
@@ -235,7 +235,8 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.1, 0.1, 0.1),
-        ee_min_limit=(0.15, -0.5, 0.15),
+        # ee_min_limit=(0.15, -0.5, 0.15),
+        ee_min_limit=(0.15, -0.5, 0.),
         ee_max_limit=(0.7, 0.5, 0.65)
     )
 
@@ -251,7 +252,7 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # General Settings
     env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=4 * (1/100) * 100)
-    viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
+    viewer: ViewerCfg = ViewerCfg(debug_vis=True, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         dt=1/100,
