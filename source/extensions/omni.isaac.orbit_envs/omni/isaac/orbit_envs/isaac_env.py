@@ -570,7 +570,7 @@ class IsaacEnv(gym.Env):
             rgb = default_color
         else:
             random_color = np.random.uniform(0, 1, size=3)
-            local_rgb_interpolation = 0.6
+            local_rgb_interpolation = 0.4
             rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
 
         prim_paths = prim_utils.find_matching_prim_paths('/World/envs/env_0/Robot/*/visuals/Looks/PlasticWhite')[:-2]
@@ -596,7 +596,7 @@ class IsaacEnv(gym.Env):
         random_color = np.random.uniform(0, 1, size=3)
         local_rgb_interpolation = 0.3
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
-        # prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'color', tuple(rgb))
+        prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'color', tuple(rgb))
         #
         #
         # default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')

@@ -206,7 +206,7 @@ class DomainRandomizationCfg:
     randomize_table = True
     randomize_goal_marker = True
     randomize_light = True
-    randomize_robot = True
+    randomize_robot = False
     randomize_background = True
     randomize_camera = True
     camera_pos_noise = 0.015
