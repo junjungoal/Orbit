@@ -250,8 +250,8 @@ class PushEnv(IsaacEnv):
         # self.previous_actions = self.actions.clone()
         self.previous_actions = actions.clone().to(device=self.device)
 
-        print("desired: ", self._ik_controller.desired_ee_pos, "action: ", actions)
-        print(self.robot.data.ee_state_w[:, 0:3] - self.envs_positions)
+        # print("desired: ", self._ik_controller.desired_ee_pos, "action: ", actions)
+        # print(self.robot.data.ee_state_w[:, 0:3] - self.envs_positions)
 
         # -- add information to extra if timeout occurred due to episode length
         # Note: this is used by algorithms like PPO where time-outs are handled differently
@@ -482,8 +482,8 @@ class PushObservationManager(ObservationManager):
 
     def tool_positions(self, env: PushEnv):
         """Current end-effector position of the arm."""
-        tool_pos = env.robot.data.ee_state_w[:, :3] - env.envs_positions
-        tool_pos[:, -1] -= 0.15
+        tool_pos = torch.clone(env.robot.data.ee_state_w[:, :3] - env.envs_positions)
+        # tool_pos[:, -1] -= 0.15
         return tool_pos
         # return env.robot.data.ee_state_w[:, :3] - env.envs_positions
 
@@ -507,8 +507,8 @@ class PushObservationManager(ObservationManager):
 
     def object_relative_tool_positions(self, env: PushEnv):
         """Current object position w.r.t. end-effector frame."""
-        ee_pos = env.robot.data.ee_state_w[:, :3]
-        ee_pos[:, -1] -= 0.15
+        ee_pos = torch.clone(env.robot.data.ee_state_w[:, :3])
+        # ee_pos[:, -1] -= 0.15
         return env.object.data.root_pos_w - ee_pos
         # return env.object.data.root_pos_w - env.robot.data.ee_state_w[:, :3]
 
@@ -569,8 +569,8 @@ class PushRewardManager(RewardManager):
     def reaching_object_position_tanh(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tool sites tracking position error using tanh-kernel."""
         # distance of end-effector to the object: (num_envs,)
-        ee_pos = env.robot.data.ee_state_w[:, :3]
-        ee_pos[:, -1] -= 0.15
+        ee_pos = torch.clone(env.robot.data.ee_state_w[:, :3])
+        # ee_pos[:, -1] -= 0.15
         ee_distance = torch.norm(ee_pos - env.object.data.root_pos_w, dim=1)
         # ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         # distance of the tool sites to the object: (num_envs, num_tool_sites)
@@ -611,8 +611,8 @@ class PushRewardManager(RewardManager):
     def tracking_object_position_tanh(self, env: PushEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using tanh-kernel."""
         # distance of the end-effector to the object: (num_envs,)
-        ee_pos = env.robot.data.ee_state_w[:, :3]
-        ee_pos[:, -1] -= 0.15
+        ee_pos = torch.clone(env.robot.data.ee_state_w[:, :3])
+        # ee_pos[:, -1] -= 0.15
         obj_to_goal = torch.norm(env.goal.data.root_pos_w[:, :2] - env.object.data.root_pos_w[:, :2], dim=1)
         ee_to_obj = torch.norm(env.object.data.root_pos_w-ee_pos, dim=1)
         # rewarded if the object is lifted above the threshold
