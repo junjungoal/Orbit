@@ -207,7 +207,7 @@ class DomainRandomizationCfg:
     randomize_table = True
     randomize_goal_marker = True
     randomize_light = True
-    randomize_robot = True
+    randomize_robot = False
     randomize_background = True
     randomize_camera = True
     camera_pos_noise = 0.015
@@ -235,8 +235,8 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.1, 0.1, 0.1),
-        ee_min_limit=(0.15, -0.5, 0.01),
-        ee_max_limit=(0.7, 0.5, 0.5)
+        ee_min_limit=(0.15, -0.5, 0.15),
+        ee_max_limit=(0.7, 0.5, 0.65)
     )
 
 
@@ -267,7 +267,7 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # Scene Settings
     # -- robot
-    FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG.init_state.dof_pos['panda_finger_joint*'] = 0
+    # FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG.init_state.dof_pos['panda_finger_joint*'] = 0
     robot: SingleArmManipulatorCfg = FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
     # -- object
     object: ManipulationObjectCfg = ManipulationObjectCfg()
