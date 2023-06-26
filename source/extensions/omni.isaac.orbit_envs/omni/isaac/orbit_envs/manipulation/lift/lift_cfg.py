@@ -145,7 +145,7 @@ class ObservationsCfg:
         object_to_goal_positions = {"scale": 1.0}
         # tool_actions_bool = {'scale': 1.0}
         # ee_actions = {'scale': 1.0}
-        # object_desired_positions = {"scale": 1.0}
+        object_desired_positions = {"scale": 1.0}
 
     # global observation settings
     return_dict_obs_in_group = False
@@ -162,10 +162,10 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 2., "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 0.2}
+    tracking_object_position_tanh = {"weight": 4., "sigma": 0.2}
     penalizing_action_rate_l2 = {"weight": 1.}
-    grasp_object_success = {'weight': 0.5}
-    # lifting_object_success = {"weight": 0.5, "threshold": 0.05}
+    grasp_object_success = {'weight': 1}
+    lifting_object_success = {"weight": 1, "threshold": 0.05}
 
 
 @configclass
