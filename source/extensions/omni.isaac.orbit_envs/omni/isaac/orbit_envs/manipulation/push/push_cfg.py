@@ -8,6 +8,7 @@ import os, sys
 from omni.isaac.orbit.controllers.differential_inverse_kinematics import DifferentialInverseKinematicsCfg
 from omni.isaac.orbit.controllers.inverse_kinematics import InverseKinematicsCfg
 from omni.isaac.orbit.objects import RigidObjectCfg
+# from omni.isaac.orbit.robots.config.peg_franka import FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
 from omni.isaac.orbit.robots.config.franka import FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
 from omni.isaac.orbit.robots.single_arm import SingleArmManipulatorCfg
 from omni.isaac.orbit.utils import configclass
@@ -200,7 +201,7 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = True
+    every_step = False
     perlin_noise = True
     randomize_object = True
     randomize_table = True
@@ -222,7 +223,7 @@ class ControlCfg:
     # control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     control_type = "differential_inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 4
+    decimation = 2
 
     moving_average = False
     decay = 0.5
@@ -250,11 +251,11 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # General Settings
     env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=4 * (1/100) * 100)
-    viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
+    viewer: ViewerCfg = ViewerCfg(debug_vis=True, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         dt=1/100,
-        substeps=1,
+        substeps=2,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
             gpu_total_aggregate_pairs_capacity=16 * 1024,

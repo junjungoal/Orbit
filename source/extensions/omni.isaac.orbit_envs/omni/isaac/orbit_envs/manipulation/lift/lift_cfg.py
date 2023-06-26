@@ -54,7 +54,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.5, dynamic_friction=1.5, restitution=0., prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -95,8 +95,8 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_uniform_min = [0.45, -0.03, 0.04]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.03, 0.04]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.05, 0.04]  # position (x,y,z)
+        position_uniform_max = [0.55, 0.05, 0.04]  # position (x,y,z)
 
     @configclass
     class ObjectDesiredPoseCfg:
@@ -106,7 +106,7 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.08]  # position default (x,y,z)
+        position_default = [0.5, 0.0, 0.1]  # position default (x,y,z)
         position_uniform_min = [0.55, -0.05, 0.08]  # position (x,y,z)
         position_uniform_max = [0.6, 0.05, 0.08]  # position (x,y,z)
         # randomize orientation
@@ -138,7 +138,7 @@ class ObservationsCfg:
         # tool_orientations = {"scale": 1.0}
         # -- object state
         object_positions = {"scale": 1.0}
-        # object_orientations = {"scale": 1.0}
+        object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
@@ -160,9 +160,10 @@ class RewardsCfg:
 
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 10}
+    reaching_object_position_tanh = {"weight": 2., "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 10}
+    tracking_object_position_tanh = {"weight": 2., "sigma": 0.2}
+    penalizing_action_rate_l2 = {"weight": 1.}
     grasp_object_success = {'weight': 0.5}
     # lifting_object_success = {"weight": 0.5, "threshold": 0.05}
 
@@ -183,9 +184,9 @@ class ControlCfg:
     # action space
     control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 4
+    decimation = 2
 
-    moving_average = True
+    moving_average = False
     decay = 0.7
 
     # configuration loaded when control_type == "inverse_kinematics"
@@ -200,14 +201,18 @@ class ControlCfg:
 
 @configclass
 class DomainRandomizationCfg:
+    randomize = False
+    every_step = False
+    perlin_noise = True
     randomize_object = True
     randomize_table = True
     randomize_light = True
     randomize_robot = True
     randomize_background = True
     randomize_camera = True
-    camera_pos_noise = 0.01
+    camera_pos_noise = 0.015
     camera_ori_noise = 0.03
+    random_obs_amplitude = False
 
 ##
 # Environment configuration
@@ -219,13 +224,12 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4 * (1/100) * 100)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        # dt=0.01,
-        dt=1/100.,
-        substeps=1,
+        dt=0.01,
+        substeps=2,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
             gpu_total_aggregate_pairs_capacity=16 * 1024,

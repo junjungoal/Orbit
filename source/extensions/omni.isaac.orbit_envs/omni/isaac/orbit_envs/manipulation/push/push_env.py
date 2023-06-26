@@ -199,6 +199,8 @@ class PushEnv(IsaacEnv):
 
 
     def _step_impl(self, actions: torch.Tensor):
+        if actions.shape[1] > 3:
+            actions = actions[:, :3]
         self.previous_object_root_pos_w = self.object.data.root_pos_w.clone()
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
@@ -224,7 +226,7 @@ class PushEnv(IsaacEnv):
             self.robot_actions[:, :self.robot.arm_num_dof] = self.actions
 
         # close the gripper
-        self.robot_actions[:, -1] = -1.
+        # self.robot_actions[:, -1] = -1.
         # perform physics stepping
         for _ in range(self.cfg.control.decimation):
             # set actions into buffers
@@ -247,6 +249,9 @@ class PushEnv(IsaacEnv):
         # -- store history
         # self.previous_actions = self.actions.clone()
         self.previous_actions = actions.clone().to(device=self.device)
+
+        print("desired: ", self._ik_controller.desired_ee_pos, "action: ", actions)
+        print(self.robot.data.ee_state_w[:, 0:3] - self.envs_positions)
 
         # -- add information to extra if timeout occurred due to episode length
         # Note: this is used by algorithms like PPO where time-outs are handled differently
@@ -560,12 +565,12 @@ class PushRewardManager(RewardManager):
         # distance of end-effector to the object: (num_envs,)
         ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         # distance of the tool sites to the object: (num_envs, num_tool_sites)
-        object_root_pos = env.object.data.root_pos_w.unsqueeze(1)  # (num_envs, 1, 3)
-        tool_sites_distance = torch.norm(env.robot.data.tool_sites_state_w[:, :, :3] - object_root_pos, dim=-1)
+        # object_root_pos = env.object.data.root_pos_w.unsqueeze(1)  # (num_envs, 1, 3)
+        # tool_sites_distance = torch.norm(env.robot.data.tool_sites_state_w[:, :, :3] - object_root_pos, dim=-1)
         # average distance of the tool sites to the object: (num_envs,)
         # note: we add the ee distance to the average to make sure that the ee is always closer to the object
-        num_tool_sites = tool_sites_distance.shape[1]
-        average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
+        # num_tool_sites = tool_sites_distance.shape[1]
+        # average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
         # success = torch.where(torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1) < threshold, True, False)
         # ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)

@@ -155,20 +155,21 @@ class LiftEnv(IsaacEnv):
                                             new_camera_quat.cpu().numpy(),
                                             env_ids)
 
-        if self.cfg.domain_randomization.randomize_object:
-            self.randomize_object()
+        if self.cfg.domain_randomization.randomize:
+            if self.cfg.domain_randomization.randomize_object:
+                self.randomize_object()
 
-        if self.cfg.domain_randomization.randomize_background:
-            self.randomize_background()
+            if self.cfg.domain_randomization.randomize_background:
+                self.randomize_background()
 
-        if self.cfg.domain_randomization.randomize_light:
-            self.randomize_light()
+            if self.cfg.domain_randomization.randomize_light:
+                self.randomize_light()
 
-        if self.cfg.domain_randomization.randomize_robot:
-            self.randomize_robot()
+            if self.cfg.domain_randomization.randomize_robot:
+                self.randomize_robot()
 
-        if self.cfg.domain_randomization.randomize_table:
-            self.randomize_table()
+            if self.cfg.domain_randomization.randomize_table:
+                self.randomize_table()
 
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
@@ -195,7 +196,7 @@ class LiftEnv(IsaacEnv):
             gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
             # print(gripper_action)
 
-            # desired = self._ik_controller.desired_ee_pos
+            desired = self._ik_controller.desired_ee_pos
             self.robot_actions[:, -1] = gripper_action
             # self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
@@ -230,9 +231,9 @@ class LiftEnv(IsaacEnv):
         # Note: this is used by algorithms like PPO where time-outs are handled differently
         self.extras["time_outs"] = self.episode_length_buf >= self.max_episode_length
         # -- add information to extra if task completed
-        # object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
-        # self.extras["is_success"] = object_position_error < 0.02
-        self.extras["is_success"] = self.is_grasped() * torch.where(self.object.data.root_pos_w[:, 2] > self.object_des_pose_w[:, 2], 1.0 ,0.0)
+        object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
+        self.extras["is_success"] = object_position_error < 0.03
+        # self.extras["is_success"] = self.is_grasped() * torch.where(self.object.data.root_pos_w[:, 2] > self.object_des_pose_w[:, 2], 1.0 ,0.0)
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -542,7 +543,8 @@ class LiftRewardManager(RewardManager):
         num_tool_sites = tool_sites_distance.shape[1]
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        return 1 - torch.tanh(ee_distance * sigma)
+        # return 1 - torch.tanh(ee_distance * sigma)
+        return 1 - torch.tanh(ee_distance / sigma)
         # return 1 - torch.tanh(average_distance * sigma)
 
     def penalizing_action_rate_l2(self, env: LiftEnv):
@@ -571,7 +573,8 @@ class LiftRewardManager(RewardManager):
         distance = torch.clamp(env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2], min=0)
         under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
         # print(distance, under)
-        return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
+        # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
+        return grasped * (1 - torch.tanh((distance / sigma)))
 
     def grasp_object_success(self, env: LiftEnv):
         # dist = torch.norm(env.object.data.root_pos_w[:, :3].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, :3], dim=-1)
@@ -592,4 +595,6 @@ class LiftRewardManager(RewardManager):
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
         close_enough_to_box = dist < 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
-        return grasped * torch.where(env.object.data.root_pos_w[:, 2] > env.object_des_pose_w[:, 2], 1.0 ,0.0)
+        dist_to_desired = torch.norm(env.object.data.root_pos_w[:, :3] - env.object_des_pose_w[:, 3])
+        # return grasped * torch.where(env.object.data.root_pos_w[:, 2] > env.object_des_pose_w[:, 2], 1.0 ,0.0)
+        return grasped * torch.where(dist_to_desired < threshold, 1.0 ,0.0)
