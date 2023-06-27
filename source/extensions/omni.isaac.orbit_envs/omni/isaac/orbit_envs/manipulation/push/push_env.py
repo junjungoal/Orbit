@@ -226,7 +226,7 @@ class PushEnv(IsaacEnv):
             self.robot_actions[:, :self.robot.arm_num_dof] = self.actions
 
         # close the gripper
-        # self.robot_actions[:, -1] = -1.
+        self.robot_actions[:, -1] = -1.
         # perform physics stepping
         for _ in range(self.cfg.control.decimation):
             # set actions into buffers
