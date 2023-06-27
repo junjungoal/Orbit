@@ -95,7 +95,7 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_uniform_min = [0.45, -0.05, 0.04]  # position (x,y,z)
+        position_uniform_min = [0.50, -0.05, 0.04]  # position (x,y,z)
         position_uniform_max = [0.55, 0.05, 0.04]  # position (x,y,z)
 
     @configclass
@@ -106,7 +106,7 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.1]  # position default (x,y,z)
+        position_default = [0.55, 0.0, 0.08]  # position default (x,y,z)
         position_uniform_min = [0.55, -0.05, 0.08]  # position (x,y,z)
         position_uniform_max = [0.6, 0.05, 0.08]  # position (x,y,z)
         # randomize orientation
@@ -162,7 +162,7 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
+    tracking_object_position_tanh = {"weight": 5., "sigma": 0.3}
     penalizing_action_rate_l2 = {"weight": 0.5}
     # grasp_object_success = {'weight': 1}
     lifting_object_success = {"weight": 3.5, "threshold": 0.05}
@@ -196,7 +196,7 @@ class ControlCfg:
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.1, 0.1, 0.1),
         ee_min_limit=(0.15, -0.4, 0.005),
-        ee_max_limit=(0.7, 0.4, 0.6)
+        ee_max_limit=(0.7, 0.4, 0.7)
     )
 
 @configclass
