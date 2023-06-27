@@ -160,12 +160,12 @@ class RewardsCfg:
 
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
-    reaching_object_position_tanh = {"weight": 2., "sigma": 0.2}
+    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 4., "sigma": 0.2}
-    penalizing_action_rate_l2 = {"weight": 1.}
-    grasp_object_success = {'weight': 1}
-    lifting_object_success = {"weight": 1, "threshold": 0.05}
+    tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
+    penalizing_action_rate_l2 = {"weight": 0.5}
+    # grasp_object_success = {'weight': 1}
+    lifting_object_success = {"weight": 3.5, "threshold": 0.05}
 
 
 @configclass
