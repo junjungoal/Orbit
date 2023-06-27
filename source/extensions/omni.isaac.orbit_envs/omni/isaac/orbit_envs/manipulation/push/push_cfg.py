@@ -201,7 +201,7 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = False
+    every_step = True
     perlin_noise = True
     randomize_object = True
     randomize_table = True
