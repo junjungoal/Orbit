@@ -594,7 +594,7 @@ class IsaacEnv(gym.Env):
 
         default_color = prim_utils.get_prim_property(f"{prim_path}/AmbientLight", 'color')
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.3
+        local_rgb_interpolation = 0.5
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'color', tuple(rgb))
         #
