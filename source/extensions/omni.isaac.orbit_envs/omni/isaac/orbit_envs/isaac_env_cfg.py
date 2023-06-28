@@ -61,10 +61,12 @@ class CameraCfg:
     """Initial camera position (in m). Default is (7.5, 7.5, 7.5)."""
     lookat: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     """Initial camera target position (in m). Default is (0.0, 0.0, 0.0)."""
-    position: Tuple[float, float, float] = (1.35, 0, 0.8)
+    # position: Tuple[float, float, float] = (1.35, 0, 0.8)
+    position: Tuple[float, float, float] = (1.1, 0, 0.8)
     # position: Tuple[float, float, float] = (1.3, 0, 0.8)
     # position: Tuple[float, float, float] = (1.2, 0, 1.1)
-    orientation: Tuple[float, float, float, float] = (-0.3069373, 0.6372103, 0.6362135, -0.3081962)
+    orientation: Tuple[float, float, float, float] = (-0.2583664, 0.6584361, 0.6574997, -0.2596206,)
+    # orientation: Tuple[float, float, float, float] = (-0.3069373, 0.6372103, 0.6362135, -0.3081962)
     # orientation: Tuple[float, float, float, float] = (-0.2583664, 0.6584361, 0.6574997, -0.2596206,)
     # orientation: Tuple[float, float, float, float] = (-0.2418396,  0.664694, 0.6637789, -0.2430905)
     height: int = 480
