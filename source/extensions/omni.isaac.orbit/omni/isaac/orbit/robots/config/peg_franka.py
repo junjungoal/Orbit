@@ -27,7 +27,7 @@ from ..single_arm import SingleArmManipulatorCfg
 # _FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/FrankaEmika/panda_instanceable.usd')
 # _FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/FrankaEmikaOriginal/panda_instanceable.usd')
 # _FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/FrankaEmikaOriginalPeg/panda_instanceable.usd')
-_FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/FrankaEmikaPeg/panda_instanceable.usd')
+_FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/FrankaEmikaSquarePeg/panda_instanceable.usd')
 
 
 FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
@@ -84,7 +84,7 @@ FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
         dof_vel={".*": 0.0},
     ),
     ee_info=SingleArmManipulatorCfg.EndEffectorFrameCfg(
-        body_name="panda_peg", pos_offset=(0.0, 0.0, 0.15), rot_offset=(1.0, 0.0, 0.0, 0.0)
+        body_name="panda_peg", pos_offset=(0.0, 0.0, 0.13), rot_offset=(1.0, 0.0, 0.0, 0.0)
         # body_name="panda_peg", pos_offset=(0, 0, 0.), rot_offset=(0, -0.9239554, -0.3824994, 0)
     ),
     rigid_props=SingleArmManipulatorCfg.RigidBodyPropertiesCfg(
