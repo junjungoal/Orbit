@@ -434,7 +434,7 @@ class PushEnv(IsaacEnv):
     def randomize_object(self, reset=False):
         default_color = np.array([0.949, 0.8, 0.2])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.3
+        local_rgb_interpolation = 0.5
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
