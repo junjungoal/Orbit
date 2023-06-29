@@ -572,12 +572,12 @@ class PushRewardManager(RewardManager):
         # num_tool_sites = tool_sites_distance.shape[1]
         # average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        success = torch.where(torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1) < 0.02, True, False)
-        above_object = env.object.data.root_pos_w
-        above_object[:, -1] += 0.04
-        ee_above_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - above_object, dim=1)
+        # success = torch.where(torch.norm(env.object.data.root_pos_w[:, :2]-env.goal.data.root_pos_w[:, :2], dim=1) < threshold, True, False)
+        ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
+        success = torch.where(ee_to_obj < threshold, True, False)
         reward = 1 - torch.tanh(ee_distance / sigma)
-        reward[success] = 1 - torch.tanh(ee_above_distance[success] / sigma)
+        reward[success] = 1.
+        # reward[success] = 1 - torch.tanh(ee_above_distance[success] / sigma)
         return reward
         # return 1 - torch.tanh(ee_distance / sigma)
 
