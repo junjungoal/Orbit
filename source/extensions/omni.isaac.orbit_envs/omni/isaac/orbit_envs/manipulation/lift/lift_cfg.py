@@ -40,6 +40,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     meta_info = RigidObjectCfg.MetaInfoCfg(
         # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
+        # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_small_instanceable.usd"),
         scale=(1, 1, 1),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
@@ -162,7 +163,7 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 5., "sigma": 0.3}
+    tracking_object_position_tanh = {"weight": 5., "sigma": 0.08}
     penalizing_action_rate_l2 = {"weight": 0.5}
     # grasp_object_success = {'weight': 1}
     lifting_object_success = {"weight": 3.5, "threshold": 0.05}
@@ -194,7 +195,7 @@ class ControlCfg:
         command_type="position_rel",
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
-        rotation_command_scale=(0.1, 0.1, 0.1),
+        rotation_command_scale=(0.05, 0.05, 0.05),
         ee_min_limit=(0.15, -0.4, 0.005),
         ee_max_limit=(0.7, 0.4, 0.7)
     )

@@ -545,9 +545,16 @@ class LiftRewardManager(RewardManager):
         num_tool_sites = tool_sites_distance.shape[1]
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        # return 1 - torch.tanh(ee_distance * sigma)
-        return 1 - torch.tanh(ee_distance / sigma)
-        # return 1 - torch.tanh(average_distance * sigma)
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.03
+        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
+
+        reward = 1 - torch.tanh(ee_distance / sigma)
+        reward[grasped] = 1.
+        return reward
+        # return 1 - torch.tanh(ee_distance / sigma)
 
     def penalizing_action_rate_l2(self, env: LiftEnv):
         """Penalize large variations in action commands."""
