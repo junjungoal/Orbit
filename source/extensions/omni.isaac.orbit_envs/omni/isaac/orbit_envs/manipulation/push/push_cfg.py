@@ -134,7 +134,7 @@ class RandomizationCfg:
 
 
     object_material_properties = {
-        "enabled": True,
+        "enabled": False,
         "static_friction_range": (0.8, 1.2),
         "dynamic_friction_range": (0.8, 1.2),
         "restitution_range": (0.0, 0.1),
