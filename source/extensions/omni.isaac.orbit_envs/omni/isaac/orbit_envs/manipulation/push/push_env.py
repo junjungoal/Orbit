@@ -12,6 +12,9 @@ from torch.distributions.uniform import Uniform
 from typing import List
 
 import omni.isaac.core.utils.prims as prim_utils
+import omni.replicator.core as rep
+import omni.replicator.isaac as rep_dr
+from omni.isaac.core.utils.types import DynamicsViewState
 
 import omni.isaac.orbit.utils.kit as kit_utils
 import omni.isaac.core.utils.prims as prim_utils
@@ -79,6 +82,8 @@ class PushEnv(IsaacEnv):
         self.object.update_buffers(self.dt)
         self.robot.update_buffers(self.dt)
         self.goal.update_buffers(self.dt)
+
+        self._setup_randomization()
 
     """
     Implementation specifics.
@@ -444,6 +449,31 @@ class PushEnv(IsaacEnv):
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/GoalMarker/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
         omni.usd.create_material_input(prim, 'diffuse_color_constant', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+
+    def _setup_randomization(self):
+        """Randomize properties of scene at start."""
+        # register with replicator
+        if self.cfg.randomization.object_material_properties["enabled"]:
+            rep_dr.physics_view.register_rigid_prim_view(rigid_prim_view=self.object.objects)
+
+            # create graph using replicator
+            with rep_dr.trigger.on_rl_frame(num_envs=self.num_envs):
+                with rep_dr.gate.on_env_reset():
+                    # read configuration for randomization
+                    sf = self.cfg.randomization.object_material_properties["static_friction_range"]
+                    df = self.cfg.randomization.object_material_properties["dynamic_friction_range"]
+                    res = self.cfg.randomization.object_material_properties["restitution_range"]
+                    # set properties into robot
+                    rep_dr.physics_view.randomize_rigid_prim_view(
+                        view_name=self.object.objects.name,
+                        operation="direct",
+                        material_properties=rep.distribution.uniform(
+                            [sf[0], df[0], res[0]] * self.object.objects.num_shapes, [sf[1], df[1], res[1]] * self.object.objects.num_shapes
+                        ),
+                        num_buckets=self.cfg.randomization.object_material_properties["num_buckets"],
+                    )
+            # prepares/executes the action graph for randomization
+            rep.orchestrator.run()
 
 
 

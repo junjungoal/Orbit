@@ -133,6 +133,16 @@ class RandomizationCfg:
     goal_pose: GoalPoseCfg = GoalPoseCfg()
 
 
+    object_material_properties = {
+        "enabled": True,
+        "static_friction_range": (0.8, 1.2),
+        "dynamic_friction_range": (0.8, 1.2),
+        "restitution_range": (0.0, 0.1),
+        "num_buckets": 16,
+    }
+
+
+
 @configclass
 class ObservationsCfg:
     """Observation specifications for the MDP."""
