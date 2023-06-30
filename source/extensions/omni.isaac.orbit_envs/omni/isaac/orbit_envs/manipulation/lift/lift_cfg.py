@@ -228,7 +228,8 @@ class LiftEnvCfg(IsaacEnvCfg):
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        dt=0.01,
+        # dt=0.01,
+        dt=1/15,
         substeps=2,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,

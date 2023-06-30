@@ -132,6 +132,7 @@ def create_ground_plane(
             "DistantLight",
             attributes={"intensity": 600.0,
                         "angle": 5.},
+            translation=(0.3, 0, 0)
         )
 
 
