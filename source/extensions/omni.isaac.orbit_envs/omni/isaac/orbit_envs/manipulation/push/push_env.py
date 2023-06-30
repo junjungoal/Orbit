@@ -168,6 +168,9 @@ class PushEnv(IsaacEnv):
             self._ik_controller.reset_idx(env_ids)
 
         self.randomize(env_ids, True)
+        if self.cfg.randomization.object_material_properties["enabled"]:
+            rep_dr.physics_view.step_randomization(env_ids)
+
 
     def randomize(self, env_ids, reset=False):
         if self.cfg.domain_randomization.randomize:
