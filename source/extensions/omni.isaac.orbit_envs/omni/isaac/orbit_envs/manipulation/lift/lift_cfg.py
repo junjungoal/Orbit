@@ -40,6 +40,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     meta_info = RigidObjectCfg.MetaInfoCfg(
         # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
         usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable.usd"),
+        # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable_mass.usd"),
         # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_small_instanceable.usd"),
         scale=(1, 1, 1),
     )
@@ -55,7 +56,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=1.5, dynamic_friction=1.5, restitution=0., prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.8, dynamic_friction=1.8, restitution=0.2, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -141,6 +142,7 @@ class ObservationsCfg:
         object_positions = {"scale": 1.0}
         object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
+        is_grasped = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_to_goal_positions = {"scale": 1.0}
@@ -163,10 +165,11 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
     reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 5., "sigma": 0.08}
-    penalizing_action_rate_l2 = {"weight": 0.5}
-    # grasp_object_success = {'weight': 1}
-    lifting_object_success = {"weight": 3.5, "threshold": 0.05}
+    tracking_object_position_tanh = {"weight": 5., "sigma": 0.05}
+    penalizing_action_rate_l2 = {"weight": 0.3}
+    grasp_object_success = {'weight': 0.5}
+    # lifting_object_success = {"weight": 3.5, "threshold": 0.05}
+    lifting_object_success = {"weight": 1., "threshold": 0.05}
 
 
 @configclass

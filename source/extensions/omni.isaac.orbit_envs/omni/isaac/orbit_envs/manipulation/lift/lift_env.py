@@ -500,6 +500,9 @@ class LiftObservationManager(ObservationManager):
         quat_w[quat_w[:, 0] < 0] *= -1
         return quat_w
 
+    def is_grasped(self, env: LiftEnv):
+        return env.is_grasped()[:, None]
+
     def arm_actions(self, env: LiftEnv):
         """Last arm actions provided to env."""
         return env.actions[:, :-1]
@@ -514,6 +517,7 @@ class LiftObservationManager(ObservationManager):
     def tool_actions_bool(self, env: LiftEnv):
         """Last tool actions transformed to a boolean command."""
         return torch.sign(env.actions[:, -1]).unsqueeze(1)
+
 
 
 class LiftRewardManager(RewardManager):
