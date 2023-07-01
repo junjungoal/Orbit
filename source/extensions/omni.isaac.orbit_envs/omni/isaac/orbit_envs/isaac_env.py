@@ -587,7 +587,8 @@ class IsaacEnv(gym.Env):
 
 
     def randomize_light(self, reset=False):
-        intensity = np.random.choice(np.linspace(100, 60000, 10000))
+        # intensity = np.random.choice(np.linspace(1000, 60000, 10000))
+        intensity = np.random.choice(np.linspace(1000, 30000, 10000))
         # print('Intensity: ', intensity)
         prim_path = '/World/defaultGroundPlane'
         prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
@@ -600,6 +601,7 @@ class IsaacEnv(gym.Env):
         #
         #
         # default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')
+        # prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'intensity', 500000)
         # random_color = np.random.uniform(0, 1, size=3)
         # local_rgb_interpolation = 0.6
         # rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
