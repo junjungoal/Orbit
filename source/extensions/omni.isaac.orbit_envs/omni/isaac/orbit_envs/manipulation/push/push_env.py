@@ -39,7 +39,7 @@ class PushEnv(IsaacEnv):
     """Environment for lifting an object off a table with a single-arm manipulator."""
 
     def __init__(self, cfg: PushEnvCfg = None, headless: bool = False, enable_camera=False,
-                 viewport=False):
+                 viewport=False, enable_render=False):
         # copy configuration
         self.cfg = cfg
         # parse the configuration for controller configuration
@@ -52,7 +52,7 @@ class PushEnv(IsaacEnv):
 
         # initialize the base class to setup the scene.
         super().__init__(self.cfg, headless=headless, enable_camera=enable_camera,
-                         viewport=viewport)
+                         viewport=viewport, enable_render=enable_render)
         # parse the configuration for information
         self._process_cfg()
         # initialize views for the cloned scenes

@@ -98,8 +98,9 @@ def create_ground_plane(
     # Change the settings of the sphere light
     # By default, the one from Isaac Sim is too dim for large number of environments.
     # Warning: This is specific to the default grid plane asset.
-    light_intensity = kwargs.get("light_intensity", 1e7)
-    light_radius = kwargs.get("light_radius", 100.0)
+    # light_intensity = kwargs.get("light_intensity", 1e7)
+    light_intensity = kwargs.get("light_intensity", 1e5)
+    light_radius = kwargs.get("light_radius", 120.0)
     # -- light intensity
     if light_intensity is not None:
         omni.kit.commands.execute(
@@ -121,18 +122,20 @@ def create_ground_plane(
         omni.kit.commands.execute(
             "ChangeProperty",
             prop_path=f"{prim_path}/SphereLight.xformOp:translate",
-            value=(0.0, 0.0, 1.5 * light_radius),
+            # value=(0.0, 0.0, 1.5 * light_radius),
+            value=(1.5, 0.0, 5.),
             prev=None,
         )
     # -- ambient light
-    ambient_light = kwargs.get("ambient_light", True)
+    # ambient_light = kwargs.get("ambient_light", True)
+    ambient_light = kwargs.get("ambient_light", False)
     if ambient_light:
         prim_utils.create_prim(
             f"{prim_path}/AmbientLight",
             "DistantLight",
             attributes={"intensity": 600.0,
                         "angle": 5.},
-            translation=(0.3, 0, 0)
+            # translation=(0.5, 0, 0)
         )
 
 

@@ -84,7 +84,7 @@ def main():
     # env_cfg.control.inverse_kinematics.command_type = "position_rel"
     env_cfg.terminations.episode_timeout = False
     # create environment
-    env = gym.make(args_cli.task, cfg=env_cfg, headless=args_cli.headless, enable_camera=False)
+    env = gym.make(args_cli.task, cfg=env_cfg, headless=args_cli.headless, enable_camera=False, enable_render=True)
     # check environment name (for reach , we don't allow the gripper)
     if "Reach" in args_cli.task:
         carb.log_warn(
