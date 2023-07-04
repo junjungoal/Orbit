@@ -148,7 +148,7 @@ class ObservationsCfg:
         object_to_goal_positions = {"scale": 1.0}
         # tool_actions_bool = {'scale': 1.0}
         # ee_actions = {'scale': 1.0}
-        object_desired_positions = {"scale": 1.0}
+        # object_desired_positions = {"scale": 1.0}
 
     # global observation settings
     return_dict_obs_in_group = False
@@ -166,7 +166,7 @@ class RewardsCfg:
     reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
     tracking_object_position_tanh = {"weight": 5., "sigma": 0.05}
-    penalizing_action_rate_l2 = {"weight": 0.3}
+    penalizing_action_rate_l2 = {"weight": 0.2}
     grasp_object_success = {'weight': 0.5}
     # lifting_object_success = {"weight": 3.5, "threshold": 0.05}
     lifting_object_success = {"weight": 1., "threshold": 0.05}
@@ -228,11 +228,11 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/200) * 100)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        dt=0.01,
+        dt=1/200,
         substeps=2,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
