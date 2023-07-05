@@ -6,7 +6,6 @@
 import os, sys
 
 from omni.isaac.orbit.controllers.differential_inverse_kinematics import DifferentialInverseKinematicsCfg
-from omni.isaac.orbit.controllers.inverse_kinematics import InverseKinematicsCfg
 from omni.isaac.orbit.objects import RigidObjectCfg
 from omni.isaac.orbit.robots.config.peg_franka import FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
 # from omni.isaac.orbit.robots.config.franka import FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG
@@ -161,18 +160,18 @@ class ObservationsCfg:
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         # tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
-        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
         # tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
         # -- object state
-        # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
-        object_positions = {"scale": 1.0}
+        # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
+        # object_positions = {"scale": 1.0}
         object_orientations = {"scale": 1.0}
         # object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        object_desired_positions = {"scale": 1.0}
+        # object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
         # previous_actions = {"scale": 1.0}
@@ -223,7 +222,7 @@ class DomainRandomizationCfg:
     randomize_camera = True
     camera_pos_noise = 0.015
     camera_ori_noise = 0.03
-    random_obs_amplitude = False
+    random_obs_amplitude = True
 
 @configclass
 class ControlCfg:
@@ -240,7 +239,6 @@ class ControlCfg:
     decay = 0.5
 
     # configuration loaded when control_type == "inverse_kinematics"
-    # inverse_kinematics: InverseKinematicsCfg = InverseKinematicsCfg(
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="position_rel",
         ik_method="dls",
