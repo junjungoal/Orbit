@@ -540,14 +540,10 @@ class LiftRewardManager(RewardManager):
     def reaching_object_position_tanh(self, env: LiftEnv, sigma: float):
         """Penalize tool sites tracking position error using tanh-kernel."""
         # distance of end-effector to the object: (num_envs,)
-        ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
-        # distance of the tool sites to the object: (num_envs, num_tool_sites)
-        object_root_pos = env.object.data.root_pos_w.unsqueeze(1)  # (num_envs, 1, 3)
-        tool_sites_distance = torch.norm(env.robot.data.tool_sites_state_w[:, :, :3] - object_root_pos, dim=-1)
-        # average distance of the tool sites to the object: (num_envs,)
-        # note: we add the ee distance to the average to make sure that the ee is always closer to the object
-        num_tool_sites = tool_sites_distance.shape[1]
-        average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
+        ee_state_w = torch.clone(env.robot.data.ee_state_w[:, :3])
+        ee_state_w[:, -1] += 0.01
+        ee_distance = torch.norm(ee_state_w - env.object.data.root_pos_w, dim=1)
+        # ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
 
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
@@ -557,6 +553,7 @@ class LiftRewardManager(RewardManager):
 
         reward = 1 - torch.tanh(ee_distance / sigma)
         reward[grasped] = 1.
+        # print(reward)
         return reward
         # return 1 - torch.tanh(ee_distance / sigma)
 
