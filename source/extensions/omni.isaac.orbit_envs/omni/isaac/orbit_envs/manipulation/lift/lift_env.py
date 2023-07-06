@@ -232,7 +232,7 @@ class LiftEnv(IsaacEnv):
         self.extras["time_outs"] = self.episode_length_buf >= self.max_episode_length
         # -- add information to extra if task completed
         object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
-        self.extras["is_success"] = object_position_error < 0.05
+        self.extras["is_success"] = object_position_error < 0.08
         # self.extras["is_success"] = self.is_grasped() * torch.where(self.object.data.root_pos_w[:, 2] > self.object_des_pose_w[:, 2], 1.0 ,0.0)
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
@@ -338,7 +338,7 @@ class LiftEnv(IsaacEnv):
         # -- when task is successful
         if self.cfg.terminations.is_success:
             object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
-            self.reset_buf = torch.where(object_position_error < 0.02, 1, self.reset_buf)
+            self.reset_buf = torch.where(object_position_error < 0.08, 1, self.reset_buf)
         # -- object fell off the table (table at height: 0.0 m)
         if self.cfg.terminations.object_falling:
             self.reset_buf = torch.where(object_pos[:, 2] < -0.05, 1, self.reset_buf)
@@ -562,7 +562,8 @@ class LiftRewardManager(RewardManager):
 
     def penalizing_action_rate_l2(self, env: LiftEnv):
         """Penalize large variations in action commands."""
-        return -torch.sum(torch.square(env.actions[:, :-1] - env.previous_actions[:, :-1]), dim=1)
+        # return -torch.sum(torch.square(env.actions[:, :-1] - env.previous_actions[:, :-1]), dim=1)
+        return -torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
 
     def tracking_object_position_exp(self, env: LiftEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using exp-kernel."""
