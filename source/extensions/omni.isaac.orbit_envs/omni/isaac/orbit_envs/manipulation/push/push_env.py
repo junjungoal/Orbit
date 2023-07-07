@@ -208,6 +208,12 @@ class PushEnv(IsaacEnv):
     def _step_impl(self, actions: torch.Tensor):
         if actions.shape[1] > 3:
             actions = actions[:, :3]
+
+        if self.cfg.domain_randomization.randomize and self.cfg.domain_randomization.randomize_action:
+            max = 0.05
+            min = -0.05
+            actions += (torch.rand_like(actions) * (max - min) + min)
+
         self.previous_object_root_pos_w = self.object.data.root_pos_w.clone()
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)

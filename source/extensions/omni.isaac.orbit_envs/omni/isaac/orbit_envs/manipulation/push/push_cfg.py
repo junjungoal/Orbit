@@ -223,6 +223,7 @@ class DomainRandomizationCfg:
     camera_pos_noise = 0.015
     camera_ori_noise = 0.03
     random_obs_amplitude = False
+    randomize_action = True
 
 @configclass
 class ControlCfg:
