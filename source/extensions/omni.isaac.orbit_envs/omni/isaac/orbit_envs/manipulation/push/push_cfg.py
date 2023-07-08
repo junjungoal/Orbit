@@ -211,7 +211,7 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = False
+    every_step = True
     perlin_noise = True
     randomize_object = True
     randomize_table = True
@@ -223,7 +223,7 @@ class DomainRandomizationCfg:
     camera_pos_noise = 0.01
     camera_ori_noise = 0.03
     random_obs_amplitude = False
-    randomize_action = False
+    randomize_action = True
 
 @configclass
 class ControlCfg:
