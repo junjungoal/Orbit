@@ -167,7 +167,7 @@ class ObservationsCfg:
         # object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
         # object_positions = {"scale": 1.0}
         object_orientations = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
-        object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
         # object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
@@ -178,7 +178,7 @@ class ObservationsCfg:
         # ee_actions = {"scale": 1.0}
 
     # global observation settings
-    return_dict_obs_in_group = False
+    return_dict_obs_in_group = True
     """Whether to return observations as dictionary or flattened vector within groups."""
     # observation groups
     policy: PolicyCfg = PolicyCfg()
@@ -211,7 +211,7 @@ class TerminationsCfg:
 @configclass
 class DomainRandomizationCfg:
     randomize = True
-    every_step = True
+    every_step = False
     perlin_noise = True
     randomize_object = True
     randomize_table = True
@@ -223,7 +223,7 @@ class DomainRandomizationCfg:
     camera_pos_noise = 0.01
     camera_ori_noise = 0.03
     random_obs_amplitude = False
-    randomize_action = True
+    randomize_action = False
 
 @configclass
 class ControlCfg:
@@ -262,12 +262,12 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=2 * (1/15) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=2 * (1/30) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         # dt=1/100,
-        dt=1/15,
+        dt=1/30,
         substeps=2,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
