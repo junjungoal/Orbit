@@ -110,7 +110,7 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
-        position_uniform_min = [0.45, -0.15, 0.045]  # position (x,y,z)
+        position_uniform_min = [0.4, -0.15, 0.045]  # position (x,y,z)
         position_uniform_max = [0.6, 0.15, 0.045]  # position (x,y,z)
         # position_uniform_min = [0.45, -0.05, 0.045]  # position (x,y,z)
         # position_uniform_max = [0.5, 0.05, 0.045]  # position (x,y,z)
@@ -123,7 +123,7 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.6, 0., 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.5, -0.15, 0.]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.15, 0.]  # position (x,y,z)
         position_uniform_max = [0.65, 0.15, 0.]  # position (x,y,z)
         # position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
         # position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
@@ -135,10 +135,10 @@ class RandomizationCfg:
 
     object_material_properties = {
         "enabled": True,
-        "static_friction_range": (0.7, 1.3),
-        "dynamic_friction_range": (0.7, 1.3),
+        "static_friction_range": (0.8, 1.3),
+        "dynamic_friction_range": (0.8, 1.3),
         "restitution_range": (0.0, 0.1),
-        "num_buckets": 32,
+        "num_buckets": 64,
     }
 
 
@@ -172,7 +172,7 @@ class ObservationsCfg:
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         # object_desired_positions = {"scale": 1.0}
-        object_to_goal_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
+        object_to_goal_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
         # -- previous action
         # previous_actions = {"scale": 1.0}
         # ee_actions = {"scale": 1.0}
@@ -189,10 +189,10 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    reaching_object_position_tanh = {"weight": 2., "sigma": 0.3, "threshold": 0.05}
+    reaching_object_position_tanh = {"weight": 2., "sigma": 0.4, "threshold": 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.12}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 5., "sigma": 0.15, "threshold": 0.08}
+    tracking_object_position_tanh = {"weight": 5., "sigma": 0.15, "threshold": 0.1}
     # push_object_success = {"weight": 7, "threshold": 0.04}
     # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
     # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
@@ -220,7 +220,7 @@ class DomainRandomizationCfg:
     randomize_robot = True
     randomize_background = True
     randomize_camera = True
-    camera_pos_noise = 0.015
+    camera_pos_noise = 0.01
     camera_ori_noise = 0.03
     random_obs_amplitude = False
     randomize_action = True
