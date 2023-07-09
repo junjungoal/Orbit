@@ -262,12 +262,12 @@ class PushEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=2 * (1/30) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=2 * (1/15) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         # dt=1/100,
-        dt=1/30,
+        dt=1/15,
         substeps=2,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
