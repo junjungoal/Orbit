@@ -43,6 +43,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable_mass.usd"),
         # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_small_instanceable.usd"),
         scale=(1, 1, 1),
+        # scale=(0.8, 0.8, 0.8),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
         pos=(0.4, 0.0, 0.04), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
@@ -56,7 +57,8 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=1.8, dynamic_friction=1.8, restitution=0.2, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.8, dynamic_friction=1.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        # static_friction=1.5, dynamic_friction=1.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -97,8 +99,10 @@ class RandomizationCfg:
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_uniform_min = [0.50, -0.05, 0.04]  # position (x,y,z)
-        position_uniform_max = [0.55, 0.05, 0.04]  # position (x,y,z)
+        # position_uniform_min = [0.50, -0.05, 0.04]  # position (x,y,z)
+        # position_uniform_max = [0.55, 0.05, 0.04]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.05, 0.04]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.05, 0.04]  # position (x,y,z)
 
     @configclass
     class ObjectDesiredPoseCfg:
@@ -109,6 +113,7 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.55, 0.0, 0.15]  # position default (x,y,z)
+        # position_default = [0.6, 0.0, 0.2]  # position default (x,y,z)
         position_uniform_min = [0.55, -0.05, 0.08]  # position (x,y,z)
         position_uniform_max = [0.6, 0.05, 0.08]  # position (x,y,z)
         # randomize orientation
@@ -162,13 +167,11 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
-    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.2}
-    # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
-    tracking_object_position_tanh = {"weight": 5., "sigma": 0.1}
+    # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
+    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
+    tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     penalizing_action_rate_l2 = {"weight": 0.05}
-    grasp_object_success = {'weight': 0.5}
-    # lifting_object_success = {"weight": 3.5, "threshold": 0.05}
+    # grasp_object_success = {'weight': 0.5}
     lifting_object_success = {"weight": 3.5, "threshold": 0.08}
 
 
@@ -228,12 +231,13 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/200) * 100)
+    # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/200) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
         dt=1/200,
-        substeps=2,
+        substeps=5,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
             gpu_total_aggregate_pairs_capacity=16 * 1024,

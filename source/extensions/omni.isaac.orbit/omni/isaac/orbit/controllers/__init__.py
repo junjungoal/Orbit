@@ -12,7 +12,6 @@
 
 # get module libraries
 from .differential_inverse_kinematics import DifferentialInverseKinematics
-from .inverse_kinematics import InverseKinematics
 from .rmp_flow import RmpFlowController
 
-__all__ = ["DifferentialInverseKinematics", "RmpFlowController", "InverseKinematics"]
+__all__ = ["DifferentialInverseKinematics", "RmpFlowController"]
