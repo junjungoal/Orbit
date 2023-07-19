@@ -138,6 +138,7 @@ class LiftEnv(IsaacEnv):
         # -- reset history
         self.previous_actions[env_ids] = 0
         self.averaged_actions[env_ids] = 0
+        self.gripper_actions[env_ids] = 0
         # -- MDP reset
         self.reset_buf[env_ids] = 0
         self.episode_length_buf[env_ids] = 0
@@ -197,8 +198,11 @@ class LiftEnv(IsaacEnv):
             # we assume last command is tool action so don't change that
 
             desired = self._ik_controller.desired_ee_pos
-            gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
-            self.robot_actions[:, -1] = gripper_action 
+            self.gripper_actions = torch.clamp(
+                self.gripper_actions + 0.1 * torch.sign(self.actions[:, -1:]), -1, 1
+            )
+            gripper_actions = torch.where(self.gripper_actions > 0, 1., -1.)
+            self.robot_actions[:, -1] = gripper_actions
             # self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
@@ -302,6 +306,7 @@ class LiftEnv(IsaacEnv):
         self.actions = torch.zeros((self.num_envs, self.num_actions), device=self.device)
         self.previous_actions = torch.zeros((self.num_envs, self.num_actions), device=self.device)
         self.averaged_actions = torch.zeros((self.num_envs, self.num_actions), device=self.device)
+        self.gripper_actions = torch.zeros((self.num_envs, 1), device=self.device)
         # robot joint actions
         self.robot_actions = torch.zeros((self.num_envs, self.robot.num_actions), device=self.device)
         # commands
@@ -555,7 +560,8 @@ class LiftRewardManager(RewardManager):
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
         # grasped = torch.where(torch.logical_and(torch.logical_and(mask, close_enough_to_box), lifted), True, False)
 
-        reward = 1 - torch.tanh(ee_distance / sigma)
+        # reward = 1 - torch.tanh(ee_distance / sigma)
+        reward = 1 - torch.tanh(ee_distance * sigma)
         reward[grasped] = 1.
         # print(reward)
         return reward
@@ -587,11 +593,12 @@ class LiftRewardManager(RewardManager):
 
         # distance of the end-effector to the object: (num_envs,)
         # distance = torch.norm(env.object_des_pose_w[:, :3] - env.object.data.root_pos_w[:, :3], dim=1)
-        distance = torch.clamp(env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2], min=0)
+        distance = torch.clamp((env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2]) / 0.06, min=0)
         # under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
         # print(distance, under)
         # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
-        return grasped * (1 - torch.tanh((distance / sigma)))
+        # return grasped * (1 - torch.tanh((distance / sigma)))
+        return grasped * (1 - torch.tanh((distance * sigma)))
 
     def tracking_object_position_diff(self, env: LiftEnv, sigma: float):
         """Penalize tracking object position error using tanh-kernel."""
