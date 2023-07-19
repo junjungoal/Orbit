@@ -547,7 +547,7 @@ class LiftRewardManager(RewardManager):
         """Penalize tool sites tracking position error using tanh-kernel."""
         # distance of end-effector to the object: (num_envs,)
         ee_state_w = torch.clone(env.robot.data.ee_state_w[:, :3])
-        ee_state_w[:, -1] += 0.01
+        # ee_state_w[:, -1] += 0.01
         ee_distance = torch.norm(ee_state_w - env.object.data.root_pos_w, dim=1)
         # ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
 

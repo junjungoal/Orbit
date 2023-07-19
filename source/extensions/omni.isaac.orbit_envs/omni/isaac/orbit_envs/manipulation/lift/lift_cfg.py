@@ -57,7 +57,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=2., dynamic_friction=2., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=2.4, dynamic_friction=2.4, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
         # static_friction=1.5, dynamic_friction=1.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
@@ -234,7 +234,7 @@ class LiftEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/200) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/200) * 200)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
