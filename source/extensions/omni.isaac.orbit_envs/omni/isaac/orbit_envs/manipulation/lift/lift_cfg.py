@@ -57,8 +57,8 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=3., dynamic_friction=3., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        # static_friction=1.5, dynamic_friction=1.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.5, dynamic_friction=1.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -170,7 +170,7 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
     reaching_object_position_tanh = {"weight": 1., "sigma": 10}
-    opening_gripper = {'weight': 0.1}
+    opening_gripper = {'weight': 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     tracking_object_position_tanh = {"weight": 1., "sigma": 5}
     # penalizing_action_rate_l2 = {"weight": 0.05}
@@ -241,7 +241,7 @@ class LiftEnvCfg(IsaacEnvCfg):
     # Physics settings
     sim: SimCfg = SimCfg(
         dt=1/300,
-        substeps=5,
+        substeps=10,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
             gpu_total_aggregate_pairs_capacity=16 * 1024,
