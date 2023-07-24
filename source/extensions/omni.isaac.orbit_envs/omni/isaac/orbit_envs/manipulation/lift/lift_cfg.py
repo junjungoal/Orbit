@@ -151,7 +151,7 @@ class ObservationsCfg:
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_to_goal_positions = {"scale": 1.0}
-        gripper_actions = {'scale': 1.0}
+        # gripper_actions = {'scale': 1.0}
         # tool_actions_bool = {'scale': 1.0}
         # ee_actions = {'scale': 1.0}
         # object_desired_positions = {"scale": 1.0}
@@ -170,10 +170,10 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 10}
+    reaching_object_position_tanh = {"weight": 0.25, "sigma": 10}
     opening_gripper = {'weight': 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 5}
+    tracking_object_position_tanh = {"weight": 1., "sigma": 1}
     # penalizing_action_rate_l2 = {"weight": 0.05}
     grasp_object_success = {'weight': 0.25}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
@@ -205,7 +205,7 @@ class ControlCfg:
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="position_rel",
         ik_method="dls",
-        position_command_scale=(0.02, 0.02, 0.02),
+        position_command_scale=(0.03, 0.03, 0.03),
         rotation_command_scale=(0.05, 0.05, 0.05),
         ee_min_limit=(0.15, -0.4, 0.0),
         ee_max_limit=(0.7, 0.4, 0.7)
