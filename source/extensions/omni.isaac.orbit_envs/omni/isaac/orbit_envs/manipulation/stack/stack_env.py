@@ -228,7 +228,7 @@ class StackEnv(IsaacEnv):
         # current_joint = self.robot.data.arm_dof_pos
         target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
         # print(current_joint - prev_joint)
-        # print(target-desired, ' action: ', self.actions)
+        print(target-desired, ' action: ', self.actions)
         # print('----')
         # -- compute MDP signals
         # reward
