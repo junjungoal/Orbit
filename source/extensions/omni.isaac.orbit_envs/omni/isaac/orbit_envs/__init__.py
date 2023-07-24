@@ -92,6 +92,11 @@ gym.register(
     entry_point="omni.isaac.orbit_envs.manipulation.lift:LiftEnv",
     kwargs={"cfg_entry_point": "omni.isaac.orbit_envs.manipulation.lift:LiftEnvCfg"},
 )
+gym.register(
+    id="Isaac-Stack-Franka-v0",
+    entry_point="omni.isaac.orbit_envs.manipulation.Stack:StackEnv",
+    kwargs={"cfg_entry_point": "omni.isaac.orbit_envs.manipulation.stack:StackEnvCfg"},
+)
 
 gym.register(
     id="Isaac-Push-Franka-v0",
