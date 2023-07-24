@@ -198,12 +198,12 @@ class LiftEnv(IsaacEnv):
             # we assume last command is tool action so don't change that
 
             desired = self._ik_controller.desired_ee_pos
-            # self.gripper_actions = torch.clamp(
-            #     self.gripper_actions + 0.2 * torch.sign(self.actions[:, -1:]), -1, 1
-            # )
-            # # gripper_actions = torch.where(self.gripper_actions > 0, 1., -1.)
-            # self.robot_actions[:, -1] = self.gripper_actions
-            self.robot_actions[:, -1] = self.actions[:, -1]
+            self.gripper_actions = torch.clamp(
+                self.gripper_actions + 0.2 * torch.sign(self.actions[:, -1:]), -1, 1
+            )
+            # gripper_actions = torch.where(self.gripper_actions > 0, 1., -1.)
+            self.robot_actions[:, -1] = self.gripper_actions
+            # self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
@@ -524,6 +524,8 @@ class LiftObservationManager(ObservationManager):
         """Last tool actions transformed to a boolean command."""
         return torch.sign(env.actions[:, -1]).unsqueeze(1)
 
+    def gripper_actions(self, env: LiftEnv):
+        return env.gripper_actions
 
 
 class LiftRewardManager(RewardManager):
@@ -578,6 +580,7 @@ class LiftRewardManager(RewardManager):
         reward[torch.logical_and(opened, close_enough_to_box)] = 0.
         reward[grasped] = 1.
         return reward
+
 
     def penalizing_action_rate_l2(self, env: LiftEnv):
         """Penalize large variations in action commands."""

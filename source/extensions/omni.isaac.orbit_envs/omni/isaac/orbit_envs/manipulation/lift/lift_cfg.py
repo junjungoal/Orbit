@@ -151,6 +151,7 @@ class ObservationsCfg:
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_to_goal_positions = {"scale": 1.0}
+        gripper_actions = {'scale': 1.0}
         # tool_actions_bool = {'scale': 1.0}
         # ee_actions = {'scale': 1.0}
         # object_desired_positions = {"scale": 1.0}
