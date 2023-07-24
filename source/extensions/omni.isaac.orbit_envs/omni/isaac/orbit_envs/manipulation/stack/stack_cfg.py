@@ -173,11 +173,14 @@ class ObservationsCfg:
         # -- object state
         object_positions = {"scale": 1.0}
         object_orientations = {"scale": 1.0}
+        target_object_positions = {"scale": 1.0}
+        target_object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
+        target_object_relative_tool_positions = {"scale": 1.0}
         is_grasped = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        object_to_goal_positions = {"scale": 1.0}
+        object_to_target_object_positions = {"scale": 1.0}
         # tool_actions_bool = {'scale': 1.0}
         # ee_actions = {'scale': 1.0}
         # object_desired_positions = {"scale": 1.0}
@@ -264,11 +267,11 @@ class StackEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/300) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/400) * 200)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        dt=1/300,
+        dt=1/400,
         substeps=10,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,

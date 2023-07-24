@@ -503,6 +503,10 @@ class StackObservationManager(ObservationManager):
         """Current object position w.r.t. end-effector frame."""
         return env.object.data.root_pos_w - env.robot.data.ee_state_w[:, :3]
 
+    def target_object_relative_tool_positions(self, env: StackEnv):
+        """Current object position w.r.t. end-effector frame."""
+        return env.target_object.data.root_pos_w - env.robot.data.ee_state_w[:, :3]
+
     def object_relative_tool_orientations(self, env: StackEnv):
         """Current object orientation w.r.t. end-effector frame."""
         # compute the relative orientation
@@ -511,9 +515,9 @@ class StackObservationManager(ObservationManager):
         quat_ee[quat_ee[:, 0] < 0] *= -1
         return quat_ee
 
-    def object_to_goal_positions(self, env: StackEnv):
+    def object_to_target_object_positions(self, env: StackEnv):
         object_positions = env.object.data.root_pos_w[:, :3]
-        goal_positions = env.target_object.data.root_pos_w[:, :3] + 0.035
+        goal_positions = env.target_object.data.root_pos_w[:, :3]
         # object_positions = env.object.data.root_pos_w[:, :3]
         # goal_positions = env.object_des_pose_w[:, :3]
         return (goal_positions - object_positions)
