@@ -67,7 +67,7 @@ class TargetManipulationObjectCfg(RigidObjectCfg):
 
     meta_info = RigidObjectCfg.MetaInfoCfg(
         # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_big_instanceable.usd"),
+        usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable_pink.usd"),
         # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cube_instanceable_mass.usd"),
         # usd_path = os.path.join(os.environ['ORBIT_PATH'], "source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/cylinder_small_instanceable.usd"),
         scale=(1, 1, 1),
@@ -86,7 +86,7 @@ class TargetManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1.5, dynamic_friction=1.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 @configclass
@@ -139,7 +139,7 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.55, 0.0, 0.06]  # position default (x,y,z)
+        position_default = [0.55, 0.0, 0.08]  # position default (x,y,z)
         # position_default = [0.6, 0.0, 0.2]  # position default (x,y,z)
         position_uniform_min = [0.55, -0.05, 0.08]  # position (x,y,z)
         position_uniform_max = [0.6, 0.05, 0.08]  # position (x,y,z)
@@ -196,14 +196,15 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 10}
-    opening_gripper = {'weight': 0.05}
+    reaching_object_position_tanh = {"weight": 0.25, "sigma": 10}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 5}
+    # tracking_object_position_tanh = {"weight": 2., "sigma": 5}
     # penalizing_action_rate_l2 = {"weight": 0.05}
     grasp_object_success = {'weight': 0.25}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
-    lifting_object_success = {"weight": 1., "threshold": 0.08}
+    lifting_object_success = {"weight": 1., "threshold": 0.11}
+    aligning_objects = {"weight": 0.5, "threshold": 0.11}
+    stack_success = {"weight": 2.}
 
 
 @configclass

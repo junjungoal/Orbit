@@ -129,6 +129,7 @@ class StackEnv(IsaacEnv):
         # -- goal pose
         self._randomize_object_desired_pose(env_ids=env_ids, cfg=self.cfg.randomization.object_desired_pose)
         self.prev_object_pos = self.object.data.root_pos_w.clone()
+        self.prev_target_object_pos = self.target_object.data.root_pos_w.clone()
 
         # -- Reward logging
         # fill extras with episode information
@@ -179,6 +180,7 @@ class StackEnv(IsaacEnv):
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
         self.prev_object_pos = self.object.data.root_pos_w.clone()
+        self.prev_target_object_pos = self.target_object.data.root_pos_w.clone()
         self.actions = actions.clone().to(device=self.device)
         if self.cfg.control.moving_average:
             self.averaged_actions[:, :3] = self.cfg.control.decay * self.averaged_actions[:, :3] + (1- self.cfg.control.decay) * self.actions[:, :3]
@@ -222,6 +224,7 @@ class StackEnv(IsaacEnv):
         # -- compute common buffers
         self.robot.update_buffers(self.dt)
         self.object.update_buffers(self.dt)
+        self.target_object.update_buffers(self.dt)
         # current_joint = self.robot.data.arm_dof_pos
         target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
         # print(current_joint - prev_joint)
@@ -295,6 +298,7 @@ class StackEnv(IsaacEnv):
         # define views over instances
         self.robot.initialize(self.env_ns + "/.*/Robot")
         self.object.initialize(self.env_ns + "/.*/Object")
+        self.target_object.initialize(self.env_ns + "/.*/TargetObject")
 
         # create controller
         if self.cfg.control.control_type == "inverse_kinematics":
@@ -484,6 +488,17 @@ class StackObservationManager(ObservationManager):
         quat_w[quat_w[:, 0] < 0] *= -1
         return quat_w
 
+    def target_object_positions(self, env: StackEnv):
+        """Current object position."""
+        return env.target_object.data.root_pos_w - env.envs_positions
+
+    def target_object_orientations(self, env: StackEnv):
+        """Current object orientation."""
+        # make the first element positive
+        quat_w = env.target_object.data.root_quat_w
+        quat_w[quat_w[:, 0] < 0] *= -1
+        return quat_w
+
     def object_relative_tool_positions(self, env: StackEnv):
         """Current object position w.r.t. end-effector frame."""
         return env.object.data.root_pos_w - env.robot.data.ee_state_w[:, :3]
@@ -497,8 +512,8 @@ class StackObservationManager(ObservationManager):
         return quat_ee
 
     def object_to_goal_positions(self, env: StackEnv):
-        object_positions = env.object.data.root_pos_w[:, 2:3]
-        goal_positions = env.object_des_pose_w[:, 2:3]
+        object_positions = env.object.data.root_pos_w[:, :3]
+        goal_positions = env.target_object.data.root_pos_w[:, :3] + 0.035
         # object_positions = env.object.data.root_pos_w[:, :3]
         # goal_positions = env.object_des_pose_w[:, :3]
         return (goal_positions - object_positions)
@@ -506,12 +521,12 @@ class StackObservationManager(ObservationManager):
     def object_desired_positions(self, env: StackEnv):
         """Desired object position."""
         # return env.object_des_pose_w[:, 0:3] - env.envs_positions
-        return env.object_des_pose_w[:, 2:3] - env.envs_positions[:, 2:3]
+        return env.target_object.root_pose_w[:, 2:3] - env.envs_positions[:, 2:3]
 
     def object_desired_orientations(self, env: StackEnv):
         """Desired object orientation."""
         # make the first element positive
-        quat_w = env.object_des_pose_w[:, 3:7]
+        quat_w = env.target_object_des_pose_w[:, 3:7]
         quat_w[quat_w[:, 0] < 0] *= -1
         return quat_w
 
@@ -558,22 +573,8 @@ class StackRewardManager(RewardManager):
         ee_state_w = torch.clone(env.robot.data.ee_state_w[:, :3])
         # ee_state_w[:, -1] += 0.01
         ee_distance = torch.norm(ee_state_w - env.object.data.root_pos_w, dim=1)
-        # ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
-
-        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
-        tool_pos = env.robot.data.tool_dof_pos
-        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.025
-        # lifted = env.object.data.root_pos_w[:, -1] > 0.025
-        # lifted = env.object.data.root_pos_w[:, -1] > 0.03
-        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
-        # grasped = torch.where(torch.logical_and(torch.logical_and(mask, close_enough_to_box), lifted), True, False)
-
-        # reward = 1 - torch.tanh(ee_distance / sigma)
         reward = 1 - torch.tanh(ee_distance * sigma)
-        reward[grasped] = 1.
         return reward
-        # return 1 - torch.tanh(ee_distance / sigma)
 
     def opening_gripper(self, env: StackEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
@@ -645,26 +646,33 @@ class StackRewardManager(RewardManager):
         # return grasped * (1 - torch.tanh((distance / sigma)))
 
     def grasp_object_success(self, env: StackEnv):
-        # dist = torch.norm(env.object.data.root_pos_w[:, :3].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, :3], dim=-1)
-        # dist = torch.norm(env.object.data.root_pos_w[:, 2].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, 2], dim=-1)
-        # dist = dist.mean(-1)
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
         close_enough_to_box = dist < 0.025
-        # lifted = env.object.data.root_pos_w[:, -1] > 0.025
-        # lifted = env.object.data.root_pos_w[:, -1] > 0.03
-        # print('grasped?: ', mask, '  close?: ', dist < 0.01, '  dist: ', dist)
         return torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
-        # return torch.where(torch.logical_and(torch.logical_and(mask, close_enough_to_box), lifted), 1.0, 0.0)
+
+    def aligning_objects(self, env: StackEnv, threshold: float):
+        obj_pos = env.object.data.root_pos_w - env.envs_positions
+        above_target_obj = torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
+        dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
+        # print("Aligning {}".format(dist))
+        return dist * above_target_obj
+
+    def stack_success(self, env: StackEnv):
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.025
+        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
+
+        dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
+        stacked = torch.logical_and(dist < 0.03, ~grasped)
+        # print("Stacking: ", stacked)
+        return torch.where(stacked, 1., 0.)
 
     def lifting_object_success(self, env: StackEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
-        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
-        tool_pos = env.robot.data.tool_dof_pos
-        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.025
-        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
-        # dist_to_desired = torch.norm(env.object.data.root_pos_w[:, :3] - env.object_des_pose_w[:, :3], dim=-1)
-        return grasped * torch.where(env.object.data.root_pos_w[:, 2] > env.object_des_pose_w[:, 2], 1.0 ,0.0)
-        # return grasped * torch.where(dist_to_desired < threshold, 1.0 ,0.0)
+        obj_pos = env.object.data.root_pos_w - env.envs_positions
+        # print("Lifting: ", torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0))
+        return torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
