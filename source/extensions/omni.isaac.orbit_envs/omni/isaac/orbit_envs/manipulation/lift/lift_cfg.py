@@ -171,9 +171,9 @@ class RewardsCfg:
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
     reaching_object_position_tanh = {"weight": 1., "sigma": 10}
-    opening_gripper = {'weight': 0.05}
+    opening_gripper = {'weight': 0.02}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 3}
+    tracking_object_position_tanh = {"weight": 2., "sigma": 2}
     # penalizing_action_rate_l2 = {"weight": 0.05}
     grasp_object_success = {'weight': 0.5}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
