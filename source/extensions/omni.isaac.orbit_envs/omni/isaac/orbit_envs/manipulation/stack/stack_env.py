@@ -663,6 +663,19 @@ class StackRewardManager(RewardManager):
         # print("Aligning {}".format(dist))
         return dist * above_target_obj
 
+    def opening_gripper(self, env: StackEnv):
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.025
+        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
+        opened = tool_pos.sum(-1) > 0.06
+        reward = torch.zeros_like(dist)
+        reward[torch.logical_and(opened, ~grasped)] = 1.
+        reward[torch.logical_and(opened, close_enough_to_box)] = 0.
+        reward[grasped] = 1.
+        return reward
+
     def stack_success(self, env: StackEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
