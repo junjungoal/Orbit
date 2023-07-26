@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=2., dynamic_friction=2., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.5, dynamic_friction=1.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -175,9 +175,9 @@ class RewardsCfg:
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 2., "sigma": 2}
     # penalizing_action_rate_l2 = {"weight": 0.05}
-    grasp_object_success = {'weight': 0.25}
+    grasp_object_success = {'weight': 0.5}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
-    lifting_object_success = {"weight": 2.25, "threshold": 0.08}
+    lifting_object_success = {"weight": 2.5, "threshold": 0.08}
 
 
 @configclass
