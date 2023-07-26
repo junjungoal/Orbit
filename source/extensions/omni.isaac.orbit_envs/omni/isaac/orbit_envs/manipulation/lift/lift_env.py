@@ -564,7 +564,7 @@ class LiftRewardManager(RewardManager):
 
         # reward = 1 - torch.tanh(ee_distance / sigma)
         reward = 1 - torch.tanh(ee_distance * sigma)
-        reward[grasped] = 1.
+        # reward[grasped] = 1.
         return reward
         # return 1 - torch.tanh(ee_distance / sigma)
 
