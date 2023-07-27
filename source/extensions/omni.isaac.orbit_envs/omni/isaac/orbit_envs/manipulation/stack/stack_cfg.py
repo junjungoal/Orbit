@@ -197,18 +197,19 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
+    staged_rewards = True
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 0.25, "sigma": 10}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 10}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     # tracking_object_position_tanh = {"weight": 2., "sigma": 5}
     # penalizing_action_rate_l2 = {"weight": 0.05}
-    opening_gripper = {'weight': 0.02}
-    grasp_object_success = {'weight': 0.25}
+    # opening_gripper = {'weight': 0.02}
+    grasp_object_success = {'weight': 2.}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
-    lifting_object_success = {"weight": 1., "threshold": 0.11}
-    aligning_objects = {"weight": 0.5, "threshold": 0.11}
-    stack_success = {"weight": 2.}
+    lifting_object_success = {"weight": 4., "threshold": 0.11}
+    # aligning_objects = {"weight": 6., "threshold": 0.11, "sigma": 1.}
+    stack_success = {"weight": 8.}
 
 
 @configclass

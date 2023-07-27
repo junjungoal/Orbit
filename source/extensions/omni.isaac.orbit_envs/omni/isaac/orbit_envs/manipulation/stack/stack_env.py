@@ -242,9 +242,9 @@ class StackEnv(IsaacEnv):
         # Note: this is used by algorithms like PPO where time-outs are handled differently
         self.extras["time_outs"] = self.episode_length_buf >= self.max_episode_length
         # -- add information to extra if task completed
-        object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
+        object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - self.target_object.data.root_pos_w[:, 0:2], dim=1)
         # self.extras["is_success"] = object_position_error < 0.08
-        self.extras["is_success"] = self.is_grasped() * torch.where(self.object.data.root_pos_w[:, 2] > self.object_des_pose_w[:, 2], 1.0 ,0.0)
+        self.extras["is_success"] = (1 - self.is_grasped()) * torch.where(object_position_error < 0.03, 1.0 ,0.0)
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -434,7 +434,7 @@ class StackEnv(IsaacEnv):
         dist = torch.norm(self.robot.data.ee_state_w[:, 0:3] - self.object.data.root_pos_w, dim=1)
         tool_pos = self.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.025
+        close_enough_to_box = dist < 0.034
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
         return grasped
 
@@ -578,13 +578,28 @@ class StackRewardManager(RewardManager):
         # ee_state_w[:, -1] += 0.01
         ee_distance = torch.norm(ee_state_w - env.object.data.root_pos_w, dim=1)
         reward = 1 - torch.tanh(ee_distance * sigma)
+
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.034
+        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
+        opened = tool_pos.sum(-1) > 0.06
+        opened_reward = torch.zeros_like(dist)
+        opened_reward[torch.logical_and(opened, ~close_enough_to_box)] = 1.
+        opened_reward[torch.logical_and(opened, close_enough_to_box)] = 0.
+        opened_reward[grasped] = 1.
+
+        reward += 0.02 * opened_reward
+
+
         return reward
 
     def opening_gripper(self, env: StackEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.025
+        close_enough_to_box = dist < 0.034
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
         opened = tool_pos.sum(-1) > 0.06
         reward = torch.zeros_like(dist)
@@ -611,7 +626,7 @@ class StackRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.025
+        close_enough_to_box = dist < 0.034
         # lifted = env.object.data.root_pos_w[:, -1] > 0.025
         # lifted = env.object.data.root_pos_w[:, -1] > 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
@@ -632,7 +647,7 @@ class StackRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.025
+        close_enough_to_box = dist < 0.034
         # lifted = env.object.data.root_pos_w[:, -1] > 0.025
         # lifted = env.object.data.root_pos_w[:, -1] > 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
@@ -653,21 +668,21 @@ class StackRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.025
+        close_enough_to_box = dist < 0.034
         return torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
 
-    def aligning_objects(self, env: StackEnv, threshold: float):
+    def aligning_objects(self, env: StackEnv, threshold: float, sigma: float):
         obj_pos = env.object.data.root_pos_w - env.envs_positions
         above_target_obj = torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
         dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
         # print("Aligning {}".format(dist))
-        return dist * above_target_obj
+        return above_target_obj * (1 - torch.tanh(dist * sigma))
 
     def opening_gripper(self, env: StackEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.025
+        close_enough_to_box = dist < 0.034
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
         opened = tool_pos.sum(-1) > 0.06
         reward = torch.zeros_like(dist)
@@ -680,7 +695,7 @@ class StackRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.025
+        close_enough_to_box = dist < 0.034
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
 
         dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
@@ -692,4 +707,9 @@ class StackRewardManager(RewardManager):
         """Sparse reward if object is lifted successfully."""
         obj_pos = env.object.data.root_pos_w - env.envs_positions
         # print("Lifting: ", torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0))
-        return torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
+        above_target_obj = torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
+        dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
+        lifted = torch.where(obj_pos[:, -1] > threshold, 1.0, 0)
+        reward = lifted + lifted * 0.5 * (1 - torch.tanh(dist))
+        return reward
+        # return torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
