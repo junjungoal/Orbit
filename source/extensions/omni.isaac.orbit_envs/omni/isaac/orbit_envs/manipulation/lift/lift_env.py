@@ -577,7 +577,7 @@ class LiftRewardManager(RewardManager):
         open_reward[torch.logical_and(opened, close_enough_to_box)] = 0.
         open_reward[grasped] = 1.
 
-        reward += 0.02 * open_reward
+        reward += 0.05 * open_reward
 
         return reward
         # return 1 - torch.tanh(ee_distance / sigma)
