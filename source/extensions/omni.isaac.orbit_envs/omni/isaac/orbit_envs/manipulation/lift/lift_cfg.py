@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=2., dynamic_friction=2., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.2, dynamic_friction=1.2, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -152,7 +152,7 @@ class ObservationsCfg:
         # -- object desired state
         object_to_goal_positions = {"scale": 1.0}
         # gripper_actions = {'scale': 1.0}
-        # tool_actions_bool = {'scale': 1.0}
+        tool_actions_bool = {'scale': 1.0}
         # ee_actions = {'scale': 1.0}
         # object_desired_positions = {"scale": 1.0}
 
@@ -170,10 +170,10 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 10}
-    opening_gripper = {'weight': 0.02}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 5}
+    opening_gripper = {'weight': 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 2}
+    tracking_object_position_tanh = {"weight": 1., "sigma": 10}
     # penalizing_action_rate_l2 = {"weight": 0.05}
     grasp_object_success = {'weight': 0.5}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
@@ -205,10 +205,10 @@ class ControlCfg:
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="position_rel",
         ik_method="dls",
-        position_command_scale=(0.03, 0.03, 0.03),
+        position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.05, 0.05, 0.05),
         ee_min_limit=(0.15, -0.4, 0.0),
-        ee_max_limit=(0.7, 0.4, 0.7)
+        ee_max_limit=(0.7, 0.4, 0.4)
     )
 
 @configclass
@@ -237,12 +237,12 @@ class LiftEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/300) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/150) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        dt=1/300,
-        substeps=10,
+        dt=1/150,
+        substeps=5,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
             gpu_total_aggregate_pairs_capacity=16 * 1024,
