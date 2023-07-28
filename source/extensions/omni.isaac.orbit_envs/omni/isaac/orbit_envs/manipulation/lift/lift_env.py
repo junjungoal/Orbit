@@ -578,6 +578,7 @@ class LiftRewardManager(RewardManager):
         open_reward[grasped] = 1.
 
         reward += 0.05 * open_reward
+        reward += env.is_grasped()
 
         return reward
         # return 1 - torch.tanh(ee_distance / sigma)
