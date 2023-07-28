@@ -575,6 +575,7 @@ class LiftRewardManager(RewardManager):
         opened = tool_pos.sum(-1) > 0.06
         reward = torch.zeros_like(dist)
         reward[torch.logical_and(opened, ~close_enough_to_box)] = 1.
+        reward[torch.logical_and(~opened, close_enough_to_box)] = 1.
         reward[env.is_grasped().bool()] = 1.
         return reward
 
