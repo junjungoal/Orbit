@@ -202,8 +202,10 @@ class LiftEnv(IsaacEnv):
             #     self.gripper_actions + 0.2 * torch.sign(self.actions[:, -1:]), -1, 1
             # )
             # gripper_actions = torch.where(self.gripper_actions > 0, 1., -1.)
+            gripper_actions = torch.where(self.actions[:, -1] > 0, 1., -1.)
             # self.robot_actions[:, -1] = self.gripper_actions
-            self.robot_actions[:, -1] = self.actions[:, -1]
+            # self.robot_actions[:, -1] = self.actions[:, -1]
+            self.robot_actions[:, -1] = gripper_actions
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
