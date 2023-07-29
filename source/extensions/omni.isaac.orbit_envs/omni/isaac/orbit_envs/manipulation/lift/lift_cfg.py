@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1.2, dynamic_friction=1.2, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -170,14 +170,14 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 5}
-    opening_gripper = {'weight': 0.1}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 8}
+    opening_gripper = {'weight': 0.05}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
-    tracking_object_position_tanh = {"weight": 1., "sigma": 10}
+    tracking_object_position_tanh = {"weight": 1., "sigma": 5}
     # penalizing_action_rate_l2 = {"weight": 0.05}
-    grasp_object_success = {'weight': 0.5}
+    grasp_object_success = {'weight': 1.}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
-    lifting_object_success = {"weight": 1., "threshold": 0.08}
+    lifting_object_success = {"weight": 2.5, "threshold": 0.08}
 
 
 @configclass
@@ -237,12 +237,12 @@ class LiftEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/150) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/200) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        dt=1/150,
-        substeps=5,
+        dt=1/200,
+        substeps=8,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
             gpu_total_aggregate_pairs_capacity=16 * 1024,
