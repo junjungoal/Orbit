@@ -582,8 +582,8 @@ class LiftRewardManager(RewardManager):
 
     def penalizing_action_rate_l2(self, env: LiftEnv):
         """Penalize large variations in action commands."""
-        # return -torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
-        return -torch.sum(torch.square(env.actions[:, -1:] - env.previous_actions[:, -1:]), dim=1)
+        return -torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
+        # return -torch.sum(torch.square(env.actions[:, -1:] - env.previous_actions[:, -1:]), dim=1)
 
     def tracking_object_position_exp(self, env: LiftEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using exp-kernel."""
