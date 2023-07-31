@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.2, dynamic_friction=1.2, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -101,8 +101,8 @@ class RandomizationCfg:
         # randomize position
         # position_uniform_min = [0.50, -0.05, 0.04]  # position (x,y,z)
         # position_uniform_max = [0.55, 0.05, 0.04]  # position (x,y,z)
-        position_uniform_min = [0.45, -0.05, 0.04]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.05, 0.04]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.1, 0.04]  # position (x,y,z)
+        position_uniform_max = [0.55, 0.1, 0.04]  # position (x,y,z)
 
     @configclass
     class ObjectDesiredPoseCfg:
@@ -118,6 +118,14 @@ class RandomizationCfg:
         position_uniform_max = [0.6, 0.05, 0.08]  # position (x,y,z)
         # randomize orientation
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
+
+    object_material_properties = {
+        "enabled": True,
+        "static_friction_range": (0.8, 1.3),
+        "dynamic_friction_range": (0.8, 1.3),
+        "restitution_range": (0.0, 0.1),
+        "num_buckets": 64,
+    }
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
@@ -141,17 +149,20 @@ class ObservationsCfg:
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
         tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
-        tool_positions = {"scale": 1.0}
+        # tool_positions = {"scale": 1.0}
+        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
         # tool_orientations = {"scale": 1.0}
         # -- object state
-        object_positions = {"scale": 1.0}
-        object_orientations = {"scale": 1.0}
+        # object_positions = {"scale": 1.0}
+        object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
+        # object_orientations = {"scale": 1.0}
+        object_orientations = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
         object_relative_tool_positions = {"scale": 1.0}
         is_grasped = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        object_to_goal_positions = {"scale": 1.0}
-        # gripper_actions = {'scale': 1.0}
+        # object_to_goal_positions = {"scale": 1.0, }
+        object_to_goal_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
         tool_actions_bool = {'scale': 1.0}
         # ee_actions = {'scale': 1.0}
         # object_desired_positions = {"scale": 1.0}
@@ -170,7 +181,7 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 6}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 8}
     opening_gripper = {'weight': 0.01}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     tracking_object_position_tanh = {"weight": 2., "sigma": 4}
@@ -213,8 +224,8 @@ class ControlCfg:
 
 @configclass
 class DomainRandomizationCfg:
-    randomize = False
-    every_step = False
+    randomize = True
+    every_step = True
     perlin_noise = True
     randomize_object = True
     randomize_table = True
@@ -222,9 +233,10 @@ class DomainRandomizationCfg:
     randomize_robot = True
     randomize_background = True
     randomize_camera = True
-    camera_pos_noise = 0.015
+    camera_pos_noise = 0.01
     camera_ori_noise = 0.03
     random_obs_amplitude = False
+    randomize_action = True
 
 ##
 # Environment configuration

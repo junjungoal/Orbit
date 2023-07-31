@@ -10,6 +10,8 @@ import torch
 from typing import List
 
 import omni.isaac.core.utils.prims as prim_utils
+import omni.replicator.core as rep
+import omni.replicator.isaac as rep_dr
 
 import omni.isaac.orbit.utils.kit as kit_utils
 from omni.isaac.orbit.controllers.differential_inverse_kinematics import DifferentialInverseKinematics
@@ -71,6 +73,7 @@ class LiftEnv(IsaacEnv):
         # -- fill up buffers
         self.object.update_buffers(self.dt)
         self.robot.update_buffers(self.dt)
+        self._setup_randomization()
 
     """
     Implementation specifics.
@@ -146,35 +149,45 @@ class LiftEnv(IsaacEnv):
         if self.cfg.control.control_type == "inverse_kinematics":
             self._ik_controller.reset_idx(env_ids)
 
-        if self.cfg.domain_randomization.randomize_camera and self.enable_camera:
-            camera_pos = self.default_camera_pos[env_ids] + (torch.randn((len(env_ids), 3), device=self.device) * 2 - 1) * self.cfg.domain_randomization.camera_pos_noise
+        self.randomize(env_ids, True)
+        if self.cfg.randomization.object_material_properties["enabled"]:
+            rep_dr.physics_view.step_randomization(env_ids)
 
-            random_axis, random_angle = random_axis_angle(angle_limit=self.cfg.domain_randomization.camera_ori_noise, batch_size=len(env_ids), device=self.device)
-
-            random_quat = quat_from_axis_angle(random_angle * random_axis)
-            new_camera_quat = quat_mul(random_quat.to(self.device), self.default_camera_ori[env_ids])
-            self.camera.set_world_poses_ros(camera_pos.cpu().numpy(),
-                                            new_camera_quat.cpu().numpy(),
-                                            env_ids)
-
+    def randomize(self, env_ids, reset=False):
         if self.cfg.domain_randomization.randomize:
+            if self.cfg.domain_randomization.randomize_camera and self.enable_camera:
+                camera_pos = self.default_camera_pos[env_ids] + (torch.randn((len(env_ids), 3), device=self.device) * 2 - 1) * self.cfg.domain_randomization.camera_pos_noise
+
+                random_axis, random_angle = random_axis_angle(angle_limit=self.cfg.domain_randomization.camera_ori_noise, batch_size=len(env_ids), device=self.device)
+
+                random_quat = quat_from_axis_angle(random_angle * random_axis)
+                new_camera_quat = quat_mul(random_quat.to(self.device), self.default_camera_ori[env_ids])
+                self.camera.set_world_poses_ros(camera_pos.cpu().numpy(),
+                                                new_camera_quat.cpu().numpy(),
+                                                env_ids)
             if self.cfg.domain_randomization.randomize_object:
-                self.randomize_object()
+                self.randomize_object(reset)
 
             if self.cfg.domain_randomization.randomize_background:
-                self.randomize_background()
+                self.randomize_background(reset)
 
             if self.cfg.domain_randomization.randomize_light:
-                self.randomize_light()
+                self.randomize_light(reset)
 
             if self.cfg.domain_randomization.randomize_robot:
-                self.randomize_robot()
+                self.randomize_robot(reset)
 
             if self.cfg.domain_randomization.randomize_table:
-                self.randomize_table()
+                self.randomize_table(reset)
 
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
+
+        if self.cfg.domain_randomization.randomize and self.cfg.domain_randomization.randomize_action:
+            max = 0.05
+            min = -0.05
+            actions += (torch.rand_like(actions) * (max - min) + min)
+
         self.prev_object_pos = self.object.data.root_pos_w.clone()
         self.actions = actions.clone().to(device=self.device)
         if self.cfg.control.moving_average:
@@ -242,6 +255,9 @@ class LiftEnv(IsaacEnv):
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
+
+        if self.cfg.domain_randomization.randomize and self.cfg.domain_randomization.every_step:
+            self.randomize(torch.arange(self.num_envs).to(self.device))
 
     def _get_observations(self) -> VecEnvObs:
         # compute observations
@@ -409,13 +425,14 @@ class LiftEnv(IsaacEnv):
         # transform command from local env to world
         self.object_des_pose_w[env_ids, 0:3] += self.envs_positions[env_ids]
 
-    def randomize_object(self):
-        default_color = np.array([0.949, 0.8, 0.21])
+    def randomize_object(self, reset=False):
+        default_color = np.array([0.949, 0.8, 0.2])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.6
+        local_rgb_interpolation = 0.3
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
+        omni.usd.create_material_input(prim, 'diffuse_color_constant', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
     def is_grasped(self):
         dist = torch.norm(self.robot.data.ee_state_w[:, 0:3] - self.object.data.root_pos_w, dim=1)
@@ -424,6 +441,31 @@ class LiftEnv(IsaacEnv):
         close_enough_to_box = dist < 0.034
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
         return grasped
+
+    def _setup_randomization(self):
+        """Randomize properties of scene at start."""
+        # register with replicator
+        if self.cfg.randomization.object_material_properties["enabled"]:
+            rep_dr.physics_view.register_rigid_prim_view(rigid_prim_view=self.object.objects)
+
+            # create graph using replicator
+            with rep_dr.trigger.on_rl_frame(num_envs=self.num_envs):
+                with rep_dr.gate.on_env_reset():
+                    # read configuration for randomization
+                    sf = self.cfg.randomization.object_material_properties["static_friction_range"]
+                    df = self.cfg.randomization.object_material_properties["dynamic_friction_range"]
+                    res = self.cfg.randomization.object_material_properties["restitution_range"]
+                    # set properties into robot
+                    rep_dr.physics_view.randomize_rigid_prim_view(
+                        view_name=self.object.objects.name,
+                        operation="direct",
+                        material_properties=rep.distribution.uniform(
+                            [sf[0], df[0], res[0]] * self.object.objects.num_shapes, [sf[1], df[1], res[1]] * self.object.objects.num_shapes
+                        ),
+                        num_buckets=self.cfg.randomization.object_material_properties["num_buckets"],
+                    )
+            # prepares/executes the action graph for randomization
+            rep.orchestrator.run()
 
 
 class LiftObservationManager(ObservationManager):
