@@ -613,7 +613,8 @@ class LiftRewardManager(RewardManager):
     def opening_gripper(self, env: LiftEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
-        close_enough_to_box = dist < 0.045
+        # close_enough_to_box = dist < 0.045
+        close_enough_to_box = dist < 0.034
         opened = tool_pos.sum(-1) > 0.06
         reward = torch.zeros_like(dist)
         reward[torch.logical_and(opened, ~close_enough_to_box)] = 1.
