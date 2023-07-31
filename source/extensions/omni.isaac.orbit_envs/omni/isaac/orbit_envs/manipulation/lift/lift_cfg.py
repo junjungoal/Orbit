@@ -121,10 +121,10 @@ class RandomizationCfg:
 
     object_material_properties = {
         "enabled": True,
-        "static_friction_range": (0.8, 1.3),
-        "dynamic_friction_range": (0.8, 1.3),
+        "static_friction_range": (1.0, 1.1),
+        "dynamic_friction_range": (1.0, 1.1),
         "restitution_range": (0.0, 0.1),
-        "num_buckets": 64,
+        "num_buckets": 10,
     }
 
     # initialize
@@ -218,8 +218,8 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.05, 0.05, 0.05),
-        ee_min_limit=(0.15, -0.35, 0.0),
-        ee_max_limit=(0.65, 0.35, 0.4)
+        ee_min_limit=(0.3, -0.3, 0.0),
+        ee_max_limit=(0.65, 0.3, 0.3)
     )
 
 @configclass
