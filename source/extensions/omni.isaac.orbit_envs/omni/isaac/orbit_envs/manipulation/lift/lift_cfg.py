@@ -101,8 +101,8 @@ class RandomizationCfg:
         # randomize position
         # position_uniform_min = [0.50, -0.05, 0.04]  # position (x,y,z)
         # position_uniform_max = [0.55, 0.05, 0.04]  # position (x,y,z)
-        position_uniform_min = [0.45, -0.05, 0.04]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.05, 0.04]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.1, 0.04]  # position (x,y,z)
+        position_uniform_max = [0.55, 0.1, 0.04]  # position (x,y,z)
 
     @configclass
     class ObjectDesiredPoseCfg:
@@ -118,6 +118,14 @@ class RandomizationCfg:
         position_uniform_max = [0.6, 0.05, 0.08]  # position (x,y,z)
         # randomize orientation
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
+
+    object_material_properties = {
+        "enabled": True,
+        "static_friction_range": (0.8, 1.3),
+        "dynamic_friction_range": (0.8, 1.3),
+        "restitution_range": (0.0, 0.1),
+        "num_buckets": 64,
+    }
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
@@ -218,13 +226,13 @@ class ControlCfg:
 class DomainRandomizationCfg:
     randomize = True
     every_step = True
-    perlin_noise = False
-    randomize_object = False
-    randomize_table = False
-    randomize_light = False
-    randomize_robot = False
-    randomize_background = False
-    randomize_camera = False
+    perlin_noise = True
+    randomize_object = True
+    randomize_table = True
+    randomize_light = True
+    randomize_robot = True
+    randomize_background = True
+    randomize_camera = True
     camera_pos_noise = 0.01
     camera_ori_noise = 0.03
     random_obs_amplitude = False
