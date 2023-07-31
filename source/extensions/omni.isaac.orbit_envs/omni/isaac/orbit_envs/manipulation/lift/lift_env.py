@@ -571,7 +571,8 @@ class LiftRewardManager(RewardManager):
     def opening_gripper(self, env: LiftEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
-        close_enough_to_box = dist < 0.045
+        # close_enough_to_box = dist < 0.045
+        close_enough_to_box = dist < 0.034
         opened = tool_pos.sum(-1) > 0.06
         reward = torch.zeros_like(dist)
         reward[torch.logical_and(opened, ~close_enough_to_box)] = 1.
@@ -582,8 +583,8 @@ class LiftRewardManager(RewardManager):
 
     def penalizing_action_rate_l2(self, env: LiftEnv):
         """Penalize large variations in action commands."""
-        # return -torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
-        return -torch.sum(torch.square(env.actions[:, -1:] - env.previous_actions[:, -1:]), dim=1)
+        return -torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
+        # return -torch.sum(torch.square(env.actions[:, -1:] - env.previous_actions[:, -1:]), dim=1)
 
     def tracking_object_position_exp(self, env: LiftEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using exp-kernel."""
