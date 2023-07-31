@@ -146,18 +146,18 @@ class LiftEnv(IsaacEnv):
         if self.cfg.control.control_type == "inverse_kinematics":
             self._ik_controller.reset_idx(env_ids)
 
-        if self.cfg.domain_randomization.randomize_camera and self.enable_camera:
-            camera_pos = self.default_camera_pos[env_ids] + (torch.randn((len(env_ids), 3), device=self.device) * 2 - 1) * self.cfg.domain_randomization.camera_pos_noise
-
-            random_axis, random_angle = random_axis_angle(angle_limit=self.cfg.domain_randomization.camera_ori_noise, batch_size=len(env_ids), device=self.device)
-
-            random_quat = quat_from_axis_angle(random_angle * random_axis)
-            new_camera_quat = quat_mul(random_quat.to(self.device), self.default_camera_ori[env_ids])
-            self.camera.set_world_poses_ros(camera_pos.cpu().numpy(),
-                                            new_camera_quat.cpu().numpy(),
-                                            env_ids)
 
         if self.cfg.domain_randomization.randomize:
+            if self.cfg.domain_randomization.randomize_camera and self.enable_camera:
+                camera_pos = self.default_camera_pos[env_ids] + (torch.randn((len(env_ids), 3), device=self.device) * 2 - 1) * self.cfg.domain_randomization.camera_pos_noise
+
+                random_axis, random_angle = random_axis_angle(angle_limit=self.cfg.domain_randomization.camera_ori_noise, batch_size=len(env_ids), device=self.device)
+
+                random_quat = quat_from_axis_angle(random_angle * random_axis)
+                new_camera_quat = quat_mul(random_quat.to(self.device), self.default_camera_ori[env_ids])
+                self.camera.set_world_poses_ros(camera_pos.cpu().numpy(),
+                                                new_camera_quat.cpu().numpy(),
+                                                env_ids)
             if self.cfg.domain_randomization.randomize_object:
                 self.randomize_object()
 
@@ -175,6 +175,12 @@ class LiftEnv(IsaacEnv):
 
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
+
+        if self.cfg.domain_randomization.randomize and self.cfg.domain_randomization.randomize_action:
+            max = 0.05
+            min = -0.05
+            actions += (torch.rand_like(actions) * (max - min) + min)
+
         self.prev_object_pos = self.object.data.root_pos_w.clone()
         self.actions = actions.clone().to(device=self.device)
         if self.cfg.control.moving_average:
