@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1.2, dynamic_friction=1.2, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -121,10 +121,10 @@ class RandomizationCfg:
 
     object_material_properties = {
         "enabled": True,
-        "static_friction_range": (1.0, 1.1),
-        "dynamic_friction_range": (1.0, 1.1),
-        "restitution_range": (0.0, 0.1),
-        "num_buckets": 10,
+        "static_friction_range": (0.95, 1.05),
+        "dynamic_friction_range": (0.95, 1.05),
+        "restitution_range": (0.0, 0.0),
+        "num_buckets": 5,
     }
 
     # initialize
@@ -181,11 +181,11 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 8}
-    opening_gripper = {'weight': 0.1}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 6}
+    opening_gripper = {'weight': 0.01}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 4}
-    penalizing_action_rate_l2 = {"weight": 0.05}
+    tracking_object_position_tanh = {"weight": 2., "sigma": 2}
+    # penalizing_action_rate_l2 = {"weight": 0.05}
     grasp_object_success = {'weight': 1.}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
     lifting_object_success = {"weight": 4., "threshold": 0.08}
@@ -218,13 +218,13 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.05, 0.05, 0.05),
-        ee_min_limit=(0.3, -0.3, 0.0),
-        ee_max_limit=(0.65, 0.3, 0.3)
+        ee_min_limit=(0.3, -0.2, 0.0),
+        ee_max_limit=(0.65, 0.2, 0.3)
     )
 
 @configclass
 class DomainRandomizationCfg:
-    randomize = True
+    randomize = False
     every_step = True
     perlin_noise = True
     randomize_object = True
@@ -249,11 +249,11 @@ class LiftEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/150) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/250) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        dt=1/150,
+        dt=1/250,
         substeps=5,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,

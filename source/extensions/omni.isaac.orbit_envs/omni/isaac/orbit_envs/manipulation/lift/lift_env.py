@@ -74,6 +74,7 @@ class LiftEnv(IsaacEnv):
         self.object.update_buffers(self.dt)
         self.robot.update_buffers(self.dt)
         self._setup_randomization()
+        self.frame_skips = 1
 
     """
     Implementation specifics.
@@ -190,9 +191,8 @@ class LiftEnv(IsaacEnv):
 
         self.prev_object_pos = self.object.data.root_pos_w.clone()
         self.actions = actions.clone().to(device=self.device)
-        if self.cfg.control.moving_average:
-            self.averaged_actions[:, :3] = self.cfg.control.decay * self.averaged_actions[:, :3] + (1- self.cfg.control.decay) * self.actions[:, :3]
-            self.actions[:, :3] = self.averaged_actions[:, :3]
+
+
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
@@ -235,7 +235,6 @@ class LiftEnv(IsaacEnv):
         # current_joint = self.robot.data.arm_dof_pos
         target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
         # print(current_joint - prev_joint)
-        # print(target-desired, ' action: ', self.actions)
         # print('----')
         # -- compute MDP signals
         # reward
@@ -509,6 +508,9 @@ class LiftObservationManager(ObservationManager):
     def object_positions(self, env: LiftEnv):
         """Current object position."""
         return env.object.data.root_pos_w - env.envs_positions
+        if self.cfg.control.moving_average:
+            self.averaged_actions[:, :3] = self.cfg.control.decay * self.averaged_actions[:, :3] + (1- self.cfg.control.decay) * self.actions[:, :3]
+            self.actions[:, :3] = self.averaged_actions[:, :3]
 
     def object_orientations(self, env: LiftEnv):
         """Current object orientation."""
@@ -613,8 +615,8 @@ class LiftRewardManager(RewardManager):
     def opening_gripper(self, env: LiftEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
-        # close_enough_to_box = dist < 0.045
-        close_enough_to_box = dist < 0.034
+        close_enough_to_box = dist < 0.045
+        # close_enough_to_box = dist < 0.034
         opened = tool_pos.sum(-1) > 0.06
         reward = torch.zeros_like(dist)
         reward[torch.logical_and(opened, ~close_enough_to_box)] = 1.
@@ -650,34 +652,14 @@ class LiftRewardManager(RewardManager):
         # distance of the end-effector to the object: (num_envs,)
         # distance = torch.norm(env.object_des_pose_w[:, :3] - env.object.data.root_pos_w[:, :3], dim=1)
         distance = torch.clamp((env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2]) / 0.06, min=0)
+
+        lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.025, 1., 0.)
         # under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
         # print(distance, under)
         # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
         # return grasped * (1 - torch.tanh((distance / sigma)))
-        return grasped * (1 - torch.tanh((distance * sigma)))
+        return lifted * grasped * (1 - torch.tanh((distance * sigma)))
 
-    def tracking_object_position_diff(self, env: LiftEnv, sigma: float):
-        """Penalize tracking object position error using tanh-kernel."""
-
-        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
-        tool_pos = env.robot.data.tool_dof_pos
-        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.034
-        # lifted = env.object.data.root_pos_w[:, -1] > 0.025
-        # lifted = env.object.data.root_pos_w[:, -1] > 0.03
-        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
-        # grasped = torch.where(torch.logical_and(torch.logical_and(mask, close_enough_to_box), lifted), 1.0, 0.0)
-
-        # distance of the end-effector to the object: (num_envs,)
-        distance = torch.norm(env.object_des_pose_w[:, :3] - env.object.data.root_pos_w[:, :3], dim=1)
-        prev_distance = torch.norm(env.object_des_pose_w[:, :3] - env.prev_object_pos[:, :3], dim=1)
-        diff = torch.clamp(distance - prev_distance, max=0.)
-        # distance = torch.clamp(env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2], min=0)
-        # under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
-        # print(distance, under)
-        # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
-        return grasped * (-diff)
-        # return grasped * (1 - torch.tanh((distance / sigma)))
 
     def grasp_object_success(self, env: LiftEnv):
         # dist = torch.norm(env.object.data.root_pos_w[:, :3].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, :3], dim=-1)
