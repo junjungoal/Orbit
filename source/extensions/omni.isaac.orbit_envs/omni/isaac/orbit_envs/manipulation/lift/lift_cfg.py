@@ -224,7 +224,7 @@ class ControlCfg:
 
 @configclass
 class DomainRandomizationCfg:
-    randomize = False
+    randomize = True
     every_step = True
     perlin_noise = True
     randomize_object = True
