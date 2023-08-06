@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.8, dynamic_friction=1.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -121,8 +121,8 @@ class RandomizationCfg:
 
     object_material_properties = {
         "enabled": True,
-        "static_friction_range": (1., 1.2),
-        "dynamic_friction_range": (1., 1.2),
+        "static_friction_range": (1.4, 1.8),
+        "dynamic_friction_range": (1.4, 1.8),
         "restitution_range": (0.0, 0.0),
         "num_buckets": 10,
     }
@@ -181,7 +181,7 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 6}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 8}
     # opening_gripper = {'weight': 0.01}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     tracking_object_position_tanh = {"weight": 2., "sigma": 2}
@@ -207,7 +207,7 @@ class ControlCfg:
     # action space
     control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 2
+    decimation = 3
 
     moving_average = False
     decay = 0.7
@@ -218,7 +218,7 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.05, 0.05, 0.05),
-        ee_min_limit=(0.3, -0.2, 0.0),
+        ee_min_limit=(0.3, -0.2, 0.01),
         ee_max_limit=(0.65, 0.2, 0.3)
     )
 
@@ -249,12 +249,12 @@ class LiftEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/250) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/300) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        dt=1/250,
-        substeps=5,
+        dt=1/100,
+        substeps=4,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
             gpu_total_aggregate_pairs_capacity=16 * 1024,

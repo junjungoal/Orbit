@@ -15,7 +15,7 @@ PANDA_HAND_MIMIC_GROUP_CFG = GripperActuatorGroupCfg(
     model_cfg=ImplicitActuatorCfg(velocity_limit=0.2, torque_limit=200),
     control_cfg=ActuatorControlCfg(command_types=["p_abs"], stiffness={".*": 1e5}, damping={".*": 1e3}),
     mimic_multiplier={"panda_finger_joint.*": 1.0},
-    speed=0.05,
+    speed=0.005,
     open_dof_pos=0.04,
     close_dof_pos=0.0,
 )
