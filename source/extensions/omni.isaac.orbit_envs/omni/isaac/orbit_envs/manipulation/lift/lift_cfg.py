@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1.8, dynamic_friction=1.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.2, dynamic_friction=1.2, restitution=0., prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -120,9 +120,9 @@ class RandomizationCfg:
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
 
     object_material_properties = {
-        "enabled": True,
-        "static_friction_range": (1.4, 1.8),
-        "dynamic_friction_range": (1.4, 1.8),
+        "enabled": False,
+        "static_friction_range": (1., 1.2),
+        "dynamic_friction_range": (1., 1.2),
         "restitution_range": (0.0, 0.0),
         "num_buckets": 10,
     }
@@ -249,12 +249,17 @@ class LiftEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3 * (1/100) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3 * (1/200) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        dt=1/100,
-        substeps=4,
+        # dt=1/120,
+        # substeps=3,
+        # dt=1/150,
+        # substeps=2,
+        dt=1/200,
+        # substeps=2,
+        substeps=2,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
             gpu_total_aggregate_pairs_capacity=16 * 1024,
