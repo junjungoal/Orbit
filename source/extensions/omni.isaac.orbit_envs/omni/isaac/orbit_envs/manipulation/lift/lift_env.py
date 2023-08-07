@@ -438,7 +438,7 @@ class LiftEnv(IsaacEnv):
         dist = torch.norm(self.robot.data.ee_state_w[:, 0:3] - self.object.data.root_pos_w, dim=1)
         tool_pos = self.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.028
+        close_enough_to_box = dist < 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
         return grasped
 
@@ -601,7 +601,7 @@ class LiftRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.028
+        close_enough_to_box = dist < 0.03
         # lifted = env.object.data.root_pos_w[:, -1] > 0.025
         # lifted = env.object.data.root_pos_w[:, -1] > 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
@@ -628,7 +628,8 @@ class LiftRewardManager(RewardManager):
 
     def penalizing_action_rate_l2(self, env: LiftEnv):
         """Penalize large variations in action commands."""
-        return -torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
+        return -torch.sum(torch.square(env.actions[:, :-1] - env.previous_actions[:, :-1]), dim=1)
+        # return -torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
         # return -torch.sum(torch.square(env.actions[:, -1:] - env.previous_actions[:, -1:]), dim=1)
 
     def tracking_object_position_exp(self, env: LiftEnv, sigma: float, threshold: float):
@@ -644,7 +645,7 @@ class LiftRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.028
+        close_enough_to_box = dist < 0.03
         # lifted = env.object.data.root_pos_w[:, -1] > 0.025
         # lifted = env.object.data.root_pos_w[:, -1] > 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
@@ -654,7 +655,7 @@ class LiftRewardManager(RewardManager):
         # distance = torch.norm(env.object_des_pose_w[:, :3] - env.object.data.root_pos_w[:, :3], dim=1)
         distance = torch.clamp((env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2]) / 0.06, min=0)
 
-        lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.035, 1., 0.)
+        lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.03, 1., 0.)
         # under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
         # print(distance, under)
         # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
@@ -669,7 +670,7 @@ class LiftRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.028
+        close_enough_to_box = dist < 0.03
         # lifted = env.object.data.root_pos_w[:, -1] > 0.025
         # lifted = env.object.data.root_pos_w[:, -1] > 0.03
         # print('grasped?: ', mask, '  close?: ', dist < 0.01, '  dist: ', dist)
@@ -681,7 +682,7 @@ class LiftRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.028
+        close_enough_to_box = dist < 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
         # dist_to_desired = torch.norm(env.object.data.root_pos_w[:, :3] - env.object_des_pose_w[:, :3], dim=-1)
         return grasped * torch.where(env.object.data.root_pos_w[:, 2] > env.object_des_pose_w[:, 2], 1.0 ,0.0)
