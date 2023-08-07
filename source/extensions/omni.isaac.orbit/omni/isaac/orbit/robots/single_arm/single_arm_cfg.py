@@ -68,9 +68,9 @@ class SingleArmManipulatorCfg(RobotBaseCfg):
             If the prim path is not absolute, it will be resolved relative to the path specified when spawning
             the object.
         """
-        static_friction: float = 1.5
+        static_friction: float = 2.
         """Static friction coefficient. Defaults to 1.0."""
-        dynamic_friction: float = 1.5
+        dynamic_friction: float = 2.
         """Dynamic friction coefficient. Defaults to 1.0."""
         restitution: float = 0.0
         """Restitution coefficient. Defaults to 0.0."""

@@ -120,7 +120,7 @@ class RandomizationCfg:
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
 
     object_material_properties = {
-        "enabled": False,
+        "enabled": True,
         "static_friction_range": (1., 1.2),
         "dynamic_friction_range": (1., 1.2),
         "restitution_range": (0.0, 0.0),
@@ -150,13 +150,13 @@ class ObservationsCfg:
         tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
         # tool_positions = {"scale": 1.0}
-        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
+        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
         # tool_orientations = {"scale": 1.0}
         # -- object state
         # object_positions = {"scale": 1.0}
-        object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
+        object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
         # object_orientations = {"scale": 1.0}
-        object_orientations = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
+        object_orientations = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
         object_relative_tool_positions = {"scale": 1.0}
         is_grasped = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
@@ -181,7 +181,7 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 6}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 8}
     # opening_gripper = {'weight': 0.01}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     tracking_object_position_tanh = {"weight": 2., "sigma": 2}
@@ -219,7 +219,7 @@ class ControlCfg:
         position_command_scale=(0.02, 0.02, 0.02),
         rotation_command_scale=(0.05, 0.05, 0.05),
         ee_min_limit=(0.3, -0.2, 0.01),
-        ee_max_limit=(0.65, 0.2, 0.3)
+        ee_max_limit=(0.7, 0.2, 0.3)
     )
 
 @configclass
