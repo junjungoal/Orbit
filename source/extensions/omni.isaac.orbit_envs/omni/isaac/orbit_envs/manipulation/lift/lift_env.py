@@ -509,9 +509,6 @@ class LiftObservationManager(ObservationManager):
     def object_positions(self, env: LiftEnv):
         """Current object position."""
         return env.object.data.root_pos_w - env.envs_positions
-        if self.cfg.control.moving_average:
-            self.averaged_actions[:, :3] = self.cfg.control.decay * self.averaged_actions[:, :3] + (1- self.cfg.control.decay) * self.actions[:, :3]
-            self.actions[:, :3] = self.averaged_actions[:, :3]
 
     def object_orientations(self, env: LiftEnv):
         """Current object orientation."""
@@ -535,9 +532,11 @@ class LiftObservationManager(ObservationManager):
     def object_to_goal_positions(self, env: LiftEnv):
         object_positions = env.object.data.root_pos_w[:, 2:3]
         goal_positions = env.object_des_pose_w[:, 2:3]
+        dist = torch.clamp(goal_positions - object_positions, min=0)
         # object_positions = env.object.data.root_pos_w[:, :3]
         # goal_positions = env.object_des_pose_w[:, :3]
-        return (goal_positions - object_positions)
+        # return (goal_positions - object_positions)
+        return dist
 
     def object_desired_positions(self, env: LiftEnv):
         """Desired object position."""
@@ -655,7 +654,7 @@ class LiftRewardManager(RewardManager):
         # distance = torch.norm(env.object_des_pose_w[:, :3] - env.object.data.root_pos_w[:, :3], dim=1)
         distance = torch.clamp((env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2]) / 0.06, min=0)
 
-        lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.03, 1., 0.)
+        lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.035, 1., 0.)
         # under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
         # print(distance, under)
         # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped

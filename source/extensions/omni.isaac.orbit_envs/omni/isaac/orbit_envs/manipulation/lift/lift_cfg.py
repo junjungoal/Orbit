@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1.2, dynamic_friction=1.2, restitution=0., prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.6, dynamic_friction=1.6, restitution=0., prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -121,8 +121,8 @@ class RandomizationCfg:
 
     object_material_properties = {
         "enabled": True,
-        "static_friction_range": (1., 1.2),
-        "dynamic_friction_range": (1., 1.2),
+        "static_friction_range": (1.6, 1.8),
+        "dynamic_friction_range": (1.6, 1.8),
         "restitution_range": (0.0, 0.0),
         "num_buckets": 10,
     }
@@ -181,11 +181,11 @@ class RewardsCfg:
     # -- robot-centric
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
     # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 1., "sigma": 8}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 6}
     # opening_gripper = {'weight': 0.01}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     tracking_object_position_tanh = {"weight": 2., "sigma": 2}
-    penalizing_action_rate_l2 = {"weight": 0.03}
+    penalizing_action_rate_l2 = {"weight": 0.01}
     grasp_object_success = {'weight': 1.}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
     lifting_object_success = {"weight": 4., "threshold": 0.08}
