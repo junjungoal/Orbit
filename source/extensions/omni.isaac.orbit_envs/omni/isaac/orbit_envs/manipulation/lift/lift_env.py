@@ -654,7 +654,7 @@ class LiftRewardManager(RewardManager):
         # distance = torch.norm(env.object_des_pose_w[:, :3] - env.object.data.root_pos_w[:, :3], dim=1)
         distance = torch.clamp((env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2]) / 0.06, min=0)
 
-        lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.035, 1., 0.)
+        lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.03, 1., 0.)
         # under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
         # print(distance, under)
         # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
