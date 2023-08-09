@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1.6, dynamic_friction=1.6, restitution=0., prim_path="/World/Materials/cubeMaterial"
+        static_friction=1., dynamic_friction=1., restitution=0., prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -121,8 +121,8 @@ class RandomizationCfg:
 
     object_material_properties = {
         "enabled": True,
-        "static_friction_range": (1.4, 1.6),
-        "dynamic_friction_range": (1.4, 1.6),
+        "static_friction_range": (1., 1.2),
+        "dynamic_friction_range": (1., 1.2),
         "restitution_range": (0.0, 0.0),
         "num_buckets": 10,
     }
