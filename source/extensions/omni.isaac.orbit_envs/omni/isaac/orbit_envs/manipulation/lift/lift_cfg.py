@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1.2, dynamic_friction=1.2, restitution=0., prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.4, dynamic_friction=1.4, restitution=0., prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -121,10 +121,10 @@ class RandomizationCfg:
 
     object_material_properties = {
         "enabled": True,
-        "static_friction_range": (1.0, 1.2),
-        "dynamic_friction_range": (1.0, 1.2),
+        "static_friction_range": (1.3, 1.4),
+        "dynamic_friction_range": (1.3, 1.4),
         "restitution_range": (0.0, 0.0),
-        "num_buckets": 10,
+        "num_buckets": 5,
     }
 
     # initialize
@@ -207,7 +207,7 @@ class ControlCfg:
     # action space
     control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 3
+    decimation = 4
 
     moving_average = False
     decay = 0.7
@@ -253,13 +253,10 @@ class LiftEnvCfg(IsaacEnvCfg):
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
-        # dt=1/120,
-        # substeps=3,
-        # dt=1/150,
-        # substeps=2,
+        # dt=1/250,
+        # substeps=5,
         dt=1/200,
-        # substeps=2,
-        substeps=2,
+        substeps=4,
         physx=PhysxCfg(
             gpu_found_lost_aggregate_pairs_capacity=1024 * 1024 * 4,
             gpu_total_aggregate_pairs_capacity=16 * 1024,
