@@ -150,19 +150,19 @@ class ObservationsCfg:
         tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
         # tool_positions = {"scale": 1.0}
-        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
+        tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         # tool_orientations = {"scale": 1.0}
         # -- object state
         # object_positions = {"scale": 1.0}
         object_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
         # object_orientations = {"scale": 1.0}
         object_orientations = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.002, "max": 0.002}}
-        object_relative_tool_positions = {"scale": 1.0}
+        object_relative_tool_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         is_grasped = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         # object_to_goal_positions = {"scale": 1.0, }
-        object_to_goal_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.003, "max": 0.003}}
+        object_to_goal_positions = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.005, "max": 0.005}}
         tool_actions_bool = {'scale': 1.0}
         # ee_actions = {'scale': 1.0}
         # object_desired_positions = {"scale": 1.0}

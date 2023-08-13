@@ -535,9 +535,12 @@ class LiftObservationManager(ObservationManager):
     def object_to_goal_positions(self, env: LiftEnv):
         object_positions = env.object.data.root_pos_w[:, 2:3]
         goal_positions = env.object_des_pose_w[:, 2:3]
+        dist = (goal_positions - object_positions)
+        dist = torch.clamp(dist, min=0)
+        return dist
         # object_positions = env.object.data.root_pos_w[:, :3]
         # goal_positions = env.object_des_pose_w[:, :3]
-        return (goal_positions - object_positions)
+        # return (goal_positions - object_positions)
 
     def object_desired_positions(self, env: LiftEnv):
         """Desired object position."""
