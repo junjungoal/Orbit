@@ -438,7 +438,7 @@ class LiftEnv(IsaacEnv):
         dist = torch.norm(self.robot.data.ee_state_w[:, 0:3] - self.object.data.root_pos_w, dim=1)
         tool_pos = self.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.03
+        close_enough_to_box = dist < 0.034
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
         return grasped
 
@@ -604,7 +604,7 @@ class LiftRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.03
+        close_enough_to_box = dist < 0.034
         # lifted = env.object.data.root_pos_w[:, -1] > 0.025
         # lifted = env.object.data.root_pos_w[:, -1] > 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
@@ -648,7 +648,7 @@ class LiftRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.03
+        close_enough_to_box = dist < 0.034
         # lifted = env.object.data.root_pos_w[:, -1] > 0.025
         # lifted = env.object.data.root_pos_w[:, -1] > 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
@@ -673,7 +673,7 @@ class LiftRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.03
+        close_enough_to_box = dist < 0.034
         # lifted = env.object.data.root_pos_w[:, -1] > 0.025
         # lifted = env.object.data.root_pos_w[:, -1] > 0.03
         # print('grasped?: ', mask, '  close?: ', dist < 0.01, '  dist: ', dist)
@@ -685,7 +685,7 @@ class LiftRewardManager(RewardManager):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
         mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.03
+        close_enough_to_box = dist < 0.034
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
         # dist_to_desired = torch.norm(env.object.data.root_pos_w[:, :3] - env.object_des_pose_w[:, :3], dim=-1)
         return grasped * torch.where(env.object.data.root_pos_w[:, 2] > env.object_des_pose_w[:, 2], 1.0 ,0.0)
