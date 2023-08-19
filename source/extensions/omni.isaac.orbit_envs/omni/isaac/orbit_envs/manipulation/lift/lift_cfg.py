@@ -58,7 +58,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         # static_friction=4., dynamic_friction=4., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
-        static_friction=1.4, dynamic_friction=1.4, restitution=0., prim_path="/World/Materials/cubeMaterial"
+        static_friction=1.2, dynamic_friction=1.2, restitution=0., prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -121,8 +121,8 @@ class RandomizationCfg:
 
     object_material_properties = {
         "enabled": True,
-        "static_friction_range": (1., 1.2),
-        "dynamic_friction_range": (1., 1.2),
+        "static_friction_range": (1.2, 1.3),
+        "dynamic_friction_range": (1.2, 1.3),
         "restitution_range": (0.0, 0.0),
         "num_buckets": 5,
     }
@@ -184,11 +184,11 @@ class RewardsCfg:
     reaching_object_position_tanh = {"weight": 1., "sigma": 8}
     # opening_gripper = {'weight': 0.01}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
-    tracking_object_position_tanh = {"weight": 2., "sigma": 2}
+    tracking_object_position_tanh = {"weight": 1., "sigma": 1}
     penalizing_action_rate_l2 = {"weight": 0.03}
     grasp_object_success = {'weight': 1.}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
-    lifting_object_success = {"weight": 4., "threshold": 0.08}
+    lifting_object_success = {"weight": 0.5, "threshold": 0.08}
 
 
 @configclass
@@ -249,7 +249,7 @@ class LiftEnvCfg(IsaacEnvCfg):
 
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4 * (1/200) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3 * (1/200) * 150)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(
