@@ -112,6 +112,7 @@ class RewardManager:
         self._device = device
         # store reward manager settings
         self._enable_only_positive_rewards = self._cfg.pop("only_positive_rewards", False)
+        self._staged_rewards = self._cfg.pop("staged_rewards", False)
         # parse config to create reward terms information
         self._prepare_reward_terms()
         # prepare extra info to store individual reward term information
@@ -205,6 +206,7 @@ class RewardManager:
         # reset computation
         self._reward_buf[:] = 0.0
         # iterate over all the reward terms
+        values = []
         for name, weight, params, func in zip(
             self._reward_term_names, self._reward_term_weights, self._reward_term_params, self._reward_term_functions
         ):
@@ -214,9 +216,16 @@ class RewardManager:
             # compute term's value
             value = func(self._env, **params) * weight
             # update total reward
-            self._reward_buf += value
+            if self._staged_rewards:
+                values.append(value)
+            else:
+                self._reward_buf += value
             # update episodic sum
             self._episode_sums[name] += value
+
+        if self._staged_rewards:
+            rew = torch.max(torch.stack(values), dim=0)[0]
+            self._reward_buf += rew
         # if enabled, consider rewards only when they yield a positive sum
         # TODO: (trick from Nikita) Add more documentation on why this might be helpful!
         if self._enable_only_positive_rewards:
