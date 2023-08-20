@@ -622,7 +622,7 @@ class StackRewardManager(RewardManager):
 
         # distance of the end-effector to the object: (num_envs,)
         # distance = torch.norm(env.object_des_pose_w[:, :3] - env.object.data.root_pos_w[:, :3], dim=1)
-        distance = torch.clamp((threshold - env.object.data.root_pos_w[:, 2]) / 0.06, min=0)
+        distance = torch.clamp((threshold - env.object.data.root_pos_w[:, 2]) / 0.11, min=0)
 
         lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.03, 1., 0.)
         # under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
@@ -668,19 +668,6 @@ class StackRewardManager(RewardManager):
         # print("Aligning {}".format(dist))
         return above_target_obj * (1 - torch.tanh(dist * sigma))
 
-    def opening_gripper(self, env: StackEnv):
-        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
-        tool_pos = env.robot.data.tool_dof_pos
-        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.034
-        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
-        opened = tool_pos.sum(-1) > 0.06
-        reward = torch.zeros_like(dist)
-        reward[torch.logical_and(opened, ~grasped)] = 1.
-        reward[torch.logical_and(opened, close_enough_to_box)] = 0.
-        reward[grasped] = 1.
-        return reward
-
     def stack_success(self, env: StackEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
         tool_pos = env.robot.data.tool_dof_pos
@@ -696,10 +683,10 @@ class StackRewardManager(RewardManager):
     def lifting_object_success(self, env: StackEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
         obj_pos = env.object.data.root_pos_w - env.envs_positions
-        # print("Lifting: ", torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0))
-        above_target_obj = torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
-        dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
-        lifted = torch.where(obj_pos[:, -1] > threshold, 1.0, 0)
-        reward = lifted + lifted * 0.5 * (1 - torch.tanh(dist))
-        return reward
-        # return torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
+        # # print("Lifting: ", torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0))
+        # above_target_obj = torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
+        # dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
+        # lifted = torch.where(obj_pos[:, -1] > threshold, 1.0, 0)
+        # reward = lifted + lifted * 0.5 * (1 - torch.tanh(dist))
+        # return reward
+        return torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
