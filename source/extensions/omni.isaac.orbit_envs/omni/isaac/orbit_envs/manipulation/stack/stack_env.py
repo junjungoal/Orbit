@@ -182,9 +182,6 @@ class StackEnv(IsaacEnv):
         self.prev_object_pos = self.object.data.root_pos_w.clone()
         self.prev_target_object_pos = self.target_object.data.root_pos_w.clone()
         self.actions = actions.clone().to(device=self.device)
-        if self.cfg.control.moving_average:
-            self.averaged_actions[:, :3] = self.cfg.control.decay * self.averaged_actions[:, :3] + (1- self.cfg.control.decay) * self.actions[:, :3]
-            self.actions[:, :3] = self.averaged_actions[:, :3]
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
@@ -203,14 +200,7 @@ class StackEnv(IsaacEnv):
             # we assume last command is tool action so don't change that
 
             desired = self._ik_controller.desired_ee_pos
-            # self.gripper_actions = torch.clamp(
-            #     self.gripper_actions + 0.2 * torch.sign(self.actions[:, -1:]), -1, 1
-            # )
-            # # gripper_actions = torch.where(self.gripper_actions > 0, 1., -1.)
-            gripper_actions = torch.where(self.actions[:, -1] > 0, 1., -1.)
-            # self.robot_actions[:, -1] = self.gripper_actions
-            # self.robot_actions[:, -1] = self.actions[:, -1]
-            self.robot_actions[:, -1] = gripper_actions
+            self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
@@ -524,17 +514,17 @@ class StackObservationManager(ObservationManager):
         # goal_positions = env.object_des_pose_w[:, :3]
         return (goal_positions - object_positions)
 
-    def object_desired_positions(self, env: StackEnv):
-        """Desired object position."""
-        # return env.object_des_pose_w[:, 0:3] - env.envs_positions
-        return env.target_object.root_pose_w[:, 2:3] - env.envs_positions[:, 2:3]
+    # def object_desired_positions(self, env: StackEnv):
+    #     """Desired object position."""
+    #     # return env.object_des_pose_w[:, 0:3] - env.envs_positions
+    #     return env.target_object.root_pose_w[:, 2:3] - env.envs_positions[:, 2:3]
 
-    def object_desired_orientations(self, env: StackEnv):
-        """Desired object orientation."""
-        # make the first element positive
-        quat_w = env.target_object_des_pose_w[:, 3:7]
-        quat_w[quat_w[:, 0] < 0] *= -1
-        return quat_w
+    # def object_desired_orientations(self, env: StackEnv):
+    #     """Desired object orientation."""
+    #     # make the first element positive
+    #     quat_w = env.target_object_des_pose_w[:, 3:7]
+    #     quat_w[quat_w[:, 0] < 0] *= -1
+    #     return quat_w
 
     def is_grasped(self, env: StackEnv):
         return env.is_grasped()[:, None]
@@ -583,19 +573,6 @@ class StackRewardManager(RewardManager):
 
         return reward
 
-    def opening_gripper(self, env: StackEnv):
-        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
-        tool_pos = env.robot.data.tool_dof_pos
-        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.034
-        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), True, False)
-        opened = tool_pos.sum(-1) > 0.06
-        reward = torch.zeros_like(dist)
-        reward[torch.logical_and(opened, ~grasped)] = 1.
-        reward[torch.logical_and(opened, close_enough_to_box)] = 0.
-        reward[grasped] = 1.
-        return reward
-
     def penalizing_action_rate_l2(self, env: StackEnv):
         """Penalize large variations in action commands."""
         # return -torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
@@ -630,29 +607,6 @@ class StackRewardManager(RewardManager):
         # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
         # return grasped * (1 - torch.tanh((distance / sigma)))
         return lifted * grasped * (1 - torch.tanh((distance * sigma)))
-
-    def tracking_object_position_diff(self, env: StackEnv, sigma: float):
-        """Penalize tracking object position error using tanh-kernel."""
-
-        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
-        tool_pos = env.robot.data.tool_dof_pos
-        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
-        close_enough_to_box = dist < 0.034
-        # lifted = env.object.data.root_pos_w[:, -1] > 0.025
-        # lifted = env.object.data.root_pos_w[:, -1] > 0.03
-        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
-        # grasped = torch.where(torch.logical_and(torch.logical_and(mask, close_enough_to_box), lifted), 1.0, 0.0)
-
-        # distance of the end-effector to the object: (num_envs,)
-        distance = torch.norm(env.object_des_pose_w[:, :3] - env.object.data.root_pos_w[:, :3], dim=1)
-        prev_distance = torch.norm(env.object_des_pose_w[:, :3] - env.prev_object_pos[:, :3], dim=1)
-        diff = torch.clamp(distance - prev_distance, max=0.)
-        # distance = torch.clamp(env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2], min=0)
-        # under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
-        # print(distance, under)
-        # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
-        return grasped * (-diff)
-        # return grasped * (1 - torch.tanh((distance / sigma)))
 
     def grasp_object_success(self, env: StackEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
