@@ -624,7 +624,7 @@ class StackRewardManager(RewardManager):
     def aligning_objects(self, env: StackEnv, threshold: float, sigma: float, lift_w: float):
         obj_pos = env.object.data.root_pos_w - env.envs_positions
         above_target_obj = torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
-        dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
+        align_dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
 
         lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.03, 1., 0.)
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
@@ -635,7 +635,7 @@ class StackRewardManager(RewardManager):
         # lifted = env.object.data.root_pos_w[:, -1] > 0.03
         grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
         # print("Aligning {}".format(dist))
-        return 2. * above_target_obj * (1 - torch.tanh(dist * sigma)) + above_target_obj * grasped * lift_w
+        return 2. * above_target_obj * (1 - torch.tanh(align_dist * sigma)) + above_target_obj * grasped * lift_w
 
     def stack_success(self, env: StackEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
