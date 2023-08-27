@@ -571,7 +571,13 @@ class StackRewardManager(RewardManager):
         ee_distance = torch.norm(ee_state_w - env.object.data.root_pos_w, dim=1)
         reward = 1 - torch.tanh(ee_distance * sigma)
 
-        return reward
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.034
+        grasp_rew =  torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
+
+        return reward + 0.5 * grasp_rew
 
     def penalizing_action_rate_l2(self, env: StackEnv):
         """Penalize large variations in action commands."""
@@ -585,7 +591,7 @@ class StackRewardManager(RewardManager):
         # rewarded if the object is lifted above the threshold
         return (env.object.data.root_pos_w[:, 2] > threshold) * torch.exp(-error / sigma)
 
-    def tracking_object_position_tanh(self, env: StackEnv, sigma: float, threshold: float):
+    def tracking_object_position_tanh(self, env: StackEnv, sigma: float, threshold: float, grasped_w: float):
         """Penalize tracking object position error using tanh-kernel."""
 
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
@@ -606,7 +612,7 @@ class StackRewardManager(RewardManager):
         # print(distance, under)
         # return under * grasped * (1 - torch.tanh((distance / 0.08) * sigma)) + (1-under) * grasped
         # return grasped * (1 - torch.tanh((distance / sigma)))
-        return lifted * grasped * (1 - torch.tanh((distance * sigma)))
+        return lifted * grasped * (1 - torch.tanh((distance * sigma))) + grasped * grasped_w
 
     def grasp_object_success(self, env: StackEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
@@ -615,12 +621,21 @@ class StackRewardManager(RewardManager):
         close_enough_to_box = dist < 0.034
         return torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
 
-    def aligning_objects(self, env: StackEnv, threshold: float, sigma: float):
+    def aligning_objects(self, env: StackEnv, threshold: float, sigma: float, lift_w: float):
         obj_pos = env.object.data.root_pos_w - env.envs_positions
         above_target_obj = torch.where(obj_pos[:, -1] > threshold, 1.0, 0.0)
         dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
+
+        lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.03, 1., 0.)
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.034
+        # lifted = env.object.data.root_pos_w[:, -1] > 0.025
+        # lifted = env.object.data.root_pos_w[:, -1] > 0.03
+        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
         # print("Aligning {}".format(dist))
-        return above_target_obj * (1 - torch.tanh(dist * sigma))
+        return 2. * above_target_obj * (1 - torch.tanh(dist * sigma)) + above_target_obj * grasped * lift_w
 
     def stack_success(self, env: StackEnv):
         dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
@@ -635,13 +650,13 @@ class StackRewardManager(RewardManager):
         return torch.where(stacked, 1., 0.)
 
     def placing_objects(self, env: StackEnv, sigma: float, aligning_w: float):
-        dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2])
+        dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2], dim=1)
         aligned = dist < 0.03
         desired_pos = env.target_object.data.root_pos_w[:, :3]
         desired_pos[:, -1] += 0.035
         dist_to_target_object = torch.norm(env.object.data.root_pos_w[:, :3] - desired_pos)
 
-        return aligned * (1 - torch.tanh(dist_to_target_object * sigma)) + aligned * aligning_w
+        return 1.5 * aligned * (1 - torch.tanh(dist_to_target_object * sigma)) + aligned * aligning_w
 
     def lifting_object_success(self, env: StackEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
