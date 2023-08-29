@@ -203,7 +203,7 @@ class RewardsCfg:
     reaching_object_position_tanh = {"weight": 1., "sigma": 8}
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     tracking_object_position_tanh = {"weight": 1., "sigma": 1, 'threshold': 0.11, 'grasped_w': 1.5}
-    # penalizing_action_rate_l2 = {"weight": 0.03}
+    penalizing_action_rate_l2 = {"weight": 0.03}
     placing_objects = {'weight': 1., "sigma": 4, "aligning_w": 4.5}
     # opening_gripper = {'weight': 0.02}
     # grasp_object_success = {'weight': 1.5}
@@ -269,7 +269,7 @@ class StackEnvCfg(IsaacEnvCfg):
     """Configuration for the Stack environment."""
     # General Settings
     # env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=2 * (1/100) * 150)
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3 * (1/200) * 150)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3 * (1/200) * 200)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(

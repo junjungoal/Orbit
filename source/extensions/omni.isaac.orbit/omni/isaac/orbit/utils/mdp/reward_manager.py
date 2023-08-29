@@ -207,6 +207,7 @@ class RewardManager:
         self._reward_buf[:] = 0.0
         # iterate over all the reward terms
         values = []
+        penalized_rew = 0.
         for name, weight, params, func in zip(
             self._reward_term_names, self._reward_term_weights, self._reward_term_params, self._reward_term_functions
         ):
@@ -218,13 +219,15 @@ class RewardManager:
             # update total reward
             if self._staged_rewards:
                 values.append(value)
+                if "penalizing" in name:
+                    penalized_rew += value
             else:
                 self._reward_buf += value
             # update episodic sum
             self._episode_sums[name] += value
 
         if self._staged_rewards:
-            rew = torch.max(torch.stack(values), dim=0)[0]
+            rew = torch.max(torch.stack(values), dim=0)[0] + penalized_rew
             self._reward_buf += rew
         # if enabled, consider rewards only when they yield a positive sum
         # TODO: (trick from Nikita) Add more documentation on why this might be helpful!
