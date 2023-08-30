@@ -209,7 +209,7 @@ class RewardsCfg:
     # grasp_object_success = {'weight': 1.5}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
     # lifting_object_success = {"weight": 0.5, "threshold": 0.11}
-    aligning_objects = {"weight": 1., "threshold": 0.11, "sigma": 6., 'lift_w': 2.5}
+    aligning_objects = {"weight": 1., "threshold": 0.11, "sigma": 5., 'lift_w': 2.5}
     stack_success = {"weight": 8.5}
 
 
@@ -240,8 +240,8 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.03),
         rotation_command_scale=(0.05, 0.05, 0.05),
-        ee_min_limit=(0.15, -0.4, 0.0),
-        ee_max_limit=(0.7, 0.4, 0.3)
+        ee_min_limit=(0.3, -0.3, 0.01),
+        ee_max_limit=(0.7, 0.3, 0.25)
     )
 
 @configclass
