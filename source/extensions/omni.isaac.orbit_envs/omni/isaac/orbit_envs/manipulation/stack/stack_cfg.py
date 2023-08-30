@@ -204,13 +204,13 @@ class RewardsCfg:
     # tracking_object_position_tanh = {"weight": 5., "sigma": 0.2}
     tracking_object_position_tanh = {"weight": 1., "sigma": 1, 'threshold': 0.11, 'grasped_w': 1.5}
     penalizing_action_rate_l2 = {"weight": 0.03}
-    placing_objects = {'weight': 1., "sigma": 4, "aligning_w": 4.5}
+    placing_objects = {'weight': 1., "sigma": 10, "aligning_w": 4.5}
     # opening_gripper = {'weight': 0.02}
     # grasp_object_success = {'weight': 1.5}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
     # lifting_object_success = {"weight": 0.5, "threshold": 0.11}
-    aligning_objects = {"weight": 1., "threshold": 0.11, "sigma": 4., 'lift_w': 2.5}
-    stack_success = {"weight": 7.5}
+    aligning_objects = {"weight": 1., "threshold": 0.11, "sigma": 6., 'lift_w': 2.5}
+    stack_success = {"weight": 8.5}
 
 
 @configclass

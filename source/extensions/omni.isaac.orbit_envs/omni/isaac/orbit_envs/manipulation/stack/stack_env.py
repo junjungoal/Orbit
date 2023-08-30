@@ -656,7 +656,7 @@ class StackRewardManager(RewardManager):
         desired_pos[:, -1] += 0.035
         dist_to_target_object = torch.norm(env.object.data.root_pos_w[:, :3] - desired_pos)
 
-        return 1.5 * aligned * (1 - torch.tanh(dist_to_target_object * sigma)) + aligned * aligning_w
+        return 2.5 * aligned * (1 - torch.tanh(dist_to_target_object * sigma)) + aligned * aligning_w
 
     def lifting_object_success(self, env: StackEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
