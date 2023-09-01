@@ -649,14 +649,14 @@ class StackRewardManager(RewardManager):
         # print("Stacking: ", stacked)
         return torch.where(stacked, 1., 0.)
 
-    def placing_objects(self, env: StackEnv, sigma: float, aligning_w: float):
-        dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2], dim=1)
-        aligned = dist < 0.03
+    def placing_objects(self, env: StackEnv, sigma: float, aligning_w: float, aligning_sigma: float):
+        aligned_dist = torch.norm(env.object.data.root_pos_w[:, :2] - env.target_object.data.root_pos_w[:, :2], dim=1)
+        aligned = aligned_dist < 0.03
         desired_pos = env.target_object.data.root_pos_w[:, :3]
         desired_pos[:, -1] += 0.035
         dist_to_target_object = torch.norm(env.object.data.root_pos_w[:, :3] - desired_pos)
 
-        return 2.5 * aligned * (1 - torch.tanh(dist_to_target_object * sigma)) + aligned * aligning_w
+        return 2.5 * aligned * (1 - torch.tanh(dist_to_target_object * sigma)) + aligned * aligning_w * (1 - torch.tanh(aligned_dist * aligning_sigma))
 
     def lifting_object_success(self, env: StackEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
