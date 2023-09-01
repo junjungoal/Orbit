@@ -209,7 +209,7 @@ class RewardsCfg:
     # grasp_object_success = {'weight': 1.5}
     # lifting_object_success = {"weight": 3.25, "threshold": 0.08}
     # lifting_object_success = {"weight": 0.5, "threshold": 0.11}
-    aligning_objects = {"weight": 1., "threshold": 0.11, "sigma": 5., 'lift_w': 2.5}
+    aligning_objects = {"weight": 1., "threshold": 0.11, "sigma": 4., 'lift_w': 2.5}
     stack_success = {"weight": 8.5}
 
 
