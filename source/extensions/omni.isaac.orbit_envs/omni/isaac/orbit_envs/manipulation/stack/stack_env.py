@@ -577,7 +577,7 @@ class StackRewardManager(RewardManager):
         close_enough_to_box = dist < 0.034
         grasp_rew =  torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
 
-        return reward + 0.5 * grasp_rew
+        return reward + grasp_rew
 
     def penalizing_action_rate_l2(self, env: StackEnv):
         """Penalize large variations in action commands."""
@@ -605,7 +605,7 @@ class StackRewardManager(RewardManager):
 
         # distance of the end-effector to the object: (num_envs,)
         # distance = torch.norm(env.object_des_pose_w[:, :3] - env.object.data.root_pos_w[:, :3], dim=1)
-        distance = torch.clamp((threshold - env.object.data.root_pos_w[:, 2]) / 0.11, min=0)
+        distance = torch.clamp((threshold - env.object.data.root_pos_w[:, 2]) / 0.1, min=0)
 
         lifted = torch.where(env.object.data.root_pos_w[:, 2] > 0.03, 1., 0.)
         # under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
