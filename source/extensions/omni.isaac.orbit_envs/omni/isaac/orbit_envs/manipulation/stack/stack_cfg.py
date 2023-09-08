@@ -129,7 +129,7 @@ class RandomizationCfg:
         # position_uniform_min = [0.50, -0.05, 0.04]  # position (x,y,z)
         # position_uniform_max = [0.55, 0.05, 0.04]  # position (x,y,z)
         position_uniform_min = [0.5, 0.1, 0.04]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.15, 0.04]  # position (x,y,z)
+        position_uniform_max = [0.55, 0.15, 0.04]  # position (x,y,z)
 
     @configclass
     class ObjectDesiredPoseCfg:
@@ -142,7 +142,7 @@ class RandomizationCfg:
         position_default = [0.55, 0.0, 0.08]  # position default (x,y,z)
         # position_default = [0.6, 0.0, 0.2]  # position default (x,y,z)
         position_uniform_min = [0.5, -0.15, 0.08]  # position (x,y,z)
-        position_uniform_max = [0.6, -0.1, 0.08]  # position (x,y,z)
+        position_uniform_max = [0.55, -0.1, 0.08]  # position (x,y,z)
         # randomize orientation
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
 
@@ -240,8 +240,8 @@ class ControlCfg:
         ik_method="dls",
         position_command_scale=(0.02, 0.02, 0.03),
         rotation_command_scale=(0.05, 0.05, 0.05),
-        ee_min_limit=(0.3, -0.3, 0.01),
-        ee_max_limit=(0.7, 0.3, 0.25)
+        ee_min_limit=(0.4, -0.25, 0.01),
+        ee_max_limit=(0.65, 0.25, 0.25)
     )
 
 @configclass
