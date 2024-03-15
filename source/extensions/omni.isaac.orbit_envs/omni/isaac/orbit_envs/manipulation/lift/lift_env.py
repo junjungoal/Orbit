@@ -31,7 +31,7 @@ import omni
 class LiftEnv(IsaacEnv):
     """Environment for lifting an object off a table with a single-arm manipulator."""
 
-    def __init__(self, cfg: LiftEnvCfg = None, headless: bool = False, enable_camera=False, enable_render=False):
+    def __init__(self, cfg: LiftEnvCfg = None, headless: bool = False, enable_camera=False, viewport=False):
         # copy configuration
         self.cfg = cfg
         # parse the configuration for controller configuration
@@ -42,7 +42,7 @@ class LiftEnv(IsaacEnv):
         self.object = RigidObject(cfg=self.cfg.object)
 
         # initialize the base class to setup the scene.
-        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera, enable_render=enable_render)
+        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera, viewport=viewport)
         # parse the configuration for information
         self._process_cfg()
         # initialize views for the cloned scenes
@@ -82,8 +82,8 @@ class LiftEnv(IsaacEnv):
         # table
         prim_utils.create_prim(self.template_env_ns + "/Table", usd_path=self.cfg.table.usd_path,
                                translation=(0.2, 0, 0))
-        prim_utils.create_prim(self.template_env_ns + "/Background", usd_path=self.cfg.background.usd_path,
-                               translation=(-0.4, 0, 0))
+        # prim_utils.create_prim(self.template_env_ns + "/Background", usd_path=self.cfg.background.usd_path,
+        #                        translation=(-0.4, 0, 0))
         # robot
         self.robot.spawn(self.template_env_ns + "/Robot")
         # object
@@ -158,6 +158,8 @@ class LiftEnv(IsaacEnv):
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
         self.actions = actions.clone().to(device=self.device)
+        current = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
+        desired = current + self.actions[:, :-1] * 0.1
         # transform actions based on controller
         if self.cfg.control.control_type == "inverse_kinematics":
             # set the controller commands
@@ -173,7 +175,9 @@ class LiftEnv(IsaacEnv):
             dof_pos_offset = self.robot.data.actuator_pos_offset
             self.robot_actions[:, : self.robot.arm_num_dof] -= dof_pos_offset[:, : self.robot.arm_num_dof]
             # we assume last command is tool action so don't change that
-            self.robot_actions[:, -1] = self.actions[:, -1]
+            gripper_action = torch.where(self.actions[:, -1] > 0, 1., -1.)
+            # self.robot_actions[:, -1] = gripper_action
+            # self.robot_actions[:, -1] = self.actions[:, -1]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:] = self.actions
         # perform physics stepping
@@ -190,6 +194,7 @@ class LiftEnv(IsaacEnv):
         self.robot.update_buffers(self.dt)
         self.object.update_buffers(self.dt)
         # -- compute MDP signals
+        target = self.robot.data.ee_state_w[:, :3] - self.envs_positions[:, :3]
         # reward
         self.reward_buf = self._reward_manager.compute()
         # terminations
@@ -201,8 +206,9 @@ class LiftEnv(IsaacEnv):
         # Note: this is used by algorithms like PPO where time-outs are handled differently
         self.extras["time_outs"] = self.episode_length_buf >= self.max_episode_length
         # -- add information to extra if task completed
-        object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
-        self.extras["is_success"] = torch.where(object_position_error < 0.02, 1, self.reset_buf)
+        # object_position_error = torch.norm(self.object.data.root_pos_w - self.object_des_pose_w[:, 0:3], dim=1)
+        # self.extras["is_success"] = object_position_error < 0.02
+        self.extras["is_success"] = self.object.data.root_pos_w[:, 2] > self.object_des_pose_w[:, 2]
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -374,13 +380,13 @@ class LiftEnv(IsaacEnv):
     def randomize_object(self):
         default_color = np.array([0.949, 0.8, 0.21])
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.3
+        local_rgb_interpolation = 0.5
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Object/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
     def randomize_table(self):
-        rgb = np.ones(3) * np.random.uniform(0.5, 0.8)
+        rgb = np.ones(3) * np.random.uniform(0.3, 0.9)
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
@@ -394,7 +400,7 @@ class LiftEnv(IsaacEnv):
                 rgb = default_color
             else:
                 random_color = np.random.uniform(0, 1, size=3)
-                local_rgb_interpolation = 0.3
+                local_rgb_interpolation = 0.5
                 rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
             omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
@@ -473,14 +479,15 @@ class LiftObservationManager(ObservationManager):
         quat_ee[quat_ee[:, 0] < 0] *= -1
         return quat_ee
 
-    def object_to_goal_positions(self, env: PushEnv):
-        object_positions = env.object.data.root_pos_w
-        goal_positions = env.goal.data.root_pos_w
+    def object_to_goal_positions(self, env: LiftEnv):
+        object_positions = env.object.data.root_pos_w[:, 2:3]
+        goal_positions = env.object_des_pose_w[:, 2:3]
         return (goal_positions - object_positions)
 
     def object_desired_positions(self, env: LiftEnv):
         """Desired object position."""
-        return env.object_des_pose_w[:, 0:3] - env.envs_positions
+        # return env.object_des_pose_w[:, 0:3] - env.envs_positions
+        return env.object_des_pose_w[:, 2:3] - env.envs_positions[:, 2:3]
 
     def object_desired_orientations(self, env: LiftEnv):
         """Desired object orientation."""
@@ -531,7 +538,9 @@ class LiftRewardManager(RewardManager):
         num_tool_sites = tool_sites_distance.shape[1]
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
-        return 1 - torch.tanh(average_distance / sigma)
+        return 1 - torch.tanh(average_distance * sigma)
+        # return 1 - torch.tanh(ee_distance / sigma)
+        # return 1 - torch.tanh(ee_distance * sigma)
 
     def penalizing_arm_dof_velocity_l2(self, env: LiftEnv):
         """Penalize large movements of the robot arm."""
@@ -556,13 +565,41 @@ class LiftRewardManager(RewardManager):
         # rewarded if the object is lifted above the threshold
         return (env.object.data.root_pos_w[:, 2] > threshold) * torch.exp(-error / sigma)
 
-    def tracking_object_position_tanh(self, env: LiftEnv, sigma: float, threshold: float):
+    def tracking_object_position_tanh(self, env: LiftEnv, sigma: float):
         """Penalize tracking object position error using tanh-kernel."""
+
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.03
+        # print('grasped?: ', mask, '  close?: ', dist < 0.01, '  dist: ', dist)
+        # print(torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0))
+        grasped = torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
+
         # distance of the end-effector to the object: (num_envs,)
-        distance = torch.norm(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        # distance = torch.norm(env.object_des_pose_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        distance = torch.clamp(env.object_des_pose_w[:, 2] - env.object.data.root_pos_w[:, 2], min=0)
         # rewarded if the object is lifted above the threshold
-        return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
+        # ee_to_obj = torch.norm(env.object.data.root_pos_w-env.robot.data.ee_state_w[:, 0:3], dim=1)
+        # return (env.object.data.root_pos_w[:, 2] > threshold) * (1 - torch.tanh(distance / sigma))
+        # return (ee_to_obj < threshold) * (1 - torch.anh(distance / sigma))
+        # return grasped * (1 - torch.tanh(distance / sigma))
+        # return grasped * (1 - torch.tanh((distance / 0.1) * sigma))
+        under = torch.where(env.object.data.root_pos_w[:, 2] < env.object_des_pose_w[:, 2], 1.0 ,0.0)
+        return under * grasped * (1 - torch.tanh(distance * sigma)) + (1-under) * grasped
+
+    def grasp_object_success(self, env: LiftEnv):
+        # dist = torch.norm(env.object.data.root_pos_w[:, :3].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, :3], dim=-1)
+        # dist = torch.norm(env.object.data.root_pos_w[:, 2].unsqueeze(1) - env.robot.data.tool_sites_state_w[:, :, 2], dim=-1)
+        # dist = dist.mean(-1)
+        dist = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        tool_pos = env.robot.data.tool_dof_pos
+        mask = torch.logical_and(tool_pos.sum(-1) < 0.06, tool_pos.sum(-1) > 0.038)
+        close_enough_to_box = dist < 0.03
+        # print('grasped?: ', mask, '  close?: ', dist < 0.01, '  dist: ', dist)
+        # print(torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0))
+        return torch.where(torch.logical_and(mask, close_enough_to_box), 1.0, 0.0)
 
     def lifting_object_success(self, env: LiftEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
-        return torch.where(env.object.data.root_pos_w[:, 2] > threshold, 1.0, 0.0)
+        return torch.where(env.object.data.root_pos_w[:, 2] > env.object_des_pose_w[:, 2], 1.0 ,0.0)

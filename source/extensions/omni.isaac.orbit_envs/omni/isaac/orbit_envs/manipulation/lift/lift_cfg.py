@@ -54,7 +54,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=0.5, dynamic_friction=0.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
+        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial"
     )
 
 
@@ -106,9 +106,9 @@ class RandomizationCfg:
         position_cat: str = "default"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.5]  # position default (x,y,z)
-        position_uniform_min = [0.55, -0.05, 0.25]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.05, 0.5]  # position (x,y,z)
+        position_default = [0.5, 0.0, 0.05]  # position default (x,y,z)
+        position_uniform_min = [0.55, -0.05, 0.05]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.05, 0.05]  # position (x,y,z)
         # randomize orientation
         orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
 
@@ -132,7 +132,7 @@ class ObservationsCfg:
         # arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
         # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
-        # tool_dof_pos_scaled = {"scale": 1.0}
+        tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
         tool_positions = {"scale": 1.0}
         # tool_orientations = {"scale": 1.0}
@@ -143,7 +143,7 @@ class ObservationsCfg:
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
         object_to_goal_positions = {"scale": 1.0}
-        object_desired_positions = {"scale": 1.0}
+        # object_desired_positions = {"scale": 1.0}
 
     # global observation settings
     return_dict_obs_in_group = False
@@ -157,20 +157,12 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    # reaching_object_position_l2 = {"weight": 0.0}
-    # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
-    # reaching_object_position_negative = {"weight": 1,}
-    # penalizing_arm_dof_velocity_l2 = {"weight": 1e-5}
-    # penalizing_tool_dof_velocity_l2 = {"weight": 1e-5}
-    # penalizing_robot_dof_acceleration_l2 = {"weight": 1e-7}
-    # -- action-centric
-    # penalizing_arm_action_rate_l2 = {"weight": 1e-2}
-    # penalizing_tool_action_l2 = {"weight": 1e-2}
-    # -- object-centric
-    # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.09}
-    lifting_object_success = {"weight": 3.5, "threshold": 0.08}
+    # reaching_object_position_tanh = {"weight": 1., "sigma": 0.1}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 10}
+    # tracking_object_position_tanh = {"weight": 1., "sigma": 0.2, "threshold": 0.05}
+    tracking_object_position_tanh = {"weight": 1., "sigma": 5}
+    grasp_object_success = {'weight': 0.25}
+    lifting_object_success = {"weight": 2.25, "threshold": 0.1}
 
 
 @configclass
@@ -189,25 +181,25 @@ class ControlCfg:
     # action space
     control_type = "inverse_kinematics"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 2
+    decimation = 4
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="position_rel",
         ik_method="dls",
-        position_command_scale=(0.05, 0.05, 0.05),
+        position_command_scale=(0.1, 0.1, 0.1),
         rotation_command_scale=(0.1, 0.1, 0.1),
         ee_min_limit=(0.15, -0.4, 0),
-        ee_max_limit=(0.7, 0.4, 0.5)
+        ee_max_limit=(0.7, 0.4, 0.6)
     )
 
 @configclass
 class DomainRandomizationCfg:
-    randomize_object = True
-    randomize_table = True
-    randomize_goal_marker = True
-    randomize_light = True
-    randomize_robot = True
+    randomize_object = False
+    randomize_table = False
+    randomize_goal_marker = False
+    randomize_light = False
+    randomize_robot = False
 
 ##
 # Environment configuration
@@ -219,7 +211,7 @@ class LiftEnvCfg(IsaacEnvCfg):
     """Configuration for the Lift environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=5.0)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=3.)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(

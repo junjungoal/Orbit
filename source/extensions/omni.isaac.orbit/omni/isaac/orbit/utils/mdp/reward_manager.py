@@ -33,6 +33,7 @@ class RewardManager:
     as kernel parameters.
 
     .. note::
+
         The reward manager multiplies the reward terms by the ``weight`` key in the configuration
         dictionary with the time-step interval ``dt`` of the environment. This is done to ensure
         that the computed reward terms are balanced with respect to the chosen time-step interval.
@@ -256,7 +257,9 @@ class RewardManager:
                 if term_cfg["weight"] == 0:
                     self._cfg.pop(term_name)
                 else:
-                    term_cfg["weight"] *= self._dt
+                    pass
+                    # term_cfg["weight"] *= self._dt
+                    # term_cfg["weight"] *= self._dt
             else:
                 raise KeyError(f"The key 'weight' not found for reward term: '{term_name}'.")
 

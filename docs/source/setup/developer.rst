@@ -29,7 +29,7 @@ To setup the IDE, please follow these instructions:
 1. Open the ``orbit`` directory on Visual Studio Code IDE
 2. Run VSCode
    `Tasks <https://code.visualstudio.com/docs/editor/tasks>`__, by
-   pressing **``Ctrl+Shift+P``**, selecting ``Tasks: Run Task`` and
+   pressing ``Ctrl+Shift+P``, selecting ``Tasks: Run Task`` and
    running the ``setup_python_env`` in the drop down menu.
 
    .. image:: ../_static/vscode_tasks.png
@@ -50,19 +50,27 @@ following links:
 * `Debugging with VSCode <https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/tutorial_advanced_python_debugging.html>`__
 
 
-.. note::
+Configuring the python interpreter
+----------------------------------
 
-   In the provided configuration, we set the default python interpreter to use the
-   python executable provided by Omniverse. This is specified in the
-   ``.vscode/settings.json`` file:
+In the provided configuration, we set the default python interpreter to use the
+python executable provided by Omniverse. This is specified in the
+``.vscode/settings.json`` file:
 
-   .. code-block:: json
+.. code-block:: json
 
-      {
-         "python.defaultInterpreterPath": "${workspaceFolder}/_isaac_sim/kit/python/bin/python3",
-         "python.envFile": "${workspaceFolder}/.vscode/.python.env",
-      }
+   {
+      "python.defaultInterpreterPath": "${workspaceFolder}/_isaac_sim/kit/python/bin/python3",
+      "python.envFile": "${workspaceFolder}/.vscode/.python.env",
+   }
 
+If you want to use a different python interpreter (for instance, from your conda environment),
+you need to change the python interpreter used by selecting and activating the python interpreter
+of your choice in the bottom left corner of VSCode, or opening the command palette (``Ctrl+Shift+P``)
+and selecting ``Python: Select Interpreter``.
+
+For more information on how to set python interpreter for VSCode, please
+refer to the `VSCode documentation <https://code.visualstudio.com/docs/python/environments#_working-with-python-interpreters>`_.
 
 Repository organization
 -----------------------
@@ -73,16 +81,17 @@ The ``orbit`` repository is structured as follows:
 
    orbit
    ├── .vscode
+   ├── .flake8
    ├── LICENSE
    ├── orbit.sh
    ├── pyproject.toml
-   ├── CHANGELOG.md
    ├── README.md
    ├── docs
    ├── source
    │   ├── extensions
    │   │   ├── omni.isaac.orbit
    │   │   └── omni.isaac.orbit_envs
+   │   │   └── omni.isaac.contrib_envs
    │   ├── standalone
    │   │   ├── demo
    │   │   ├── environments
@@ -93,13 +102,7 @@ The ``orbit`` repository is structured as follows:
 The ``source`` directory contains the source code for ``orbit`` *extensions*
 and *standalone applications*. The two are the different development workflows
 supported in `NVIDIA Isaac Sim <https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/tutorial_required_workflows.html>`__.
-
-.. note::
-
-   Instead of maintaining a `changelog <https://keepachangelog.com/en/1.0.0/>`__ for each
-   extension, we maintain a common changelog file for the whole repository. This is
-   located in the root directory of the repository and is named ``CHANGELOG.md``.
-
+These are described in the following sections.
 
 Extensions
 ~~~~~~~~~~
@@ -228,6 +231,48 @@ provided by ``orbit``. These applications are written in python and are structur
   These include a random policy, zero-action policy, teleoperation or scripted state machines.
 * **workflows**: Contains applications for using environments with various learning-based frameworks. These include different
   reinforcement learning or imitation learning libraries.
+
+
+Building the documentation locally
+----------------------------------
+
+The documentation for ``orbit`` is generated using `Sphinx <https://www.sphinx-doc.org/en/master/>`__.
+It is written in `reStructuredText <https://docutils.sourceforge.io/rst.html>`__ format and
+is located in the ``docs`` directory. We use the `sphinx-book-theme <https://sphinx-book-theme.readthedocs.io/en/stable/>`__
+for the documentation theme.
+
+.. caution::
+
+   To build the documentation, we recommend creating a virtual environment to avoid any conflicts
+   with the python packages installed in the system.
+
+
+To build the documentation, run the following command in the terminal which installs the required python packages and
+builds the documentation using the ``docs/Makefile``:
+
+.. code:: bash
+
+   ./orbit.sh --docs  # or `./orbit.sh -d`
+
+The documentation is generated in the ``docs/_build`` directory. To view the documentation, open
+the ``index.html`` file in the ``html`` directory. This can be done by running the following command
+in the terminal:
+
+.. code:: bash
+
+   xdg-open docs/_build/html/index.html
+
+.. hint::
+
+   The ``xdg-open`` command is used to open the ``index.html`` file in the default browser. If you are
+   using a different operating system, you can use the appropriate command to open the file in the browser.
+
+
+To do a clean build, run the following command in the terminal:
+
+.. code:: bash
+
+   rm -rf docs/_build && ./orbit.sh --docs
 
 
 Code style

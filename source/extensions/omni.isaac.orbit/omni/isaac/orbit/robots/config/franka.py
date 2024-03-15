@@ -23,8 +23,8 @@ from omni.isaac.orbit.utils.assets import ISAAC_ORBIT_NUCLEUS_DIR
 
 from ..single_arm import SingleArmManipulatorCfg
 
-# _FRANKA_PANDA_ARM_INSTANCEABLE_USD = f"{ISAAC_ORBIT_NUCLEUS_DIR}/Robots/FrankaEmika/panda_instanceable.usd"
-_FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/panda_instanceable.usd')
+_FRANKA_PANDA_ARM_INSTANCEABLE_USD = f"{ISAAC_ORBIT_NUCLEUS_DIR}/Robots/FrankaEmika/panda_instanceable.usd"
+# _FRANKA_PANDA_ARM_INSTANCEABLE_USD = os.path.join(os.environ['ORBIT_PATH'], 'source/extensions/omni.isaac.orbit_envs/omni/isaac/orbit_envs/manipulation/push/assets/panda_instanceable.usd')
 
 
 FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
@@ -35,16 +35,27 @@ FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
         tool_sites_names=["panda_leftfinger", "panda_rightfinger"],
     ),
     init_state=SingleArmManipulatorCfg.InitialStateCfg(
-        dof_pos={
-            "panda_joint1": 0.0,
-            "panda_joint2": -np.pi/4.,
-            "panda_joint3": 0.0,
-            "panda_joint4": -3*np.pi/4,
-            "panda_joint5": 0.0,
-            "panda_joint6": np.pi/2,
-            "panda_joint7": np.pi/4,
-            "panda_finger_joint*": 0.04,
-        },
+        # dof_pos={
+        #     "panda_joint1": 0.0,
+        #     "panda_joint2": -np.pi/4.,
+        #     "panda_joint3": 0.0,
+        #     "panda_joint4": -3*np.pi/4,
+        #     "panda_joint5": 0.0,
+        #     "panda_joint6": np.pi/2,
+        #     "panda_joint7": np.pi/4,
+        #     "panda_finger_joint*": 0.04,
+        # },
+        # dof_pos={
+        #     "panda_joint1": 0.0,
+        #     "panda_joint2": np.pi/8.,
+        #     "panda_joint3": 0.,
+        #     "panda_joint4": -np.pi * 5 / 8.,
+        #     "panda_joint5": 0.0,
+        #     "panda_joint6": np.pi * 3 / 4.,
+        #     "panda_joint7": np.pi/4.,
+        #     "panda_finger_joint*": 0.04,
+        # },
+        #
         # dof_pos={
         #     "panda_joint1": 0.0,
         #     "panda_joint2": np.pi/16.,
@@ -55,6 +66,17 @@ FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
         #     "panda_joint7": np.pi/4,
         #     "panda_finger_joint*": 0.04,
         # },
+        dof_pos={
+            "panda_joint1": 0.0,
+            "panda_joint2": -0.318,
+            "panda_joint3": 0.,
+            "panda_joint4": -2.739,
+            "panda_joint5": 0.0,
+            "panda_joint6": np.pi * 3 / 4.,
+            "panda_joint7": np.pi/4.,
+            "panda_finger_joint*": 0.04,
+        },
+
         dof_vel={".*": 0.0},
     ),
     ee_info=SingleArmManipulatorCfg.EndEffectorFrameCfg(

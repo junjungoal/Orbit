@@ -55,8 +55,8 @@ class ManipulationObjectCfg(RigidObjectCfg):
         disable_gravity=False,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
-        static_friction=1., dynamic_friction=1., restitution=0.0, prim_path="/World/Materials/cubeMaterial",
-        mass=0.2
+        static_friction=0.8, dynamic_friction=0.8, restitution=0.0, prim_path="/World/Materials/cubeMaterial",
+        # mass=0.2
     )
 
 @configclass
@@ -68,7 +68,7 @@ class GoalMarkerCfg(RigidObjectCfg):
         scale=(1, 1, 1),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.55, 0.05, 0.0), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.6, 0.0, 0.0), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         disable_gravity=True,
@@ -107,8 +107,10 @@ class RandomizationCfg:
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.45, 0.0, 0.045]  # position default (x,y,z)
-        position_uniform_min = [0.45, -0.05, 0.045]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.05, 0.045]  # position (x,y,z)
+        position_uniform_min = [0.45, -0.1, 0.045]  # position (x,y,z)
+        position_uniform_max = [0.5, 0.1, 0.045]  # position (x,y,z)
+        # position_uniform_min = [0.45, -0.05, 0.045]  # position (x,y,z)
+        # position_uniform_max = [0.5, 0.05, 0.045]  # position (x,y,z)
 
     @configclass
     class GoalPoseCfg:
@@ -117,9 +119,11 @@ class RandomizationCfg:
         # category
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.55, 0.2, 0.0]  # position default (x,y,z)
-        position_uniform_min = [0.6, -0.05, 0.]  # position (x,y,z)
-        position_uniform_max = [0.6, 0.05, 0.]  # position (x,y,z)
+        position_default = [0.6, 0., 0.0]  # position default (x,y,z)
+        position_uniform_min = [0.55, -0.1, 0.]  # position (x,y,z)
+        position_uniform_max = [0.6, 0.1, 0.]  # position (x,y,z)
+        # position_uniform_min = [0.6, -0.02, 0.]  # position (x,y,z)
+        # position_uniform_max = [0.6, 0.02, 0.]  # position (x,y,z)
 
     # initialize
     object_initial_pose: ObjectInitialPoseCfg = ObjectInitialPoseCfg()
@@ -147,11 +151,11 @@ class ObservationsCfg:
         # tool_orientations = {"scale": 1.0}
         # -- object state
         object_positions = {"scale": 1.0}
-        object_orientations = {"scale": 1.0}
+        # object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
         # object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        object_desired_positions = {"scale": 1.0}
+        # object_desired_positions = {"scale": 1.0}
         object_to_goal_positions = {"scale": 1.0}
         # -- previous action
         # arm_actions = {"scale": 1.0}
@@ -169,14 +173,12 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    # reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.15}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
-    # tracking_object_position_diff = {'weight': 10.}
-    # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.1}
-    # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.2, "threshold": 0.1}
-    # push_object_success = {"weight": 3.5, "threshold": 0.04}
-    reaching_object_position_negative = {"weight": 1.,}
-    push_object_success = {"weight": 3.5, "threshold": 0.03}
+    reaching_object_position_tanh = {"weight": 1., "sigma": 0.2}
+    tracking_object_position_tanh = {"weight": 2.5, "sigma": 0.05, "threshold": 0.08}
+    # push_object_success = {"weight": 7, "threshold": 0.04}
+    # reaching_object_position_tanh = {"weight": 1., "sigma": 5}
+    # tracking_object_position_tanh = {"weight": 2.5, "sigma": 20, "threshold": 0.08}
+    push_object_success = {"weight": 3.5, "threshold": 0.04}
 
 
 @configclass
@@ -212,7 +214,7 @@ class ControlCfg:
         command_type="position_rel",
         ik_method="dls",
         position_command_scale=(0.05, 0.05, 0.05),
-        rotation_command_scale=(0.2, 0.2, 0.2),
+        rotation_command_scale=(0.1, 0.1, 0.1),
         ee_min_limit=(0.15, -0.4, 0),
         ee_max_limit=(0.7, 0.4, 0.5)
     )
@@ -228,7 +230,7 @@ class PushEnvCfg(IsaacEnvCfg):
     """Configuration for the Push environment."""
 
     # General Settings
-    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=2.5, episode_length_s=4.0)
+    env: EnvCfg = EnvCfg(num_envs=4096, env_spacing=5, episode_length_s=2.0)
     viewer: ViewerCfg = ViewerCfg(debug_vis=False, eye=(7.5, 7.5, 7.5), lookat=(0.0, 0.0, 0.0))
     # Physics settings
     sim: SimCfg = SimCfg(

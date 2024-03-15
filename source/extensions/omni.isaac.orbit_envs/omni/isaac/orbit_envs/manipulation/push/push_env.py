@@ -35,7 +35,8 @@ import omni
 class PushEnv(IsaacEnv):
     """Environment for lifting an object off a table with a single-arm manipulator."""
 
-    def __init__(self, cfg: PushEnvCfg = None, headless: bool = False, enable_camera=False, enable_render=False):
+    def __init__(self, cfg: PushEnvCfg = None, headless: bool = False, enable_camera=False,
+                 viewport=False):
         # copy configuration
         self.cfg = cfg
         # parse the configuration for controller configuration
@@ -47,7 +48,8 @@ class PushEnv(IsaacEnv):
         self.goal = RigidObject(cfg=self.cfg.goal)
 
         # initialize the base class to setup the scene.
-        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera, enable_render=enable_render)
+        super().__init__(self.cfg, headless=headless, enable_camera=enable_camera,
+                         viewport=viewport)
         # parse the configuration for information
         self._process_cfg()
         # initialize views for the cloned scenes
@@ -216,7 +218,7 @@ class PushEnv(IsaacEnv):
         # -- add information to extra if task completed
         object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - self.goal.data.root_pos_w[:, :2], dim=1)
         # self.extras["is_success"] = torch.where(object_position_error < 0.005, 1, self.reset_buf)
-        self.extras["is_success"] = object_position_error < 0.03
+        self.extras["is_success"] = object_position_error < 0.04
         # -- update USD visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             self._debug_vis()
@@ -323,7 +325,7 @@ class PushEnv(IsaacEnv):
         if self.cfg.terminations.is_success:
             goal_positions = env.goal.get_world_poses()[0]
             object_position_error = torch.norm(self.object.data.root_pos_w[:, :2] - goal_positions[:, :2], dim=1)
-            self.reset_buf = torch.where(object_position_error < 0.03, 1, self.reset_buf)
+            self.reset_buf = torch.where(object_position_error < 0.04, 1, self.reset_buf)
         # -- object fell off the table (table at height: 0.0 m)
         if self.cfg.terminations.object_falling:
             self.reset_buf = torch.where(object_pos[:, 2] < -0.05, 1, self.reset_buf)
@@ -388,7 +390,7 @@ class PushEnv(IsaacEnv):
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
     def randomize_table(self):
-        rgb = np.ones(3) * np.random.uniform(0.5, 0.8)
+        rgb = np.ones(3) * np.random.uniform(0.3, 0.9)
         prim = prim_utils.get_prim_at_path(self.template_env_ns+'/Table/visuals/OmniPBR')
         omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
@@ -410,7 +412,7 @@ class PushEnv(IsaacEnv):
                 rgb = default_color
             else:
                 random_color = np.random.uniform(0, 1, size=3)
-                local_rgb_interpolation = 0.3
+                local_rgb_interpolation = 0.5
                 rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
             omni.usd.create_material_input(prim, 'diffuse_tint', Gf.Vec3f(*rgb), Sdf.ValueTypeNames.Color3f)
 
@@ -423,7 +425,7 @@ class PushEnv(IsaacEnv):
         prim_utils.set_prim_property(f"{prim_path}/AmbientLight", 'intensity', intensity)
         default_color = prim_utils.get_prim_property(f"{prim_path}/SphereLight", 'color')
         random_color = np.random.uniform(0, 1, size=3)
-        local_rgb_interpolation = 0.2
+        local_rgb_interpolation = 0.4
         rgb = (1.0 - local_rgb_interpolation) * default_color + local_rgb_interpolation * random_color
         prim_utils.set_prim_property(f"{prim_path}/SphereLight", 'color', tuple(rgb))
 
@@ -543,6 +545,7 @@ class PushRewardManager(RewardManager):
         average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
 
         return 1 - torch.tanh(ee_distance / sigma)
+        # return 1 - torch.tanh(average_distance / sigma)
 
     def penalizing_arm_dof_velocity_l2(self, env: PushEnv):
         """Penalize large movements of the robot arm."""

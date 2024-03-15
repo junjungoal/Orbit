@@ -412,7 +412,6 @@ def subtract_frame_transforms(
     # t12 = t02 - t01
     t12 = quat_apply(q10, t02 - t01)
 
-
     return t12, q12
 
 
